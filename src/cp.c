@@ -38,7 +38,6 @@ int main() {
     shellReturn();
 }
 
-// TODO : Autocomplete & relative pathing
 void cp(char *dirtable, char current_dir_index, char flags, char *target, char *linkname) {
     // Technically just "copy" of previous implementation of ln
     // char as string / char
@@ -48,12 +47,15 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
     // char as 1 byte integer
     char file_read[FILE_SIZE_MAXIMUM];
     char target_entry_byte = 0;
+    char target_parent_byte = 0;
+    char link_status = -1;
     char source_dir_idx;
     char copied_dir_idx;
     int returncode_src = 0;
     int returncode_cpy = 0;
     bool is_write_success = false, valid_filename = true;
     bool f_target_found = false, empty_entry_found = false;
+    bool is_found_parent = false;
     int i = 0, j = 0;
     int f_entry_idx = 0;
     int f_entry_sector_idx = 0;
@@ -117,40 +119,79 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
     }
     else {
         clear(file_read, FILE_SIZE_MAXIMUM);
+        read(file_read, copied_directory_name, &returncode_cpy, copied_dir_idx);
+        clear(file_read, FILE_SIZE_MAXIMUM);
         read(file_read, source_directory_name, &returncode_src, source_dir_idx);
-        if (returncode_src == 0) {
-            if (flags == 0) {
-                // Simple copy, refuse folder
-                if (file_read[0] != NULL) {
-                    // FIXME : Will ignore ln for now
-                    write(file_read, copied_directory_name, &returncode_cpy, copied_dir_idx);
+        if (returncode_src == 0 && returncode_cpy == -1) {
+            // Link check
+            // Find entry in files
+            i = 0;
+            while (i < FILES_ENTRY_COUNT && !is_found_parent) {
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
+                if (dirtable[i*FILES_ENTRY_SIZE + PARENT_BYTE_OFFSET] == source_dir_idx &&
+                    !strcmp(source_directory_name, filename_buffer)) {
+                    is_found_parent = true;
+                    target_entry_byte = dirtable[i*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET];
+                    link_status = dirtable[i*FILES_ENTRY_SIZE+LINK_BYTE_OFFSET];
+                }
+                i++;
+            }
+
+            if (link_status == SOFTLINK_ENTRY) {
+                // Get linked strings / folder with recursion depth limit 16
+                i = 0;
+                // TODO : Extra, currently only single softlink depth supported
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, dirtable+target_entry_byte*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
+                target_parent_byte = dirtable[target_entry_byte*FILES_ENTRY_SIZE + PARENT_BYTE_OFFSET];
+                target_entry_byte = dirtable[target_entry_byte*FILES_ENTRY_SIZE + ENTRY_BYTE_OFFSET];
+                clear(file_read, FILE_SIZE_MAXIMUM);
+                read(file_read, filename_buffer, &returncode_src, target_parent_byte);
+                // Needed to compare due _mash_cache always filling empty space
+                // Implying softlink to _mash_cache is not available
+                if (!strcmp(filename_buffer, "_mash_cache"))
+                    target_entry_byte = EMPTY_FILES_ENTRY;
+            }
+
+            if (target_entry_byte != EMPTY_FILES_ENTRY) {
+                if (flags == 0) {
+                    // Simple copy, refuse folder
+                    if (file_read[0] != NULL)
+                        write(file_read, copied_directory_name, &returncode_cpy, copied_dir_idx);
+                    else {
+                        print("cp: error: ", BIOS_WHITE);
+                        print(target, BIOS_WHITE);
+                        print(" is a folder\n", BIOS_WHITE);
+                        returncode_cpy = -1;
+                    }
                 }
                 else {
-                    print("cp: error: ", BIOS_WHITE);
-                    print(target, BIOS_WHITE);
-                    print(" is a folder\n", BIOS_WHITE);
-                    returncode_cpy = -1;
-                }
+                    // Recursive
+                    // TODO : Add
+
+                    // read(file_read, linkname, &returncode, target_dir);
+
+
+
+                    // else {
+                        //     print("cp: recursive copy error\n", BIOS_GRAY);
+                        //     returncode = -1;
+                        // }
+                    }
             }
             else {
-                // Recursive
-                // TODO : Add
-
-                // read(file_read, linkname, &returncode, target_dir);
-
-
-
-                // else {
-                //     print("cp: recursive copy error\n", BIOS_GRAY);
-                //     returncode = -1;
-                // }
+                print("cp: ", BIOS_WHITE);
+                print(source_directory_name, BIOS_WHITE);
+                print(" softlink broken\n", BIOS_WHITE);
             }
+
         }
         else {
             print("cp: error: ", BIOS_WHITE);
             print(target, BIOS_WHITE);
             print(" not found\n", BIOS_WHITE);
-            returncode_cpy = -1;
+            returncode_src = -1;
         }
 
         if (returncode_src == 0 && returncode_cpy == 0) {

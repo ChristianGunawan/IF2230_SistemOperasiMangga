@@ -60,6 +60,7 @@ void ln(char *dirtable, char current_dir_index, char flags, char *target, char *
     bool f_target_found = false, empty_entry_found = false;
     bool is_found_parent = false;
     bool is_found_empty = false;
+    bool is_hardlink_file = true;
     int i = 0, j = 0;
     int f_entry_idx = 0;
     int f_entry_sector_idx = 0;
@@ -123,12 +124,23 @@ void ln(char *dirtable, char current_dir_index, char flags, char *target, char *
     }
     else {
         clear(file_read, FILE_SIZE_MAXIMUM);
+        read(file_read, copied_directory_name, &returncode_cpy, copied_dir_idx);
+        clear(file_read, FILE_SIZE_MAXIMUM);
         read(file_read, source_directory_name, &returncode_src, source_dir_idx);
-        if (returncode_src == 0) {
+        if (returncode_src == 0 && returncode_cpy == -1) {
             if (flags == 1)
                 link_status = SOFTLINK_ENTRY;
-            else
-                link_status = HARDLINK_ENTRY;
+            else {
+                if (file_read[0] == NULL) {
+                    print("ln: ", BIOS_GRAY);
+                    print(source_directory_name, BIOS_GRAY);
+                    print(": cannot hardlink folder\n", BIOS_GRAY);
+                    is_hardlink_file = false;
+                    returncode_src = -1;
+                }
+                else
+                    link_status = HARDLINK_ENTRY;
+            }
 
             // Find parent S byte
             i = 0;
@@ -178,21 +190,27 @@ void ln(char *dirtable, char current_dir_index, char flags, char *target, char *
                 print(" error\n", BIOS_WHITE);
                 returncode_cpy = -1;
             }
-            else {
+            else if (is_hardlink_file) {
                 // Updating directory table
                 directSectorWrite(dirtable, FILES_SECTOR);
                 directSectorWrite(dirtable+SECTOR_SIZE, FILES_SECTOR+1);
             }
 
         }
-        else {
+        else if (returncode_src == -1) {
             print("ln: error: ", BIOS_WHITE);
             print(target, BIOS_WHITE);
             print(" not found\n", BIOS_WHITE);
-            returncode_cpy = -1;
+            returncode_src = -1;
+        }
+        else if (returncode_cpy == 0) {
+            print("ln: error: ", BIOS_WHITE);
+            print(linkname, BIOS_WHITE);
+            print(" exist\n", BIOS_WHITE);
+            returncode_cpy = 0;
         }
 
-        if (returncode_src == 0 && returncode_cpy == 0) {
+        if (returncode_src == 0 && returncode_cpy == -1) {
             print(linkname, BIOS_GRAY);
             print(": link created\n", BIOS_GRAY);
         }
