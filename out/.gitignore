@@ -1,1 +1,5 @@
 compiledgcc.o
+bootloader
+kernel
+kernel.o
+kernel_asm.o
