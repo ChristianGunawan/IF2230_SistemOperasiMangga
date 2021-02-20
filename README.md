@@ -1,7 +1,13 @@
 # Tugas Besar - Sistem Operasi - IF2230
 **TBA**
 
-<!-- ALSA - Vcxsrv -
+<!--
+chmod +x troubleshoot
+
+Dependencies
+ALSA - Vcxsrv - Ubuntu 20.04 - <TBA>
+
+
 - Bochs troubleshoot,
 -- xserver
 https://medium.com/javarevisited/using-wsl-2-with-x-server-linux-on-windows-a372263533c3
