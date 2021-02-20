@@ -1,5 +1,5 @@
 # 13519214 - Makefile
-all: diskimage bootloader
+all: diskimage bootloader kernel
 
 clean:
 	rm out/*
