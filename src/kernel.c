@@ -15,42 +15,64 @@ void handleInterrupt21 (int AX, int BX, int CX, int DX);
 void printString(char *string);
 void readString(char *string);
 void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
-
+void videoMemoryWrite(char char);
 
 int main() {
     // TODO : Extra, ASCII
-    printString("av\0");
-    makeInterrupt21();
+    // printString("halooo");
+    int i = 0;
+    while (i < 15) {
+        printString("PPPPPPPPPPPPP");
+        i++;
+    }
+
+    // Temporary read string
+    while (1) {
+        int s = interrupt(0x16, 0x00, 0, 0, 0);
+        if (s == 8) // Backspace
+            videoMemoryWrite(0);
+        else
+            videoMemoryWrite(s);
+    }
+
+    // interrupt(0x10, 0x1300, 0x010D, 0x0005 ,0x0101);
+    // makeInterrupt21();
 
     while (1);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX){
     switch (AX) {
-        case 0x0:
-            printString(BX);
-            break;
-        case 0x1:
-            // readString(BX);
-            break;
+        // case 0x0:
+        //     printString(BX);
+        //     break;
+        // case 0x1:
+        //     // readString(BX);
+        //     break;
         default:
             printString("Invalid interrupt");
     }
 }
 
 int strlen(char* string) {
+    // Standard string length function
     int length = 0;
     while (*(string+length) != '\0')
         length++;
     return length;
 }
 
+void videoMemoryWrite(char char) {
+    // putInMemory() wrapper for video memory
+    putInMemory(V_MEM, V_OFFSET, char);
+}
+
 void printString(char *string) {
-    // Self-note : pt[i] operator not translate to *(pt+i) in bcc
+    // Self-note : (?) pt[i] operator not translate to *(pt+i) in bcc
     int i = 0;
     while (*(string+i) != '\0') {
-        putInMemory(V_MEM, V_OFFSET + 2*i, string[i]);
-        putInMemory(V_MEM, V_OFFSET + 1 + 2*i, 0xD);
+        videoMemoryWrite(string[i]);
+        videoMemoryWrite(0xD);
         i++;
     }
 
