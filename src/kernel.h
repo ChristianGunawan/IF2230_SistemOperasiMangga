@@ -20,3 +20,9 @@ void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
 
 void videoMemoryWrite(int offset, char character);
 // putInMemory() wrapper for video memory writing
+
+void drawBootLogo();
+// Drawing boot logo
+
+void clearScreen();
+// Wipe entire screen
