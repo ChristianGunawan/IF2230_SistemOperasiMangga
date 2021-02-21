@@ -15,7 +15,7 @@ void handleInterrupt21 (int AX, int BX, int CX, int DX);
 void printString(char *string);
 void readString(char *string);
 void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
-void videoMemoryWrite(char char);
+void videoMemoryWrite(int offset, char character);
 
 int main() {
     // TODO : Extra, ASCII
@@ -30,9 +30,9 @@ int main() {
     while (1) {
         int s = interrupt(0x16, 0x00, 0, 0, 0);
         if (s == 8) // Backspace
-            videoMemoryWrite(0);
+            videoMemoryWrite(0, 0);
         else
-            videoMemoryWrite(s);
+            videoMemoryWrite(0, s);
     }
 
     // interrupt(0x10, 0x1300, 0x010D, 0x0005 ,0x0101);
@@ -62,17 +62,17 @@ int strlen(char* string) {
     return length;
 }
 
-void videoMemoryWrite(char char) {
+void videoMemoryWrite(int offset, char character) {
     // putInMemory() wrapper for video memory
-    putInMemory(V_MEM, V_OFFSET, char);
+    putInMemory(V_MEM, V_OFFSET + offset, character);
 }
 
 void printString(char *string) {
     // Self-note : (?) pt[i] operator not translate to *(pt+i) in bcc
     int i = 0;
     while (*(string+i) != '\0') {
-        videoMemoryWrite(string[i]);
-        videoMemoryWrite(0xD);
+        videoMemoryWrite(2*i, string[i]);
+        videoMemoryWrite(1 + 2*i, 0xD);
         i++;
     }
 
