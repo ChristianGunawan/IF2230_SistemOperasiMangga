@@ -14,9 +14,11 @@
 int main() {
     // TODO : Extra, ASCII
     char *s;
-    char stringBuffer[1000000];
+    char stringBuffer[1024];
 
-    readString(s);
+    clear(stringBuffer, 1024);
+    readString(stringBuffer);
+    printString(stringBuffer);
 
     while (1);
 }
@@ -39,11 +41,10 @@ void videoMemoryWrite(int offset, char character) {
 }
 
 void printString(char *string) {
-    // Self-note : (?) pt[i] operator not translate to *(pt+i) in bcc
     int i = 0;
-    while (*(string+i) != '\0') {
+    while (string[i] != '\0') {
         videoMemoryWrite(2*i, string[i]);
-        videoMemoryWrite(1 + 2*i, 0xD);
+        videoMemoryWrite(1 + 2*i, 0xD); // DEBUG
         i++;
     }
 
@@ -55,11 +56,21 @@ void readString(char *string) {
     char c = interrupt(0x16, 0x00, 0, 0, 0);
     int i = 1;
     string[0] = c;
-    while (c != 0xd) {
+    while (c != 0xD) {
+        // ASCII 0xD -> Carriage Return
         c = interrupt(0x16, 0x00, 0, 0, 0);
-        string[i] = c;
-        videoMemoryWrite(0,c); // DEBUG
-        i++;
+        if (c != 0xD) {
+            string[i] = c;
+            i++;
+        }
     }
     string[i] = '\0';
+}
+
+void clear(char *string, int length) {
+    int i = 0;
+    while (i < length) {
+        string[i] = '\0';
+        i++;
+    }
 }
