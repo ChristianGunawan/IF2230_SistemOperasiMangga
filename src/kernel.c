@@ -20,25 +20,19 @@ void videoMemoryWrite(int offset, char character);
 int main() {
     // TODO : Extra, ASCII
     // printString("halooo");
+    char *s;
     int i = 0;
     while (i < 15) {
         printString("PPPPPPPPPPPPP");
         i++;
     }
-
-    // Temporary read string
-    while (1) {
-        int s = interrupt(0x16, 0x00, 0, 0, 0);
-        if (s == 8) // Backspace
-            videoMemoryWrite(0, 0);
-        else
-            videoMemoryWrite(0, s);
-    }
+    
+    readString(s);
 
     // interrupt(0x10, 0x1300, 0x010D, 0x0005 ,0x0101);
     // makeInterrupt21();
 
-    while (1);
+    
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX){
@@ -83,5 +77,17 @@ void printString(char *string) {
 
 
 
-// void readString(char *string);
+void readString(char *string) {
+    // Temporary read string
+    char c = interrupt(0x16, 0x00, 0, 0, 0);
+    int i = 1;
+    string[0] = c;
+    while (c != 0xd) {
+        c = interrupt(0x16, 0x00, 0, 0, 0);
+        string[i] = c;
+        videoMemoryWrite(0,c);
+        i++;
+    }
+    string[i] = '\0';    
+}
 // void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
