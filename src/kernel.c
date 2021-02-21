@@ -21,13 +21,16 @@ int main() {
 
     // Initial screen
     clearScreen();
-    setCursorPos(1,1);
+    setCursorPos(0,0);
     drawBootLogo();
 
     // Other
-    interrupt(0x21, 0x1, stringBuffer, 0, 0);
-    interrupt(0x21, 0x0, stringBuffer, 0, 0);
-    while (1);
+    while (1) {
+        interrupt(0x21, 0x1, stringBuffer, 0, 0);
+        clearScreen();
+        interrupt(0x21, 0x0, stringBuffer, 0, 0);
+    }
+    // while (1);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX){
@@ -55,29 +58,73 @@ void printString(char *string) {
     //     videoMemoryWrite(1 + 2*i, 0xD);
     //     i++;
     // }
-    int i = 0, temp = 0;
+
+    // Interrupt 0x10 for print 1 char
+    // AX = Mode, BX = Color, CX = Print n times
+    // TODO : Get cursor pos (?)
+    int i = 0, temp = 0, col = 0;
     while (string[i] != '\0') {
-        temp = 0x900 + string[i];
-        interrupt(0x10, temp, 0x000D, 0x1, 0);
+        temp = 0x0900 | string[i];
+        setCursorPos(1, col);
+        interrupt(0x10, temp, 0x0007, 0x1, 0);
+        col++;
         i++;
     }
-
-    // interrupt(0x10,0x1301,0x010D,strlen(string),0);
+    setCursorPos(0, 0);
 }
 
 void readString(char *string) {
-    char c = interrupt(0x16, 0x00, 0, 0, 0);
-    int i = 1;
-    string[0] = c;
-    while (c != 0xD) {
+    // -- Non-print type readString --
+    // char c = interrupt(0x16, 0x00, 0, 0, 0);
+    // int i = 1;
+    // string[0] = c;
+    // while (c != 0xD) {
+    //     // Note : ASCII 0xD -> Carriage Return
+    //     c = interrupt(0x16, 0x00, 0, 0, 0);
+    //     switch (c) {
+    //         case 0xD:
+    //             break;
+    //         case 0x8:
+    //             i--;
+    //             break;
+    //         default:
+    //             string[i] = c;
+    //             i++;
+    //     }
+    // }
+    // string[i] = '\0';
+
+    // -- Print type readString --
+    char c; // = interrupt(0x16, 0x00, 0, 0, 0);
+    int i = 0, col = 0, temp = 0;
+    // string[0] = c;
+    do {
         // Note : ASCII 0xD -> Carriage Return
         c = interrupt(0x16, 0x00, 0, 0, 0);
-        if (c != 0xD) {
-            string[i] = c;
-            i++;
+        switch (c) {
+            case 0xD:
+                break;
+            case 0x8:
+                if (i > 0)
+                    i--;
+
+                interrupt(0x10, 0x0920, 0, 0x1, 0);
+                if (col > 0) {
+                    col--;
+                    setCursorPos(0, col);
+                }
+                // 0x20 -> Space
+                break;
+            default:
+                string[i] = c;
+                temp = 0x0900 | c;
+                setCursorPos(0, col);
+                interrupt(0x10, temp, 0x0007, 0x1, 0);
+                i++;
+                col++;
         }
-        // TODO : Add backspace, 0x8
-    }
+    } while (c != 0xD);
+    setCursorPos(0, 0);
     string[i] = '\0';
 }
 
@@ -104,5 +151,12 @@ void setCursorPos(int r, int c) {
 }
 
 void drawBootLogo() {
+    // int i = 0;
+    // interrupt(0x10, 0x0004, 0, 0, 0);
+    // while (i < 80) {
+    //     putInMemory(V_MEM, 0x2000+i, 0xFF);
+    //     i++;
+    // }
+    // interrupt(0x10, 0x0003, 0, 0, 0);
     // TODO : Extra, ASCII / Graphical
 }
