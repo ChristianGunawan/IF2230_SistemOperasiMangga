@@ -26,3 +26,7 @@ void drawBootLogo();
 
 void clearScreen();
 // Wipe entire screen
+
+void setCursorPos(int r, int c);
+// Move cursor position
+// Note : Row and Column start from 0

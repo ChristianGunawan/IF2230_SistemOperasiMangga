@@ -12,17 +12,21 @@
 #include "std.h"
 
 int main() {
+    // Declaration
     char stringBuffer[1024];
 
-    clearScreen();
-    drawBootLogo();
-
-    // clear(stringBuffer, 1024);
-    // readString(stringBuffer);
-    // printString(stringBuffer);
-
+    // Setup
+    clear(stringBuffer, 1024);
     makeInterrupt21();
 
+    // Initial screen
+    clearScreen();
+    setCursorPos(1,1);
+    drawBootLogo();
+
+    // Other
+    interrupt(0x21, 0x1, stringBuffer, 0, 0);
+    interrupt(0x21, 0x0, stringBuffer, 0, 0);
     while (1);
 }
 
@@ -44,13 +48,19 @@ void videoMemoryWrite(int offset, char character) {
 }
 
 void printString(char *string) {
-    int i = 0;
+    // Direct video memory writing
+    // int i = 0;
+    // while (string[i] != '\0') {
+    //     videoMemoryWrite(2*i, string[i]);
+    //     videoMemoryWrite(1 + 2*i, 0xD);
+    //     i++;
+    // }
+    int i = 0, temp = 0;
     while (string[i] != '\0') {
-        videoMemoryWrite(2*i, string[i]);
-        videoMemoryWrite(1 + 2*i, 0xD); // DEBUG
+        temp = 0x900 + string[i];
+        interrupt(0x10, temp, 0x000D, 0x1, 0);
         i++;
     }
-    // TODO : Use int
 
     // interrupt(0x10,0x1301,0x010D,strlen(string),0);
 }
@@ -88,6 +98,11 @@ void clearScreen() {
     }
 }
 
+void setCursorPos(int r, int c) {
+    int temp = 0x100*r + c;
+    interrupt(0x10, 0x0200, 0x1, 0, temp);
+}
+
 void drawBootLogo() {
-        // TODO : Extra, ASCII
+    // TODO : Extra, ASCII / Graphical
 }
