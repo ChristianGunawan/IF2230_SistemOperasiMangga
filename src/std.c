@@ -7,3 +7,7 @@ int strlen(char* string) {
         length++;
     return length;
 }
+
+int mod(int a, int n) {
+    return a - n*(a/n);
+}

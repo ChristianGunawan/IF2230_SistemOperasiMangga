@@ -74,30 +74,11 @@ void printString(char *string) {
 }
 
 void readString(char *string) {
-    // -- Non-print type readString --
-    // char c = interrupt(0x16, 0x00, 0, 0, 0);
-    // int i = 1;
-    // string[0] = c;
-    // while (c != 0xD) {
-    //     // Note : ASCII 0xD -> Carriage Return
-    //     c = interrupt(0x16, 0x00, 0, 0, 0);
-    //     switch (c) {
-    //         case 0xD:
-    //             break;
-    //         case 0x8:
-    //             i--;
-    //             break;
-    //         default:
-    //             string[i] = c;
-    //             i++;
-    //     }
-    // }
-    // string[i] = '\0';
-
-    // -- Print type readString --
-    char c; // = interrupt(0x16, 0x00, 0, 0, 0);
+    char c;
     int i = 0, col = 0, temp = 0;
-    // string[0] = c;
+    // Enabling Cursor
+    interrupt(0x10, 0x0100, 0, 0x000F, 0);
+
     do {
         // Note : ASCII 0xD -> Carriage Return
         c = interrupt(0x16, 0x00, 0, 0, 0);
@@ -126,6 +107,8 @@ void readString(char *string) {
     } while (c != 0xD);
     setCursorPos(0, 0);
     string[i] = '\0';
+    // Disabling cursor
+    interrupt(0x10, 0x0100, 0, 0x3F00, 0);
 }
 
 void clear(char *string, int length) {
@@ -151,12 +134,31 @@ void setCursorPos(int r, int c) {
 }
 
 void drawBootLogo() {
-    // int i = 0;
-    // interrupt(0x10, 0x0004, 0, 0, 0);
+    int i = 0, j = 0, k = 0, temp = 0;;
+    interrupt(0x10, 0x0013, 0, 0, 0);
+    // Draw Logo
     // while (i < 80) {
-    //     putInMemory(V_MEM, 0x2000+i, 0xFF);
+    //     // putInMemory(V_MEM, V_OFFSET+i, 0xFF);
+    //     interrupt(0x10, 0x0C0D, 0, 0+i, 0+i);
     //     i++;
     // }
-    // interrupt(0x10, 0x0003, 0, 0, 0);
+    // TODO : Extra, Load
+    // while (k < 4096) {
+    //     if (mod(k, 32) == 0) {
+    //         // temp = 0x0C00 | mod(k, 0x10);
+    //         temp = 0x0C0E;
+    //         interrupt(0x10, temp, 0, mod(k, 32), 0);
+    //         interrupt(0x10, temp, 0, mod(k, 32), 1);
+    //         interrupt(0x10, temp, 0, mod(k, 32), 2);
+    //         interrupt(0x10, temp, 0, mod(k, 32), 3);
+    //         interrupt(0x10, temp, 0, mod(k, 32), 4);
+    //     }
+    //     if (j > 256) {
+    //         j = 0;
+    //         k++;
+    //     }
+    //     j++;
+    // }
+    interrupt(0x10, 0x0003, 0, 0, 0);
     // TODO : Extra, ASCII / Graphical
 }
