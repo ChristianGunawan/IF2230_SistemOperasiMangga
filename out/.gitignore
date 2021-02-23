@@ -1,5 +1,4 @@
-compiledgcc.o
+*.o
 bootloader
 kernel
-kernel.o
-kernel_asm.o
+*.img

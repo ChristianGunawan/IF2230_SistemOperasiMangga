@@ -20,9 +20,11 @@ bootloader:
 
 kernel:
 	bcc -ansi -c -o out/kernel.o src/kernel.c
+	bcc -ansi -c -o out/std.o src/std.c
+	bcc -ansi -c -o out/other.o src/other.c
 	nasm -f as86 src/kernel.asm -o out/kernel_asm.o
-	ld86 -o out/kernel -d out/kernel.o out/kernel_asm.o
-	dd if=out/kernel of=out/system.img bs=512 conv=notrunc seek=1
+	ld86 -o out/kernel -d out/*.o
+	dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1
 
 
 
