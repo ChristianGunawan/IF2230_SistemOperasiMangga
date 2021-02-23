@@ -19,14 +19,10 @@ int main() {
 
     // Initial screen
     clearScreen();
-    // interrupt(0x10, 0x0003, 0, 0, 0);
-    // setCursorPos(1,0);
-    // printString("Hello World!");
-    // setCursorPos(0,0);
     drawBootLogo();
-    interrupt(0x10, 0x0003, 0, 0, 0);
 
-    // Other
+    // Print & Read string loop
+    interrupt(0x10, 0x0003, 0, 0, 0);
     setCursorPos(1,0);
     interrupt(0x21, 0x0, "Output :", 0, 0);
     while (1) {
@@ -54,16 +50,12 @@ void handleInterrupt21(int AX, int BX, int CX, int DX){
     }
 }
 
-void videoMemoryWrite(int offset, char character) {
-    putInMemory(V_MEM, V_OFFSET + offset, character);
-}
-
 void printString(char *string) {
     // -- Direct video memory writing --
     // int i = 0;
     // while (string[i] != '\0') {
-    //     videoMemoryWrite(2*i, string[i]);
-    //     videoMemoryWrite(1 + 2*i, 0xD);
+    //     charVideoMemoryWrite(2*i, string[i]);
+    //     charVideoMemoryWrite(1 + 2*i, 0xD);
     //     i++;
     // }
 
@@ -92,13 +84,13 @@ void printString(char *string) {
 }
 
 void readString(char *string) {
+    // TODO : Actually no bound checking
     char c;
     int i = 0, col = 0, temp = 0;
     // Enabling Cursor
     interrupt(0x10, 0x0100, 0, 0x000F, 0);
 
     do {
-        // Note : ASCII 0xD -> Carriage Return
         c = interrupt(0x16, 0x00, 0, 0, 0);
         switch (c) {
             case 0xD:
@@ -122,6 +114,7 @@ void readString(char *string) {
                 i++;
                 col++;
         }
+        // Note : ASCII 0xD -> Carriage Return
     } while (c != 0xD);
     setCursorPos(0, 0);
     string[i] = '\0';
@@ -135,19 +128,4 @@ void clear(char *string, int length) {
         string[i] = '\0';
         i++;
     }
-}
-
-void clearScreen() {
-    // Switch to real mode
-    int i = 0;
-    while (i < 4096) {
-        videoMemoryWrite(2*i, ' ');
-        videoMemoryWrite(1 + 2*i, 0x0);
-        i++;
-    }
-}
-
-void setCursorPos(int r, int c) {
-    int temp = 0x100*r + c;
-    interrupt(0x10, 0x0200, 0x1, 0, temp);
 }

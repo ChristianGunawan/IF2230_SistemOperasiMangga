@@ -4,8 +4,6 @@
 #define V_MEM 0xB000
 #define V_OFFSET 0x8000
 #define V_GRAPHIC 0xA000
-#define X_OFFSET 5
-#define Y_OFFSET 50
 
 // Implemented in assembly
 extern void putInMemory(int segment, int address, char character);
@@ -24,13 +22,3 @@ void readString(char *string);
 
 void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
 // Clearing string buffer
-
-void videoMemoryWrite(int offset, char character);
-// putInMemory() wrapper for video memory writing
-
-void clearScreen();
-// Wipe entire screen
-
-void setCursorPos(int r, int c);
-// Move cursor position
-// Note : Row and Column start from 0
