@@ -19,20 +19,26 @@ int main() {
 
     // Initial screen
     clearScreen();
-    setCursorPos(0,0);
+    // interrupt(0x10, 0x0003, 0, 0, 0);
+    // setCursorPos(1,0);
+    // printString("Hello World!");
+    // setCursorPos(0,0);
     drawBootLogo();
+    interrupt(0x10, 0x0003, 0, 0, 0);
 
     // Other
-    // setCursorPos(0,0);
-    // interrupt(0x21, 0x0, "Hello World!", 0, 0);
+    setCursorPos(1,0);
+    interrupt(0x21, 0x0, "Output :", 0, 0);
     while (1) {
-        temp = 0x0E00 + 'a';
-        interrupt(0x10, temp, 0x0007, 0, 0);
-        // interrupt(0x21, 0x1, stringBuffer, 0, 0);
-        // clearScreen();
-        // interrupt(0x21, 0x0, stringBuffer, 0, 0);
+        setCursorPos(0,0);
+        interrupt(0x21, 0x1, stringBuffer, 0, 0);
+        setCursorPos(0,0);
+        interrupt(0x21, 0x0, "                        ", 0, 0);
+        setCursorPos(2,0);
+        interrupt(0x21, 0x0, "                        ", 0, 0);
+        setCursorPos(2,0);
+        interrupt(0x21, 0x0, stringBuffer, 0, 0);
     }
-    // while (1);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX){
@@ -53,7 +59,7 @@ void videoMemoryWrite(int offset, char character) {
 }
 
 void printString(char *string) {
-    // Direct video memory writing
+    // -- Direct video memory writing --
     // int i = 0;
     // while (string[i] != '\0') {
     //     videoMemoryWrite(2*i, string[i]);
@@ -61,18 +67,28 @@ void printString(char *string) {
     //     i++;
     // }
 
+    // -- Position based print --
     // Interrupt 0x10 for print 1 char
     // AX = Mode, BX = Color, CX = Print n times
     // TODO : Get cursor pos (?)
-    int i = 0, temp = 0, col = 0;
+    // int i = 0, temp = 0, col = 0;
+    // while (string[i] != '\0') {
+    //     temp = 0x0900 | string[i];
+    //     setCursorPos(1, col);
+    //     interrupt(0x10, temp, 0x0007, 0x1, 0);
+    //     col++;
+    //     i++;
+    // }
+    // setCursorPos(0, 0);
+
+    // -- TTY based print --
+    // AL = Char, BH = Page, BL = Color
+    int i = 0, temp = 0;
     while (string[i] != '\0') {
-        temp = 0x0900 | string[i];
-        setCursorPos(1, col);
-        interrupt(0x10, temp, 0x0007, 0x1, 0);
-        col++;
+        temp = 0x0E00 | string[i];
+        interrupt(0x10, temp, 0x0007, 0, 0);
         i++;
     }
-    setCursorPos(0, 0);
 }
 
 void readString(char *string) {
@@ -122,6 +138,7 @@ void clear(char *string, int length) {
 }
 
 void clearScreen() {
+    // Switch to real mode
     int i = 0;
     while (i < 4096) {
         videoMemoryWrite(2*i, ' ');

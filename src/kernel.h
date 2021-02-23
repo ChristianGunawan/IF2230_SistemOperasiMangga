@@ -4,6 +4,8 @@
 #define V_MEM 0xB000
 #define V_OFFSET 0x8000
 #define V_GRAPHIC 0xA000
+#define X_OFFSET 5
+#define Y_OFFSET 50
 
 // Implemented in assembly
 extern void putInMemory(int segment, int address, char character);
