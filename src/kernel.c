@@ -4,16 +4,14 @@
 // - First defined function is starting function
 // - Pointer declaration syntax is <type> *<varname>;
 
-// Configuration
-#define V_MEM 0xB000
-#define V_OFFSET 0x8000
-
 #include "kernel.h"
 #include "std.h"
+#include "other.h"
 
 int main() {
     // Declaration
     char stringBuffer[1024];
+    int temp;
 
     // Setup
     clear(stringBuffer, 1024);
@@ -25,10 +23,14 @@ int main() {
     drawBootLogo();
 
     // Other
+    // setCursorPos(0,0);
+    // interrupt(0x21, 0x0, "Hello World!", 0, 0);
     while (1) {
-        interrupt(0x21, 0x1, stringBuffer, 0, 0);
-        clearScreen();
-        interrupt(0x21, 0x0, stringBuffer, 0, 0);
+        temp = 0x0E00 + 'a';
+        interrupt(0x10, temp, 0x0007, 0, 0);
+        // interrupt(0x21, 0x1, stringBuffer, 0, 0);
+        // clearScreen();
+        // interrupt(0x21, 0x0, stringBuffer, 0, 0);
     }
     // while (1);
 }
@@ -131,34 +133,4 @@ void clearScreen() {
 void setCursorPos(int r, int c) {
     int temp = 0x100*r + c;
     interrupt(0x10, 0x0200, 0x1, 0, temp);
-}
-
-void drawBootLogo() {
-    int i = 0, j = 0, k = 0, temp = 0;;
-    interrupt(0x10, 0x0013, 0, 0, 0);
-    // Draw Logo
-    // while (i < 80) {
-    //     // putInMemory(V_MEM, V_OFFSET+i, 0xFF);
-    //     interrupt(0x10, 0x0C0D, 0, 0+i, 0+i);
-    //     i++;
-    // }
-    // TODO : Extra, Load
-    // while (k < 4096) {
-    //     if (mod(k, 32) == 0) {
-    //         // temp = 0x0C00 | mod(k, 0x10);
-    //         temp = 0x0C0E;
-    //         interrupt(0x10, temp, 0, mod(k, 32), 0);
-    //         interrupt(0x10, temp, 0, mod(k, 32), 1);
-    //         interrupt(0x10, temp, 0, mod(k, 32), 2);
-    //         interrupt(0x10, temp, 0, mod(k, 32), 3);
-    //         interrupt(0x10, temp, 0, mod(k, 32), 4);
-    //     }
-    //     if (j > 256) {
-    //         j = 0;
-    //         k++;
-    //     }
-    //     j++;
-    // }
-    interrupt(0x10, 0x0003, 0, 0, 0);
-    // TODO : Extra, ASCII / Graphical
 }

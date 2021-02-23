@@ -1,5 +1,10 @@
 // 13519214 - Kernel header
 
+// Configuration
+#define V_MEM 0xB000
+#define V_OFFSET 0x8000
+#define V_GRAPHIC 0xA000
+
 // Implemented in assembly
 extern void putInMemory(int segment, int address, char character);
 extern void makeInterrupt21();
@@ -20,9 +25,6 @@ void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
 
 void videoMemoryWrite(int offset, char character);
 // putInMemory() wrapper for video memory writing
-
-void drawBootLogo();
-// Drawing boot logo
 
 void clearScreen();
 // Wipe entire screen
