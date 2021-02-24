@@ -2,9 +2,9 @@
 **TBA**
 
 ## Kelompok Mangga K04 :
-*[Gregorius Dimas Baskara 13519190]
-*[Christian Gunawan 13519199]
-*[Tanur Rizaldi Rahardjo 13519214]
+* [Gregorius Dimas Baskara 13519190]
+* [Christian Gunawan 13519199]
+* [Tanur Rizaldi Rahardjo 13519214]
    
    
 <!-- ALSA - Vcxsrv -
