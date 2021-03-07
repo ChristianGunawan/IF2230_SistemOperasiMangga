@@ -15,15 +15,15 @@ diskimage:
 	dd if=/dev/zero of=out/mangga.img bs=512 count=2880
 
 bootloader:
-	nasm src/bootloader.asm -o out/bootloader;
+	nasm src/asm/bootloader.asm -o out/bootloader;
 	dd if=out/bootloader of=out/mangga.img bs=512 count=1 conv=notrunc
 
 kernel:
 	bcc -ansi -c -o out/kernel.o src/kernel.c
 	bcc -ansi -c -o out/std.o src/std.c
 	bcc -ansi -c -o out/other.o src/other.c
-	nasm -f as86 src/kernel.asm -o out/kernel_asm.o
-	ld86 -o out/kernel -d out/*.o
+	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
+	ld86 -o out/kernel -d out/*.o # Linking
 	dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1
 
 

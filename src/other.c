@@ -1,7 +1,7 @@
 // 13519214 - Other function
 
-#include "kernel.h"
-#include "other.h"
+#include "header/kernel.h"
+#include "header/other.h"
 
 void drawPixel(int x, int y, int color) {
     putInMemory(V_GRAPHIC, x+y*320, color);

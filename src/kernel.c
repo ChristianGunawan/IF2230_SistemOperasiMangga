@@ -4,9 +4,9 @@
 // - First defined function is starting function
 // - Pointer declaration syntax is <type> *<varname>;
 
-#include "kernel.h"
-#include "std.h"
-#include "other.h"
+#include "header/kernel.h"
+#include "header/std.h"
+#include "header/other.h"
 
 int main() {
     // Declaration
