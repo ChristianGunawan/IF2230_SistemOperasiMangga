@@ -18,4 +18,7 @@ https://www.stat.ipb.ac.id/agusms/index.php/2019/01/15/how-to-run-graphical-linu
 - ALSA
 https://bbs.archlinux.org/viewtopic.php?id=94696
 objdump -D -b binary -m i8086 <filename>
+
+Resource
+https://www.fountainware.com/EXPL/bios_key_codes.htm
 -->

@@ -12,10 +12,12 @@
 #define CHAR_BACKSPACE 0x8
 #define CHAR_NULL 0x0
 #define CHAR_SPACE 0x20
-#define CHAR_ARROW_LEFT 
-#define CHAR_ARROW_RIGHT
-#define CHAR_ARROW_UP
-#define CHAR_ARROW_DOWN
+
+// BIOS Scancodes
+#define SCANCODE_RIGHT_ARROW 0x4D
+#define SCANCODE_LEFT_ARROW 0x4B
+#define SCANCODE_UP_ARROW 0x48
+#define SCANCODE_DOWN_ARROW 0x50
 
 // BIOS Color Enum
 // Note : Probably bcc doesn't have enum keyword
@@ -45,6 +47,7 @@ extern void putInMemory(int segment, int address, char character);
 extern void makeInterrupt21();
 extern int interrupt(int number, int AX, int BX, int CX, int DX);
 extern int getRawCursorPos(); // TODO : Split to another asm file
+extern int getRawKeyPress();
 
 void handleInterrupt21 (int AX, int BX, int CX, int DX);
 // Interupt 21H Handler

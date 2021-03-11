@@ -8,6 +8,7 @@ global _putInMemory
 global _interrupt
 global _makeInterrupt21
 global _getRawCursorPos
+global _getRawKeyPress
 extern _handleInterrupt21
 
 ;void putInMemory (int segment, int address, char character)
@@ -67,7 +68,6 @@ _makeInterrupt21:
 ;int getRawCursorPos()
 ;returning integer with higher 8 bit as row, lower 8 bit as column
 _getRawCursorPos:
-	push   bp
 	push   bx
 	push   cx
 	push   dx
@@ -78,16 +78,15 @@ _getRawCursorPos:
 	pop    dx
 	pop    cx
 	pop    bx
-	pop    bp
 	ret
 
 
 ;int getRawKeyPress()
 ;returning integer with raw return, check INT 16H for references
-; _getRawKeyPress:
-; 	push bp
-;
-; 	pop bp
+_getRawKeyPress:
+    xor   ax,ax  ;AH = 00H
+	int   0x16
+	ret
 
 
 ;this is called when interrupt 21 happens

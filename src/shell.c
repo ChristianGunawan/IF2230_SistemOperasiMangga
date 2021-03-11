@@ -4,20 +4,21 @@
 #include "header/kernel.h" // TODO : Split getCursorPos
 #include "header/std.h"
 
+// TODO : Wrap printColoredString() ?
 
 void shell() {
-    char stringBuffer[1024];
-    stringBuffer[0] = '\0';
-    printString("OK\n");
+    char string_buffer[1024], directory_string[1024];
+    string_buffer[0] = '\0';
+    // TODO : Raw keypress wrapper for SCANCODE_UP_ARROW and SCANCODE_DOWN_ARROW last commands
+    // TODO : strcpy(), cleanup
+    directory_string[0] = '/';
+    directory_string[1] = '\0';
     while (1) {
-        readString(stringBuffer);
-        // interrupt(0x21, 0x0, "location x ", 0, 0);
-        // stringBuffer[0] = mod(getCursorPos(), 10) + 0x30;
-        // interrupt(0x21, 0x0, stringBuffer, 0, 0);
-        //
-        // interrupt(0x21, 0x0, "location y ", 0, 0);
-        // stringBuffer[0] = mod(getCursorPos()/0x100, 10) + 0x30;
-        // interrupt(0x21, 0x0, stringBuffer, 0, 0);
+        printColoredString("mangga", BIOS_GREEN);
+        printString(":");
+        printColoredString(directory_string, BIOS_BLUE);
+        printString("$ ");
+        readString(string_buffer);
     }
 
 }

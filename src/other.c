@@ -108,10 +108,10 @@ void printColoredString(char *string, char color) {
                 i++;
                 break;
             default:
-                setCursorPos(getCursorPos(1), column_position);
                 directCharPrint(string[i], color);
                 column_position++;
                 i++;
+                setCursorPos(getCursorPos(1), column_position);
         }
     }
 
