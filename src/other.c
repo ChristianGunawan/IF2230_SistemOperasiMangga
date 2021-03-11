@@ -52,10 +52,88 @@ void clearScreen() {
     }
 }
 
+
 void setCursorPos(int r, int c) {
     int temp = 0x100*r + c;
     interrupt(0x10, 0x0200, 0x1, 0, temp);
 }
+
+int getCursorPos(char isRow) {
+    if (isRow)
+        return getRawCursorPos() >> 8;
+    else
+        return getRawCursorPos() & 0xFF;
+}
+
+
+void directCharPrint(char a, char color) {
+    // Check INT 10H with AH = 09H for references
+    int out_char;
+    out_char = 0x0900 | a;
+    interrupt(0x10, out_char, color, 0x1, 0);
+}
+
+void enableKeyboardCursor() {
+    // Note : CX as cursor shape
+    interrupt(0x10, 0x0100, 0, 0x0607, 0);
+}
+
+void disableKeyboardCursor() {
+    // Check INT 10H with AH = 01H for references
+    interrupt(0x10, 0x0100, 0, 0x3F00, 0);
+}
+
+
+void printColoredString(char *string, char color) {
+    // -- Direct video memory writing --
+    // int i = 0;
+    // while (string[i] != '\0') {
+    //     charVideoMemoryWrite(2*i, string[i]);
+    //     charVideoMemoryWrite(1 + 2*i, 0xD);
+    //     i++;
+    // }
+
+    // -- Position based print --
+    // Interrupt 0x10 for print 1 char
+    // AH = Mode, AL = Char, BH = Page Number, BL = Color, CX = Print n times
+    int i = 0, temp = 0, column_position = 0;
+    column_position = getCursorPos(0);
+    while (string[i] != CHAR_NULL) {
+        switch (string[i]) {
+            // Warning : CRLF or Windows will register as 2x newline
+            case CHAR_CARRIAGE_RETURN:
+            case CHAR_LINEFEED:
+                setCursorPos(getCursorPos(1) + 1, 0); // FIXME : Unknown behavior for out from screen case
+                column_position = 0;
+                i++;
+                break;
+            default:
+                setCursorPos(getCursorPos(1), column_position);
+                directCharPrint(string[i], color);
+                column_position++;
+                i++;
+        }
+    }
+
+    // -- TTY based print --
+    // AL = Char, BH = Page, BL = Color
+    // int i = 0, temp = 0;
+    // while (string[i] != CHAR_NULL) {
+    //     switch (string[i]) {
+    //         // Warning : CRLF or Windows will register as 2x newline
+    //         case CHAR_CARRIAGE_RETURN:
+    //         case CHAR_LINEFEED:
+    //             setCursorPos(getCursorPos(1) + 1, 0); // FIXME : Unknown behavior for out from screen case
+    //             i++;
+    //             break;
+    //         default:
+    //             temp = 0x0E00 | string[i];
+    //             interrupt(0x10, temp, BIOS_LIGHT_RED, 0, 0);
+    //             i++;
+    //     }
+    // }
+}
+
 
 void charVideoMemoryWrite(int offset, char character) {
     putInMemory(V_MEM, V_OFFSET + offset, character);

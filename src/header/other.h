@@ -32,3 +32,15 @@ void bitDraw(int xs, int ys, int color, char *bitarray);
 
 void drawBootLogo();
 // Drawing boot logo
+
+void directCharPrint(char a, int color);
+// Direct interrupt to printing colored char
+
+void printColoredString(char *string, char color);
+// Generalized version of printString
+
+void enableKeyboardCursor();
+// Enabling keyboard cursor
+
+void disableKeyboardCursor();
+// Disabling keyboard cursor

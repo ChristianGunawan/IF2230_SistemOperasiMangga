@@ -7,7 +7,7 @@
 global _putInMemory
 global _interrupt
 global _makeInterrupt21
-global _getCursorPos
+global _getRawCursorPos
 extern _handleInterrupt21
 
 ;void putInMemory (int segment, int address, char character)
@@ -64,21 +64,19 @@ _makeInterrupt21:
 	pop ds
 	ret
 
-_getCursorPos:
+;int getRawCursorPos()
+;returning integer with higher 8 bit as row, lower 8 bit as column
+_getRawCursorPos:
 	push   bp
 	mov    bp,sp
 	push   di
 	push   si
 	push   cx
 	push   dx
-	dec    sp
-	dec    sp
 	mov    ax,0x0300 ; using INT 10H with AH = 03H
 	mov    bx,0x0    ; page number = 0, BH = 0x00H
 	int    0x10      ; direct int call
 	mov    ax,dx ; return %dx;
-	inc    sp
-	inc    sp
 	pop    dx
 	pop    cx
 	pop    si
