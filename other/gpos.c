@@ -1,3 +1,5 @@
+// 13519214 - Assembly setup
+// Compile using bcc and Link with kernel_asm.o
 extern int interrupt(int number, int AX, int BX, int CX, int DX);
 
 int main() {
@@ -6,12 +8,11 @@ int main() {
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {
-    
+
 }
 
 int getCursorPos() {
     int DX;
-    interrupt(0x10, 0x0300, 0x0000, 0, 0);
     DX = 3;
     return DX;
 }
