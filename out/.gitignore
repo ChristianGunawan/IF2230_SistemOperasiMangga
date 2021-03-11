@@ -1,3 +1,4 @@
+fs/*
 *.o
 bootloader
 kernel

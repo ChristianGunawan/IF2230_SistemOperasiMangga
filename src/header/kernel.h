@@ -9,7 +9,7 @@
 extern void putInMemory(int segment, int address, char character);
 extern void makeInterrupt21();
 extern int interrupt(int number, int AX, int BX, int CX, int DX);
-
+// extern int getCursorPos();
 
 void handleInterrupt21 (int AX, int BX, int CX, int DX);
 // Interupt 21 Handler
@@ -22,3 +22,13 @@ void readString(char *string);
 
 void clear(char *buffer, int length); //Fungsi untuk mengisi buffer dengan 0
 // Clearing string buffer
+
+void readSector(char *buffer, int sector);
+// Reading file at sector and copy to buffer
+
+void writeSector(char *buffer, int sector);
+// Writing buffer at sector
+
+// readFile();
+// writeFile();
+// loadFile();

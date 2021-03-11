@@ -1,5 +1,5 @@
 # 13519214 - Makefile
-all: diskimage bootloader kernel
+all: diskimage bootloader kernel insertfilesystem
 
 clean:
 	rm out/*
@@ -22,9 +22,21 @@ kernel:
 	bcc -ansi -c -o out/kernel.o src/kernel.c
 	bcc -ansi -c -o out/std.o src/std.c
 	bcc -ansi -c -o out/other.o src/other.c
+	bcc -ansi -c -o out/shell.o src/shell.c
 	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	ld86 -o out/kernel -d out/*.o # Linking
 	dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1
+
+createfilesystem:
+	dd if=/dev/zero of=out/fs/map.img bs=512 count=1
+	dd if=/dev/zero of=out/fs/files.img bs=512 count=2
+	dd if=/dev/zero of=out/fs/sectors.img bs=512 count=1
+
+insertfilesystem:
+	dd if=out/fs/map.img of=out/mangga.img bs=512 count=1 seek=256 conv=notrunc
+	dd if=out/fs/files.img of=out/mangga.img bs=512 count=2 seek=257 conv=notrunc
+	dd if=out/fs/sectors.img of=out/mangga.img bs=512 count=1 seek=259 conv=notrunc
+
 
 
 

@@ -7,6 +7,7 @@
 global _putInMemory
 global _interrupt
 global _makeInterrupt21
+; global _getCursorPos
 extern _handleInterrupt21
 
 ;void putInMemory (int segment, int address, char character)
@@ -47,7 +48,7 @@ intr:	int 0x00	;call the interrupt (00 will be changed above)
 
 ;void makeInterrupt21()
 ;this sets up the interrupt 0x21 vector
-;when an interrupt 0x21 is called in the future, 
+;when an interrupt 0x21 is called in the future,
 ;_interrupt21ServiceRoutine will run
 
 _makeInterrupt21:
@@ -62,6 +63,10 @@ _makeInterrupt21:
 	mov [si],dx	;set up our vector
 	pop ds
 	ret
+
+; _getCursorPos:
+
+
 
 ;this is called when interrupt 21 happens
 ;it will call your function:

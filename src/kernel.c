@@ -7,6 +7,7 @@
 #include "header/kernel.h"
 #include "header/std.h"
 #include "header/other.h"
+#include "header/shell.h"
 
 int main() {
     // Declaration
@@ -19,21 +20,22 @@ int main() {
 
     // Initial screen
     clearScreen();
-    drawBootLogo();
+    // drawBootLogo();
 
     // Print & Read string loop
     interrupt(0x10, 0x0003, 0, 0, 0);
-    setCursorPos(1,0);
-    interrupt(0x21, 0x0, "Output :", 0, 0);
+    shell();
+    // setCursorPos(1,0);
+    // interrupt(0x21, 0x0, "Output :", 0, 0);
     while (1) {
-        setCursorPos(0,0);
-        interrupt(0x21, 0x1, stringBuffer, 0, 0);
-        setCursorPos(0,0);
-        interrupt(0x21, 0x0, "                        ", 0, 0);
-        setCursorPos(2,0);
-        interrupt(0x21, 0x0, "                        ", 0, 0);
-        setCursorPos(2,0);
-        interrupt(0x21, 0x0, stringBuffer, 0, 0);
+        // setCursorPos(0,0);
+        // interrupt(0x21, 0x1, stringBuffer, 0, 0);
+        // setCursorPos(0,0);
+        // interrupt(0x21, 0x0, "                        ", 0, 0);
+        // setCursorPos(2,0);
+        // interrupt(0x21, 0x0, "                        ", 0, 0);
+        // setCursorPos(2,0);
+        // interrupt(0x21, 0x0, stringBuffer, 0, 0);
     }
 }
 
@@ -88,7 +90,7 @@ void readString(char *string) {
     char c;
     int i = 0, col = 0, temp = 0;
     // Enabling Cursor
-    interrupt(0x10, 0x0100, 0, 0x000F, 0);
+    interrupt(0x10, 0x0100, 0, 0x0607, 0);
 
     do {
         c = interrupt(0x16, 0x00, 0, 0, 0);
@@ -103,6 +105,7 @@ void readString(char *string) {
                 if (col > 0) {
                     col--;
                     setCursorPos(0, col);
+
                 }
                 // 0x20 -> Space
                 break;
