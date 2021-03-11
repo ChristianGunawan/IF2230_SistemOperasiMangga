@@ -12,6 +12,10 @@
 #define CHAR_BACKSPACE 0x8
 #define CHAR_NULL 0x0
 #define CHAR_SPACE 0x20
+#define CHAR_ARROW_LEFT 
+#define CHAR_ARROW_RIGHT
+#define CHAR_ARROW_UP
+#define CHAR_ARROW_DOWN
 
 // BIOS Color Enum
 // Note : Probably bcc doesn't have enum keyword

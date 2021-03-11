@@ -68,9 +68,7 @@ _makeInterrupt21:
 ;returning integer with higher 8 bit as row, lower 8 bit as column
 _getRawCursorPos:
 	push   bp
-	mov    bp,sp
-	push   di
-	push   si
+	push   bx
 	push   cx
 	push   dx
 	mov    ax,0x0300 ; using INT 10H with AH = 03H
@@ -79,10 +77,17 @@ _getRawCursorPos:
 	mov    ax,dx ; return %dx;
 	pop    dx
 	pop    cx
-	pop    si
-	pop    di
+	pop    bx
 	pop    bp
 	ret
+
+
+;int getRawKeyPress()
+;returning integer with raw return, check INT 16H for references
+; _getRawKeyPress:
+; 	push bp
+;
+; 	pop bp
 
 
 ;this is called when interrupt 21 happens
