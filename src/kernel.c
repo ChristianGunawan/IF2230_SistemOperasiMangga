@@ -60,7 +60,7 @@ void readString(char *string) {
     // TODO : Literally gets()
     // TODO : Extra, arrow keys control char
     char c;
-    int i = 0, col = 0, temp = 0, savedCursorRow, savedCursorCol;
+    int i = 0, savedCursorRow, savedCursorCol;
     enableKeyboardCursor();
     savedCursorRow = getCursorPos(1);
     savedCursorCol = getCursorPos(0);
@@ -73,19 +73,14 @@ void readString(char *string) {
             case CHAR_BACKSPACE:
                 if (i > 0)
                     i--;
-
-                directCharPrint(CHAR_SPACE, BIOS_BLACK);
-                if (col > 0) {
-                    col--;
-                    setCursorPos(savedCursorRow, col);
-                }
-
+                setCursorPos(savedCursorRow, savedCursorCol + i);
+                directCharPrint(CHAR_SPACE, BIOS_GRAY);
                 break;
             default:
-                setCursorPos(savedCursorRow, col);
+                setCursorPos(savedCursorRow, savedCursorCol + i);
                 directCharPrint(c, BIOS_LIGHT_BLUE);
                 i++;
-                col++;
+                setCursorPos(savedCursorRow, savedCursorCol + i);
         }
     } while (c != CHAR_INPUT_NEWLINE);
     string[i] = CHAR_NULL; // Terminating string

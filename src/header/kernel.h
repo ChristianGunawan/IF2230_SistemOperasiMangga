@@ -43,7 +43,7 @@ extern int interrupt(int number, int AX, int BX, int CX, int DX);
 extern int getRawCursorPos(); // TODO : Split to another asm file
 
 void handleInterrupt21 (int AX, int BX, int CX, int DX);
-// Interupt 21 Handler
+// Interupt 21H Handler
 
 void printString(char *string);
 // System call for char print
