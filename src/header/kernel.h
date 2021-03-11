@@ -9,7 +9,7 @@
 extern void putInMemory(int segment, int address, char character);
 extern void makeInterrupt21();
 extern int interrupt(int number, int AX, int BX, int CX, int DX);
-// extern int getCursorPos();
+extern int getCursorPos(); // TODO : Split to another asm file
 
 void handleInterrupt21 (int AX, int BX, int CX, int DX);
 // Interupt 21 Handler

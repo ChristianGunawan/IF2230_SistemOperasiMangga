@@ -39,7 +39,7 @@ int main() {
     }
 }
 
-void handleInterrupt21(int AX, int BX, int CX, int DX){
+void handleInterrupt21(int AX, int BX, int CX, int DX) {
     switch (AX) {
         case 0x0:
             printString(BX);
@@ -104,15 +104,14 @@ void readString(char *string) {
                 interrupt(0x10, 0x0920, 0, 0x1, 0);
                 if (col > 0) {
                     col--;
-                    setCursorPos(0, col);
-
+                    setCursorPos(getCursorPos() >> 8, col);
                 }
                 // 0x20 -> Space
                 break;
             default:
                 string[i] = c;
                 temp = 0x0900 | c;
-                setCursorPos(0, col);
+                setCursorPos(getCursorPos() >> 8, col);
                 interrupt(0x10, temp, 0x0007, 0x1, 0);
                 i++;
                 col++;

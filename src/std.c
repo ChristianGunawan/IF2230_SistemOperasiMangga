@@ -9,5 +9,6 @@ int strlen(char* string) {
 }
 
 int mod(int a, int n) {
+    // TODO : Rewriting in actual mod instruction
     return a - n*(a/n);
 }
