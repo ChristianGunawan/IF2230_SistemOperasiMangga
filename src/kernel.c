@@ -10,11 +10,13 @@
 #include "kernel-header/output.h"
 #include "kernel-header/screen.h"
 #include "std-header/boolean.h"
+#include "std-header/std.h"
 
 extern void shell();
 
 int main() {
     char buf[1024];
+    int temp;
     clear(buf,1024);
     // Setup
     makeInterrupt21();
@@ -28,12 +30,18 @@ int main() {
     interrupt(0x10, 0x0003, 0, 0, 0);
 
     // FS DEBUGGING
-    readSector(buf, 15);
+    readSector(buf, 0x100);
     if (buf[0] != '\0') {
         printString("early catch");
-        printString(buf);
+        temp = 0;
+        while (temp < 512) {
+            if (buf[temp] == '\xFF')
+                printString("FF Found\n");
+            temp++;
+        }
     }
-    writeSector("Hello", 15); // Will get segfault on second run
+    writeFile("Haha", "Hoho", &temp, 3);
+    // writeSector("Hello", 10);
 
     shell();
     while (true);
@@ -156,13 +164,18 @@ void clear(char *string, int length) {
     }
 }
 
+// I/O System Calls
+// WARNING : It will read entire 512 bytes starting from buffer,
+//           ensure entire buffer is cleared first and not reading directly from .rodata
+// Note : BIOS counting sector 0 as sector 1 in INT 13H
+// Note : readSector() and writeSector() is adding 1 to sector,
+//        thus readSector(buffer, 10) starting location of files (sector 11 on BIOS, sector 0 is bootloader and 1-10 is kernel)
 void readSector(char *buffer, int sector) {
     interrupt(0x13, 0x0201, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
 }
 
 void writeSector(char *buffer, int sector) {
     // TODO : Read more, CH = Track on AH 03H (?)
-    // WARNING : It will read entire 512 bytes starting from buffer, ensure entire buffer is cleared first
     interrupt(0x13, 0x0301, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
 }
 
@@ -170,6 +183,54 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
 // Read file with relative path
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
+    char map_buf[SECTOR_SIZE], files_buf[2][SECTOR_SIZE], sectors_buf[SECTOR_SIZE];
+    int f_sector_idx = 0, i = 0, j = 0, buffer_size = 0;
+    int map_empty_bytes_sum = 0;
+    bool is_empty_dir_exist = false, is_enough_sector = false;
+    bool is_empty_sectors_idx_exist = false;
+    readSector(files_buf[0], FILES_SECTOR);
+    readSector(files_buf[1], FILES_SECTOR + SECTOR_SIZE);
+
+    // Directory checking
+    while (i < 2) {
+        j = 0;
+        while (j < SECTOR_SIZE && !is_empty_dir_exist) {
+            if (files_buf[i][j+ENTRY_BYTE_OFFSET] == EMPTY_FILES_ENTRY) {
+                f_sector_idx = i;
+                is_empty_dir_exist = true;
+            }
+            j += 0x10;
+        }
+        i++;
+    }
+
+    if (is_empty_dir_exist) {
+        // Checking whether enough empty space or not in map
+        readSector(map_buf, MAP_SECTOR);
+        i = 0;
+        buffer_size = strlen(buffer); // In bytes
+        while (i < SECTOR_SIZE && !is_enough_sector) {
+            // Finding empty sector in map
+            if (map_buf[i] == '\x00')
+                map_empty_bytes_sum += SECTOR_SIZE;
+            if (buffer_size <= map_empty_bytes_sum)
+                is_enough_sector = true;
+            i++;
+        }
+    }
+
+    if (is_enough_sector) {
+        // Checking available entry in sectors filesystem
+        // i = 0; TODO : ADD
+        // while (i < 0x1F && !is_empty_sectors_idx_exist) {
+        //     j = 0;
+        //     is_non_empty = false;
+        //     while (j < 0x10) {
+        //         if (sectors_buf[i] != )
+        //
+        //     }
+        // }
+    }
 
 }
 // Writing file with relative path

@@ -2,6 +2,24 @@
 
 #include "config.h"
 
+
+// --- Internal Filesystem Configuration ---
+#define SECTOR_SIZE 512
+// Kernel Maximum Size, if changed ensure dd commands in makefile and bootloader.asm set properly
+#define KERNEL_SECTOR_SIZE 15
+// Macro for filesystem syscalls
+#define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry
+#define MAP_SECTOR 0x100
+#define FILES_SECTOR 0x101
+#define SECTORS_SECTOR 0x103
+
+// Flags in files filesystem
+#define ROOT_PARENT_FOLDER 0xFF // Flag for "P" byte
+#define EMPTY_FILES_ENTRY 0xFE // Flag for "S" byte
+#define FOLDER_ENTRY 0xFF // Flag for "S" byte
+#define PARENT_BYTE_OFFSET 0xF // "P" byte, parent folder index
+#define ENTRY_BYTE_OFFSET 0xE // "S" byte, entry index at sectors filesystem
+
 // INT 21H Handler
 // TODO : Add
 

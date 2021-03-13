@@ -32,7 +32,7 @@ kernel:
 	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	@ld86 -o out/kernel -d out/*.o
 	# ------------ Compiled kernel stat ------------
-	# Max Kernel Size : 5120 bytes (10 sectors, 1 sector = 512 bytes)
+	# Max Kernel Size : 7680 bytes (15 sectors, 1 sector = 512 bytes)
 	@stat --printf="Kernel Size : %s bytes\n" out/kernel
 	# ----------------------------------------------
 	@dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1 status=noxfer
@@ -46,8 +46,8 @@ insertfilesystem:
 	@dd if=out/fs/files.img of=out/mangga.img bs=512 count=2 seek=257 conv=notrunc status=noxfer
 	@dd if=out/fs/sectors.img of=out/mangga.img bs=512 count=1 seek=259 conv=notrunc status=noxfer
 
-
-
+filesystemcreator:
+	@gcc -Wall -Wextra -O3 -o other/fscreate other/filesystem_create.c
 
 # Test recipes
 kernelgcc:

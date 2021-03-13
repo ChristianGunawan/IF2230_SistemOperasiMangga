@@ -19,4 +19,5 @@ void shell() {
         print(string_buffer);
         print(">\n\n");
     }
+    // TODO : Check cursor position, handle out of screen case
 }
