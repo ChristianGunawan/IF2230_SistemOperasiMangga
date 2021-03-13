@@ -29,6 +29,8 @@ void readSector(char *buffer, int sector);
 void writeSector(char *buffer, int sector);
 // Writing buffer at sector
 
-// readFile();
-// writeFile();
-// loadFile();
+void readFile(char *buffer, char *path, int *result, char parentIndex);
+// Read file with relative path
+
+void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
+// Writing file with relative path

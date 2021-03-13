@@ -2,8 +2,9 @@
 all: diskimage bootloader kernel createfilesystem insertfilesystem
 
 clean:
-	rm out/fs/*;
-	rm out/*
+	# -- Cleaning output files --
+	@rm out/fs/*;
+	@rm out/*
 
 test: kernelgcc
 
@@ -13,29 +14,37 @@ cleantest: cleangcc
 
 # Main recipes
 diskimage:
-	dd if=/dev/zero of=out/mangga.img bs=512 count=2880
+	# -- Initial mangga.img --
+	@dd if=/dev/zero of=out/mangga.img bs=512 count=2880 status=noxfer
 
 bootloader:
-	nasm src/asm/bootloader.asm -o out/bootloader;
-	dd if=out/bootloader of=out/mangga.img bs=512 count=1 conv=notrunc
+	# -- Bootloader insertion --
+	@nasm src/asm/bootloader.asm -o out/bootloader;
+	@dd if=out/bootloader of=out/mangga.img bs=512 count=1 conv=notrunc status=noxfer
 
 kernel:
-	bcc -ansi -c -o out/kernel.o src/kernel.c
-	bcc -ansi -c -o out/std.o src/std.c
-	bcc -ansi -c -o out/screen.o src/screen.c
-	bcc -ansi -c -o out/shell.o src/shell.c
-	bcc -ansi -c -o out/output.o src/output.c
-	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
-	ld86 -o out/kernel -d out/*.o # Linking
-	dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1
+	# -- Source Compilation --
+	@bcc -ansi -c -o out/kernel.o src/kernel.c
+	@bcc -ansi -c -o out/std.o src/std.c
+	@bcc -ansi -c -o out/screen.o src/screen.c
+	@bcc -ansi -c -o out/shell.o src/shell.c
+	@bcc -ansi -c -o out/output.o src/output.c
+	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
+	@ld86 -o out/kernel -d out/*.o
+	# ------------ Compiled kernel stat ------------
+	# Max Kernel Size : 5120 bytes (10 sectors, 1 sector = 512 bytes)
+	@stat --printf="Kernel Size : %s bytes\n" out/kernel
+	# ----------------------------------------------
+	@dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1 status=noxfer
 
 createfilesystem:
-	./other/fscreate out/fs/map.img out/fs/files.img out/fs/sectors.img
+	@./other/fscreate out/fs/map.img out/fs/files.img out/fs/sectors.img
 
 insertfilesystem:
-	dd if=out/fs/map.img of=out/mangga.img bs=512 count=1 seek=256 conv=notrunc
-	dd if=out/fs/files.img of=out/mangga.img bs=512 count=2 seek=257 conv=notrunc
-	dd if=out/fs/sectors.img of=out/mangga.img bs=512 count=1 seek=259 conv=notrunc
+	# -- Filesystem insertion --
+	@dd if=out/fs/map.img of=out/mangga.img bs=512 count=1 seek=256 conv=notrunc status=noxfer
+	@dd if=out/fs/files.img of=out/mangga.img bs=512 count=2 seek=257 conv=notrunc status=noxfer
+	@dd if=out/fs/sectors.img of=out/mangga.img bs=512 count=1 seek=259 conv=notrunc status=noxfer
 
 
 

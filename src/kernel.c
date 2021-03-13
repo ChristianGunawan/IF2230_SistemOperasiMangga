@@ -14,6 +14,8 @@
 extern void shell();
 
 int main() {
+    char buf[1024];
+    clear(buf,1024);
     // Setup
     makeInterrupt21();
 
@@ -24,6 +26,15 @@ int main() {
 
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
+
+    // FS DEBUGGING
+    readSector(buf, 15);
+    if (buf[0] != '\0') {
+        printString("early catch");
+        printString(buf);
+    }
+    writeSector("Hello", 15); // Will get segfault on second run
+
     shell();
     while (true);
 }
@@ -144,3 +155,21 @@ void clear(char *string, int length) {
         i++;
     }
 }
+
+void readSector(char *buffer, int sector) {
+    interrupt(0x13, 0x0201, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
+}
+
+void writeSector(char *buffer, int sector) {
+    // TODO : Read more, CH = Track on AH 03H (?)
+    // WARNING : It will read entire 512 bytes starting from buffer, ensure entire buffer is cleared first
+    interrupt(0x13, 0x0301, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
+}
+
+void readFile(char *buffer, char *path, int *result, char parentIndex);
+// Read file with relative path
+
+void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
+
+}
+// Writing file with relative path
