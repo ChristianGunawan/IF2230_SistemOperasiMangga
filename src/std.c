@@ -1,5 +1,6 @@
 // 13519214 - Standard function
 
+#include "std-header/std.h"
 #include "kernel-header/config.h"
 
 int strlen(char *string) {
@@ -72,3 +73,27 @@ int getFullKey() {
 // TODO : Extra, printf(), Extra Extra : Color escape sequence
 
 // TODO : Extra, strtoint / atoi and inttostr
+
+void inttostr(char *buffer, int n) {
+    int i = 0;
+    while (n > 10) {
+        buffer[i] = CHAR_NUMBER_0 + mod(n, 10);
+        i++;
+        n /= 10;
+    }
+    buffer[i] = CHAR_NUMBER_0 + mod(n, 10); // First digit
+    i++;
+    buffer[i] = '\0';
+    strrev(buffer);
+}
+
+void strrev(char *string) {
+    int i = 0, length = strlen(string);
+    char temp;
+    while (i < length/2) {
+        temp = string[i];
+        string[i] = string[length - 1 - i];
+        string[length - 1 - i] = temp;
+        i++;
+    }
+}

@@ -13,12 +13,19 @@
 #define FILES_SECTOR 0x101
 #define SECTORS_SECTOR 0x103
 
+// Predefined values in map filesystem
+#define EMPTY_MAP_ENTRY 0x00 // For empty entry
+#define FILLED_MAP_ENTRY 0xFF // If sector are filled
+
 // Flags in files filesystem
 #define ROOT_PARENT_FOLDER 0xFF // Flag for "P" byte
 #define EMPTY_FILES_ENTRY 0xFE // Flag for "S" byte
 #define FOLDER_ENTRY 0xFF // Flag for "S" byte
-#define PARENT_BYTE_OFFSET 0xF // "P" byte, parent folder index
-#define ENTRY_BYTE_OFFSET 0xE // "S" byte, entry index at sectors filesystem
+#define PARENT_BYTE_OFFSET 0x0 // "P" byte, parent folder index
+#define ENTRY_BYTE_OFFSET 0x1 // "S" byte, entry index at sectors filesystem
+
+// Predefined values in sectors filesystem
+#define EMPTY_SECTORS_ENTRY 0x00 // For empty entry
 
 // INT 21H Handler
 // TODO : Add

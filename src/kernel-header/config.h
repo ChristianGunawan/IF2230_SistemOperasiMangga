@@ -10,6 +10,7 @@
 #define CHAR_BACKSPACE 0x8
 #define CHAR_NULL 0x0
 #define CHAR_SPACE 0x20
+#define CHAR_NUMBER_0 0x30
 
 // BIOS Scancodes
 #define SCANCODE_RIGHT_ARROW 0x4D

@@ -20,4 +20,5 @@ void shell() {
         print(">\n\n");
     }
     // TODO : Check cursor position, handle out of screen case
+    // TODO : Extra, posibility of additional INT 10H
 }
