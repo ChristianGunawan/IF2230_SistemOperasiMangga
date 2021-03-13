@@ -96,22 +96,19 @@ void printColoredString(char *string, char color) {
     // -- Position based print --
     // Interrupt 0x10 for print 1 char
     // AH = Mode, AL = Char, BH = Page Number, BL = Color, CX = Print n times
-    int i = 0, temp = 0, column_position = 0;
-    column_position = getCursorPos(0);
+    int i = 0, temp = 0;
     while (string[i] != CHAR_NULL) {
         switch (string[i]) {
             // Warning : CRLF or Windows will register as 2x newline
             case CHAR_CARRIAGE_RETURN:
             case CHAR_LINEFEED:
                 setCursorPos(getCursorPos(1) + 1, 0); // FIXME : Unknown behavior for out from screen case
-                column_position = 0;
                 i++;
                 break;
             default:
                 directCharPrint(string[i], color);
-                column_position++;
                 i++;
-                setCursorPos(getCursorPos(1), column_position);
+                setCursorPos(getCursorPos(1), getCursorPos(0) + 1);
         }
     }
 

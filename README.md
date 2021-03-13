@@ -21,4 +21,6 @@ objdump -D -b binary -m i8086 <filename>
 
 Resource
 https://www.fountainware.com/EXPL/bios_key_codes.htm
+TODO : Create hex edit for fs
+TODO : Rename getRawKeyPress -> split from actual raw mode
 -->

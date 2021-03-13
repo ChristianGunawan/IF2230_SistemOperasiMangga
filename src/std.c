@@ -1,14 +1,38 @@
 // 13519214 - Standard function
 
-int strlen(char* string) {
+int strlen(char *string) {
     // Standard string length function
-    int length = 0;
-    while (*(string+length) != '\0')
-        length++;
-    return length;
+    int i = 0;
+    while (string[i] != '\0')
+        i++;
+    return i;
+}
+
+void strcpy(char *dest, char *src) {
+    int i = 0;
+    while (src[i] != '\0')
+        dest[i] = src[i];
+}
+
+char strcmp(char *s1, char *s2) {
+    int i = 0;
+    if (strlen(s1) == strlen(s2)) {
+        // If string length matches, check every char
+        while (s1[i] != '\0') {
+            if (s1[i] != s2[i])
+                return 1;
+        }
+
+        // If both string matches
+        return 0;
+    }
+
+    return 1;
 }
 
 int mod(int a, int n) {
     // TODO : Rewriting in actual mod instruction
     return a - n*(a/n);
 }
+
+// TODO : print()

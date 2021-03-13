@@ -8,7 +8,7 @@ global _putInMemory
 global _interrupt
 global _makeInterrupt21
 global _getRawCursorPos
-global _getRawKeyPress
+global _getFullKeyPress
 extern _handleInterrupt21
 
 ;void putInMemory (int segment, int address, char character)
@@ -81,9 +81,9 @@ _getRawCursorPos:
 	ret
 
 
-;int getRawKeyPress()
+;int getFullKeyPress()
 ;returning integer with raw return, check INT 16H for references
-_getRawKeyPress:
+_getFullKeyPress:
     xor   ax,ax  ;AH = 00H
 	int   0x16
 	ret

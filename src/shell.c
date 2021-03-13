@@ -1,7 +1,7 @@
 // TODO : Recheck kernel size
 
 #include "header/shell.h"
-#include "header/kernel.h" // TODO : Split getCursorPos
+#include "header/kernel.h" // TODO : Split getCursorPos, should not including kernel.h
 #include "header/std.h"
 
 // TODO : Wrap printColoredString() ?
@@ -19,6 +19,10 @@ void shell() {
         printColoredString(directory_string, BIOS_BLUE);
         printString("$ ");
         readString(string_buffer);
+        printString("\nInput : <");
+        printString(string_buffer);
+        printString(">\n");
+
     }
 
 }

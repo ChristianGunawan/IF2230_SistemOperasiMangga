@@ -3,6 +3,7 @@
 // - Variable declaration must be put on top of code
 // - First defined function is starting function
 // - Pointer declaration syntax is <type> *<varname>;
+// - #include weird behavior if directly next to comment (only 1 newline, 2 newline work fine)
 
 #include "header/kernel.h"
 #include "header/std.h"
@@ -10,33 +11,17 @@
 #include "header/shell.h"
 
 int main() {
-    // Declaration
-    char string_buffer[1024];
-    int temp;
-
     // Setup
-    clear(string_buffer, 1024);
     makeInterrupt21();
 
     // Initial screen
     clearScreen();
-    drawBootLogo();
+    drawBootLogo();     // Note : drawBootLogo() does not revert video mode
 
-    // Print & Read string loop
+    // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
     shell();
-    // setCursorPos(1,0);
-    // interrupt(0x21, 0x0, "Output :", 0, 0);
-    while (1) {
-        // setCursorPos(0,0);
-        // interrupt(0x21, 0x1, stringBuffer, 0, 0);
-        // setCursorPos(0,0);
-        // interrupt(0x21, 0x0, "                        ", 0, 0);
-        // setCursorPos(2,0);
-        // interrupt(0x21, 0x0, "                        ", 0, 0);
-        // setCursorPos(2,0);
-        // interrupt(0x21, 0x0, stringBuffer, 0, 0);
-    }
+    while (1);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {
@@ -58,7 +43,6 @@ void printString(char *string) {
 
 void readString(char *string) {
     // TODO : Literally gets()
-    // TODO : Extra, arrow keys control char
     char c, scancode;
     int i = 0, j = 0, max_i = 0, savedCursorRow, savedCursorCol, rawKey;
     enableKeyboardCursor();
@@ -66,9 +50,7 @@ void readString(char *string) {
     savedCursorCol = getCursorPos(0);
 
     do {
-        // c = interrupt(0x16, 0x00, 0, 0, 0);
-        // DEBUG
-        rawKey = getRawKeyPress();
+        rawKey = getFullKeyPress();
         c = rawKey & 0xFF;      // AL Value
         scancode = rawKey >> 8; // AH Value
         // Warning : Prioritizing ASCII before scancode
