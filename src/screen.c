@@ -3,6 +3,7 @@
 #include "kernel-header/kernel.h"
 #include "kernel-header/screen.h"
 #include "basic-header/basic-opr.h"
+#include "std-header/boolean.h"
 
 void drawPixel(int x, int y, int color) {
     putInMemory(V_GRAPHIC, x+y*320, color);
@@ -59,7 +60,7 @@ void setCursorPos(int r, int c) {
     interrupt(0x10, 0x0200, 0x1, 0, temp);
 }
 
-int getCursorPos(char isRow) {
+int getCursorPos(bool isRow) {
     if (isRow)
         return getRawCursorPos() >> 8;
     else
@@ -103,7 +104,7 @@ void printColoredString(char *string, char color) {
             // Warning : CRLF or Windows will register as 2x newline
             case CHAR_CARRIAGE_RETURN:
             case CHAR_LINEFEED:
-                setCursorPos(getCursorPos(1) + 1, 0); // FIXME : Unknown behavior for out from screen case
+                setCursorPos(getCursorPos(1) + 1, 0); // FIXME : Extra, Unknown behavior for out from screen case
                 i++;
                 break;
             default:
@@ -121,7 +122,7 @@ void printColoredString(char *string, char color) {
     //         // Warning : CRLF or Windows will register as 2x newline
     //         case CHAR_CARRIAGE_RETURN:
     //         case CHAR_LINEFEED:
-    //             setCursorPos(getCursorPos(1) + 1, 0); // FIXME : Unknown behavior for out from screen case
+    //             setCursorPos(getCursorPos(1) + 1, 0);
     //             i++;
     //             break;
     //         default:
@@ -132,13 +133,15 @@ void printColoredString(char *string, char color) {
     // }
 }
 
+void getCursorPosWrapper(int *ptr, bool isrow) {
+    (*ptr) = getCursorPos(isrow);
+}
 
 void charVideoMemoryWrite(int offset, char character) {
     putInMemory(V_MEM, V_OFFSET + offset, character);
 }
 
 void drawBootLogo() {
-    // TODO : Use raw binary
     int i = 0, j = 0;
     char *logo = LOGO_STRING;
 

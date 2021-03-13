@@ -21,5 +21,8 @@ void print(char *string, char color);
 void gets(char *string);
 // Simple keyboard input, ye olde gets()
 
+void putchar(char a);
+// Standard 1 char output
+
 int getFullKey();
 // Getting 1 keypress, blocking, no echo

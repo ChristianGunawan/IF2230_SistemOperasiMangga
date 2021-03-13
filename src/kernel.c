@@ -31,16 +31,36 @@ int main() {
 void handleInterrupt21(int AX, int BX, int CX, int DX) {
     switch (AX) {
         case 0x0:
-            printColoredString(BX, CX);
+            switch (CX) {
+                case 0x0:
+                    printColoredString(BX, DX);
+                    break;
+                case 0x1:
+                    setCursorPos(getCursorPos(1), getCursorPos(0) - 1);
+                    directCharPrint(CHAR_SPACE, BIOS_GRAY);
+                    break;
+            }
             break;
         case 0x1:
-            if (CX)
-                getFullKeyWrapper(BX);
-            else
-                readString(BX);
+            switch (CX) {
+                case 0x0:
+                    readString(BX);
+                    break;
+                case 0x1:
+                    getFullKeyWrapper(BX);
+                    break;
+                case 0x2:
+                    setCursorPos(BX & 0xFF00, BX & 0x00FF);
+                    break;
+                case 0x3:
+                    getCursorPosWrapper(BX, DX);
+                    break;
+                default:
+                    printString("Invalid interrupt\n");
+            }
             break;
         default:
-            printString("Invalid interrupt");
+            printString("Invalid interrupt\n");
     }
 }
 
@@ -49,7 +69,7 @@ void printString(char *string) {
 }
 
 void readString(char *string) {
-    // TODO : Literally gets()
+    // FIXME : Extra, Literally gets()
     char c, scancode;
     int i = 0, j = 0, max_i = 0, savedCursorRow, savedCursorCol, rawKey;
     enableKeyboardCursor();

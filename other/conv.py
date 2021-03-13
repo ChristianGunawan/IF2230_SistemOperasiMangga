@@ -2,7 +2,6 @@
 # https://pillow.readthedocs.io/en/4.0.x/reference/Image.html
 from PIL import Image
 
-# TODO : Raw binary data
 filename = "mangga.bmp"
 bitmap = Image.open(filename)
 output = open("binary.txt","w")
