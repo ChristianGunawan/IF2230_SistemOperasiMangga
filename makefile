@@ -23,6 +23,7 @@ kernel:
 	bcc -ansi -c -o out/std.o src/std.c
 	bcc -ansi -c -o out/screen.o src/screen.c
 	bcc -ansi -c -o out/shell.o src/shell.c
+	bcc -ansi -c -o out/output.o src/output.c
 	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	ld86 -o out/kernel -d out/*.o # Linking
 	dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1

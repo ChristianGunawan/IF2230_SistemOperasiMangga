@@ -4,10 +4,14 @@
 // - First defined function is starting function
 // - Pointer declaration syntax is <type> *<varname>;
 // - #include weird behavior if directly next to comment (only 1 newline, 2 newline work fine)
+// - Bizzare filename behavior (cannot using filename starting with i (?)), no error & compiled normally but cannot start
 
 #include "kernel-header/kernel.h"
+#include "kernel-header/output.h"
 #include "kernel-header/screen.h"
-#include "kernel-header/shell.h"
+#include "std-header/boolean.h"
+
+extern void shell();
 
 int main() {
     // Setup
@@ -15,21 +19,25 @@ int main() {
 
     // Initial screen
     clearScreen();
-    drawBootLogo();     // Note : drawBootLogo() does not revert video mode
+    // DEBUG
+    // drawBootLogo();     // Note : drawBootLogo() does not revert video mode
 
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
     shell();
-    while (1);
+    while (true);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {
     switch (AX) {
         case 0x0:
-            printString(BX);
+            printColoredString(BX, CX);
             break;
         case 0x1:
-            readString(BX);
+            if (CX)
+                getFullKeyWrapper(BX);
+            else
+                readString(BX);
             break;
         default:
             printString("Invalid interrupt");

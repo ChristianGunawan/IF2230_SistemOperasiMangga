@@ -2,12 +2,14 @@
 
 #include "config.h"
 
+// INT 21H Handler
+// TODO : Add
+
+
 // Implemented in assembly
 extern void putInMemory(int segment, int address, char character);
 extern void makeInterrupt21();
 extern int interrupt(int number, int AX, int BX, int CX, int DX);
-extern int getRawCursorPos(); // TODO : Split to another asm file
-extern int getRawKeyPress();
 
 void handleInterrupt21(int AX, int BX, int CX, int DX);
 // Interupt 21H Handler

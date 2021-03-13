@@ -10,6 +10,10 @@
 #define LOGO_X_OFFSET 8
 #define LOGO_Y_OFFSET 0
 
+// Implemented in assembly
+extern int getRawCursorPos(); // TODO : Split to another asm file
+
+
 void charVideoMemoryWrite(int offset, char character);
 // putInMemory() wrapper for video memory writing
 
@@ -19,6 +23,9 @@ void clearScreen();
 void setCursorPos(int r, int c);
 // Move cursor position
 // Note : Row and Column start from 0
+
+int getCursorPos(char isRow);
+// Get cursor position
 
 void drawPixel(int x, int y, int color);
 // Change color single pixel on screen,
