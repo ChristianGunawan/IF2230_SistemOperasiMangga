@@ -31,13 +31,13 @@ int main() {
     interrupt(0x10, 0x0003, 0, 0, 0);
 
     // FS DEBUGGING
-    readSector(buf, 2);
-    while (buf[temp] != CHAR_NULL) {
-        inttostr(&tp, buf[temp]);
-        temp++;
-        print(tp,BIOS_BLUE);
-        print("\n");
-    }
+    // readSector(buf, 2);
+    // while (buf[temp] != CHAR_NULL) {
+    //     inttostr(&tp, buf[temp]);
+    //     temp++;
+    //     print(tp,BIOS_BLUE);
+    //     print("\n");
+    // }
     // print(buf);
 
     // if (buf[0] != '\0') {
@@ -49,7 +49,7 @@ int main() {
     //         temp++;
     //     }
     // }
-    // writeFile("Haha", "Hoho", &temp, 0);
+    writeFile("Entry kok byte gan", "Ininamanyafile", &temp, 0);
     // writeSector("Hello", 10);
 
     shell();
@@ -192,8 +192,10 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     char map_buf[SECTOR_SIZE], files_buf[2][SECTOR_SIZE], sectors_buf[SECTOR_SIZE]; // Filesystem buffer
-    int i = 0, j = 0; // Iterator index
-    int f_entry_idx = 0, sectors_entry_idx = 0; // Targets Index
+    char file_segment_buffer[SECTOR_SIZE];
+    char dbg[16];
+    int i = 0, j = 0, segment_idx = 0; // Iterator index
+    int f_entry_idx = 0, f_entry_sector_idx = 0, sectors_entry_idx = 0; // Targets Index
     int map_empty_bytes_sum = 0, buffer_size = 0;
     bool is_empty_dir_exist = false, is_enough_sector = false;
     bool is_empty_sectors_idx_exist = false, is_empty = true;
@@ -207,7 +209,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         j = 0;
         while (j < SECTOR_SIZE && !is_empty_dir_exist) {
             if (files_buf[i][j+ENTRY_BYTE_OFFSET] == EMPTY_FILES_ENTRY) {
-                f_entry_idx = i;
+                f_entry_sector_idx = i;
+                f_entry_idx = j;
                 is_empty_dir_exist = true;
             }
             j += 0x10;
@@ -234,7 +237,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     if (is_enough_sector) {
         // Outer loop checking per files (1 file = 16 bytes in sectors filesystem)
         i = 0;
-        while (i < 0x1F && !is_empty_sectors_idx_exist) {
+        while (i < 0x20 && !is_empty_sectors_idx_exist) {
             j = 0;
             is_empty = true;
             // Inner loop checking is 1 file is all 0x00 byte or not
@@ -257,13 +260,34 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
     // File writing
     if (is_ready_to_write) {
+        // Updating files filesystem
+        files_buf[f_entry_sector_idx][f_entry_idx+PARENT_BYTE_OFFSET] = ROOT_PARENT_FOLDER;
+        files_buf[f_entry_sector_idx][f_entry_idx+ENTRY_BYTE_OFFSET] = sectors_entry_idx;
+        strcpy((files_buf[f_entry_sector_idx]+f_entry_idx+PATHNAME_BYTE_OFFSET), path);
+
         // Find empty sector between 0x0 and 0x100 (256, limitation of 1 byte entry in sectors) and write
         i = 0;
+        j = 0;
         while (i < (SECTOR_SIZE >> 1) && !is_done_write) {
             if (map_buf[i] == EMPTY_MAP_ENTRY) {
+                // Updating map filesystem
                 map_buf[i] = FILLED_MAP_ENTRY;
-                // Entry writing
-                // writeSector()
+
+                // Updating sectors filesystem
+                // FIXME : Extra, split to multiple sectors
+                // WARNING : Will stop if file more than 8192 bytes
+                if (j < 16)
+                    sectors_buf[sectors_entry_idx*0x10+j] = i;
+                j++;
+
+                // Entry writing at sector
+                clear(file_segment_buffer, SECTOR_SIZE);
+                strcpy(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE));
+                writeSector(file_segment_buffer, i);
+                inttostr(dbg, i);
+                print(dbg, BIOS_GREEN);
+                print(file_segment_buffer);
+                segment_idx++;
                 buffer_size -= SECTOR_SIZE;
             }
             // Checking is file done writing
@@ -272,6 +296,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             }
             i++;
         }
+
+        (*sectors) = sectors_entry_idx;
 
         // Filesystem records update
         writeSector(map_buf, MAP_SECTOR);

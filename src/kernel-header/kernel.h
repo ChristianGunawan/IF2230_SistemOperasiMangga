@@ -9,9 +9,9 @@
 #define KERNEL_SECTOR_SIZE 15
 // Macro for filesystem syscalls
 #define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry
-#define MAP_SECTOR 0x100
-#define FILES_SECTOR 0x101
-#define SECTORS_SECTOR 0x103
+#define MAP_SECTOR 0x101
+#define FILES_SECTOR 0x102
+#define SECTORS_SECTOR 0x104
 
 // Predefined values in map filesystem
 #define EMPTY_MAP_ENTRY 0x00 // For empty entry
@@ -23,6 +23,7 @@
 #define FOLDER_ENTRY 0xFF // Flag for "S" byte
 #define PARENT_BYTE_OFFSET 0x0 // "P" byte, parent folder index
 #define ENTRY_BYTE_OFFSET 0x1 // "S" byte, entry index at sectors filesystem
+#define PATHNAME_BYTE_OFFSET 0x2 // 14 bytes, filled with pathnames
 
 // Predefined values in sectors filesystem
 #define EMPTY_SECTORS_ENTRY 0x00 // For empty entry
