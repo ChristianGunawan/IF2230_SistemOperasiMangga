@@ -1,7 +1,8 @@
-// 13519214 - Other function
+// 13519214 - Screen-related function
 
 #include "kernel-header/kernel.h"
-#include "kernel-header/other.h"
+#include "kernel-header/screen.h"
+#include "basic-header/basic-opr.h"
 
 void drawPixel(int x, int y, int color) {
     putInMemory(V_GRAPHIC, x+y*320, color);

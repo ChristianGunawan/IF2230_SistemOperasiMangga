@@ -21,7 +21,7 @@ bootloader:
 kernel:
 	bcc -ansi -c -o out/kernel.o src/kernel.c
 	bcc -ansi -c -o out/std.o src/std.c
-	bcc -ansi -c -o out/other.o src/other.c
+	bcc -ansi -c -o out/screen.o src/screen.c
 	bcc -ansi -c -o out/shell.o src/shell.c
 	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	ld86 -o out/kernel -d out/*.o # Linking

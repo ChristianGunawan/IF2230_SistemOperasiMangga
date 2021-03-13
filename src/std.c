@@ -30,9 +30,4 @@ char strcmp(char *s1, char *s2) {
     return 1;
 }
 
-int mod(int a, int n) {
-    // TODO : Rewriting in actual mod instruction
-    return a - n*(a/n);
-}
-
 // TODO : print()

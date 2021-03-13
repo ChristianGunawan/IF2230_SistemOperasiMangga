@@ -6,8 +6,7 @@
 // - #include weird behavior if directly next to comment (only 1 newline, 2 newline work fine)
 
 #include "kernel-header/kernel.h"
-#include "std-header/std.h"
-#include "kernel-header/other.h"
+#include "kernel-header/screen.h"
 #include "kernel-header/shell.h"
 
 int main() {
