@@ -1,8 +1,7 @@
 // TODO : Recheck kernel size
 
-#include "header/shell.h"
-#include "header/kernel.h" // TODO : Split getCursorPos, should not including kernel.h
-#include "header/std.h"
+#include "kernel-header/kernel.h" // TODO : Split getCursorPos, should not including kernel.h
+#include "std-header/std.h"
 
 // TODO : Wrap printColoredString() ?
 

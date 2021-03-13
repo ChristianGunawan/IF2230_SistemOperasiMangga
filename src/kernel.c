@@ -5,10 +5,10 @@
 // - Pointer declaration syntax is <type> *<varname>;
 // - #include weird behavior if directly next to comment (only 1 newline, 2 newline work fine)
 
-#include "header/kernel.h"
-#include "header/std.h"
-#include "header/other.h"
-#include "header/shell.h"
+#include "kernel-header/kernel.h"
+#include "std-header/std.h"
+#include "kernel-header/other.h"
+#include "kernel-header/shell.h"
 
 int main() {
     // Setup
