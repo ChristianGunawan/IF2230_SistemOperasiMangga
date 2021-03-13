@@ -1,7 +1,8 @@
 # 13519214 - Makefile
-all: diskimage bootloader kernel insertfilesystem
+all: diskimage bootloader kernel createfilesystem insertfilesystem
 
 clean:
+	rm out/fs/*;
 	rm out/*
 
 test: kernelgcc
@@ -29,9 +30,7 @@ kernel:
 	dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1
 
 createfilesystem:
-	dd if=/dev/zero of=out/fs/map.img bs=512 count=1
-	dd if=/dev/zero of=out/fs/files.img bs=512 count=2
-	dd if=/dev/zero of=out/fs/sectors.img bs=512 count=1
+	./other/fscreate out/fs/map.img out/fs/files.img out/fs/sectors.img
 
 insertfilesystem:
 	dd if=out/fs/map.img of=out/mangga.img bs=512 count=1 seek=256 conv=notrunc

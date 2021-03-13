@@ -17,7 +17,7 @@ void shell() {
         gets(string_buffer);
         print("\nInput : <");
         print(string_buffer);
-        print(">\n");
+        print(">\n\n");
     }
 
 }
