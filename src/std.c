@@ -1,6 +1,7 @@
 // 13519214 - Standard function
 
 #include "std-header/std.h"
+#include "std-header/boolean.h"
 #include "kernel-header/config.h"
 
 int strlen(char *string) {
@@ -17,6 +18,24 @@ void strcpy(char *dest, char *src) {
         dest[i] = src[i];
         i++;
     }
+    dest[i] = '\0';
+}
+
+void rawstrcpy(char *dest, char *src) {
+    int i = 0;
+    while (src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+    }
+}
+
+void strcpybounded(char *dest, char *src, int n) {
+    int i = 0;
+    while (src[i] != '\0' && i < n) {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
 }
 
 char strcmp(char *s1, char *s2) {
@@ -26,6 +45,7 @@ char strcmp(char *s1, char *s2) {
         while (s1[i] != '\0') {
             if (s1[i] != s2[i])
                 return 1;
+            i++;
         }
 
         // If both string matches
@@ -73,11 +93,16 @@ int getFullKey() {
 
 
 // TODO : Extra, printf(), Extra Extra : Color escape sequence
-
+// TODO : Extra, simple string builder
 // TODO : Extra, strtoint / atoi and inttostr
 
 void inttostr(char *buffer, int n) {
     int i = 0;
+    bool is_negative = false;
+    if (n < 0) {
+        n *= -1;
+        is_negative = true;
+    }
     while (n > 10) {
         buffer[i] = CHAR_NUMBER_0 + mod(n, 10);
         i++;
@@ -85,6 +110,10 @@ void inttostr(char *buffer, int n) {
     }
     buffer[i] = CHAR_NUMBER_0 + mod(n, 10); // First digit
     i++;
+    if (is_negative) {
+        buffer[i] = '-';
+        i++;
+    }
     buffer[i] = '\0';
     strrev(buffer);
 }

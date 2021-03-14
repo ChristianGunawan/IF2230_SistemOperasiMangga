@@ -1,6 +1,11 @@
 // 13519214 - Standard function header
 
-// Standard string operation
+// ---------------- Standard Macro ----------------
+#define NULL 0x00
+
+
+
+// ---------------- Standard string operation ----------------
 int strlen(char *string);
 // Standard string length
 
@@ -9,6 +14,13 @@ int mod(int a, int n);
 
 void strcpy(char *dest, char *src);
 // Standard strcpy without returning
+
+void strcpybounded(char *dest, char *src, int n);
+// strcpy only first n characters
+
+void rawstrcpy(char *dest, char *src);
+// strcpy without copying null terminator
+
 
 char strcmp(char *s1, char *s2);
 // Standard strcmp function
@@ -22,7 +34,7 @@ void inttostr(char *buffer, int n);
 
 
 
-// Standard I/O
+// ---------------- Standard I/O ----------------
 void print(char *string, char color);
 // Simple printing with color
 
