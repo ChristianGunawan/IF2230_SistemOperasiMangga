@@ -5,7 +5,6 @@
 #include "kernel-header/config.h"
 
 int strlen(char *string) {
-    // Standard string length function
     int i = 0;
     while (string[i] != '\0')
         i++;
@@ -36,6 +35,14 @@ void strcpybounded(char *dest, char *src, int n) {
         i++;
     }
     dest[i] = '\0';
+}
+
+void rawstrcpybounded(char *dest, char *src, int n) {
+    int i = 0;
+    while (src[i] != '\0' && i < n) {
+        dest[i] = src[i];
+        i++;
+    }
 }
 
 char strcmp(char *s1, char *s2) {

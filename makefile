@@ -49,6 +49,10 @@ insertfilesystem:
 filesystemcreator:
 	@gcc -Wall -Wextra -O3 -o other/fscreate other/filesystem_create.c
 
+fileloader:
+	@gcc -Wall -Wextra -O3 -o other/loadFile other/fileloader.c
+
+
 # Test recipes
 kernelgcc:
 	gcc -c -Wall -Wextra -o out/compiledgcc.o src/kernel.c

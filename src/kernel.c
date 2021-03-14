@@ -233,7 +233,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
         while (i < 0x10 && sector_read_target != EMPTY_SECTORS_ENTRY) {
             clear(file_segment_buffer, SECTOR_SIZE);
             readSector(file_segment_buffer, sector_read_target);
-            strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+            rawstrcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
             i++;
             sector_read_target = sectors_buf[sectors_entry_idx*0x10 + i];
         }
@@ -308,10 +308,10 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // parentIndex == ROOT_PARENT_FOLDER always valid parent folder
     if (parentIndex != ROOT_PARENT_FOLDER) {
         // div(parentIndex,0x20) -> Because 1 files filesystem only contain 0x20 index
-        // mod(parentIndex*0x10, SECTOR_SIZE)+ENTRY_BYTE_OFFSET ->
+        // mod(parentIndex*FILE_SECTOR_SIZE, SECTOR_SIZE)+ENTRY_BYTE_OFFSET ->
         //      2 files filesystem span from 0 to 2*SECTOR_SIZE-1 bytes, 1 files only contain 1 SECTOR_SIZE.
         //      ENTRY_BYTE_OFFSET used for checking "S" byte / entry byte in files filesystem
-        parent_entry_byte = files_buf[div(parentIndex,0x20)][mod(parentIndex*0x10, SECTOR_SIZE)+ENTRY_BYTE_OFFSET];
+        parent_entry_byte = files_buf[div(parentIndex,0x20)][mod(parentIndex*FILE_SECTOR_SIZE, SECTOR_SIZE)+ENTRY_BYTE_OFFSET];
         if (parent_entry_byte == EMPTY_FILES_ENTRY)
             valid_parent_folder = false;
     }
@@ -337,7 +337,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             readSector(map_buf, MAP_SECTOR);
             i = 0;
             buffer_size = strlen(buffer); // In bytes
-            while (i < SECTOR_SIZE && !is_enough_sector) {
+            while (i < (SECTOR_SIZE >> 1) && !is_enough_sector) {
                 // Finding empty sector in map
                 if (map_buf[i] == EMPTY_MAP_ENTRY)
                     map_empty_bytes_sum += SECTOR_SIZE;
@@ -356,8 +356,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                 j = 0;
                 is_empty = true;
                 // Inner loop checking is 1 file is all 0x00 byte or not
-                while (j < 0x10 && is_empty) {
-                    if (sectors_buf[i*0x10 + j] != EMPTY_SECTORS_ENTRY)
+                while (j < FILE_SECTOR_SIZE && is_empty) {
+                    if (sectors_buf[i*FILE_SECTOR_SIZE + j] != EMPTY_SECTORS_ENTRY)
                     is_empty = false;
                     j++;
                 }
@@ -391,12 +391,12 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                     // FIXME : Extra, split to multiple sectors
                     // WARNING : Will stop writing if file more than 8192 bytes
                     if (j < 16)
-                        sectors_buf[sectors_entry_idx*0x10+j] = i;
+                        sectors_buf[sectors_entry_idx*FILE_SECTOR_SIZE+j] = i;
                     j++;
 
                     // Entry writing at sector
                     clear(file_segment_buffer, SECTOR_SIZE);
-                    strcpy(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE));
+                    rawstrcpybounded(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE), SECTOR_SIZE);
                     writeSector(file_segment_buffer, i);
                     segment_idx++;
                     buffer_size -= SECTOR_SIZE;

@@ -21,6 +21,9 @@ void strcpybounded(char *dest, char *src, int n);
 void rawstrcpy(char *dest, char *src);
 // strcpy without copying null terminator
 
+void rawstrcpybounded(char *dest, char *src, int n);
+// strcpy only first n characters and without null terminator
+
 char strcmp(char *s1, char *s2);
 // Standard strcmp function
 
