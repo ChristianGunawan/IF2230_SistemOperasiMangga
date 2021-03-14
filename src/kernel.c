@@ -1,8 +1,8 @@
 // ------- Kernel -------
 // BCC notes
 // - Variable declaration must be put on top of code
-// - First defined function is starting function
-// - Pointer declaration syntax is <type> *<varname>;
+// - First defined function is starting function, not function called main()
+// - Pointer declaration syntax is strictly <type> *<varname>;
 // - #include weird behavior if directly next to comment (only 1 newline, 2 newline work fine)
 // - Bizzare filename behavior (cannot using filename starting with i (?)), no error & compiled normally but cannot start
 
@@ -28,7 +28,17 @@ int main() {
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
 
+    // TODO : Kernel size may need another expansion
     // FS DEBUGGING
+    print("READING\n");
+    readFile(buf, "not found", &temp, ROOT_PARENT_FOLDER);
+    print("VALUES\n");
+    print(buf);
+    print("ERROR CODE : ");
+    inttostr(buf, temp);
+    print(buf);
+
+    print("\nWRITING\n");
     writeFile("Entry kok byte gan", "Ininamanyafile", &temp, ROOT_PARENT_FOLDER);
     inttostr(buf, temp);
     print(buf);
@@ -45,7 +55,7 @@ int main() {
     inttostr(buf, temp);
     print(buf);
     print(": Folder on folder return code\n");
-    
+
     shell();
     while (true);
 }
@@ -177,26 +187,73 @@ void readSector(char *buffer, int sector) {
 }
 
 void writeSector(char *buffer, int sector) {
-    // TODO : Read more, CH = Track on AH 03H (?)
     interrupt(0x13, 0x0301, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
 }
 
-void readFile(char *buffer, char *path, int *result, char parentIndex);
-// Read file with relative path
+void readFile(char *buffer, char *path, int *result, char parentIndex) {
+    char files_buf[2][SECTOR_SIZE], sectors_buf[SECTOR_SIZE]; // Filesystem buffer
+    char file_segment_buffer[SECTOR_SIZE];
+    char filename_buffer[16];
+    int i = 0, j = 0;
+    int sectors_entry_idx = 0, sector_read_target = 0;
+    bool valid_parent_folder = true, is_filename_match_found = false, valid_filename_length = true;
+
+    readSector(files_buf[0], FILES_SECTOR);
+    readSector(files_buf[1], FILES_SECTOR + 1);
+
+    // Filename length check
+    if (strlen(path) > 14)
+        valid_filename_length = false;
+
+    // Find matching filename
+    if (valid_filename_length) {
+        while (i < 2 && !is_filename_match_found) {
+            j = 0;
+            while (j < SECTOR_SIZE && !is_filename_match_found) {
+                // Checking existing filename in same parent folder
+                if (files_buf[i][j+PARENT_BYTE_OFFSET] == parentIndex) {
+                    // Needed buffer because entry may ignoring null terminator
+                    clear(filename_buffer, 16);
+                    strcpybounded(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
+                    if (!strcmp(path, filename_buffer)) {
+                        is_filename_match_found = true;
+                        sectors_entry_idx = files_buf[i][j+ENTRY_BYTE_OFFSET];
+                    }
+                }
+                j += 0x10;
+            }
+            i++;
+        }
+    }
+
+    if (is_filename_match_found) {
+        readSector(sectors_buf, SECTORS_SECTOR);
+        i = 0;
+        sector_read_target = sectors_buf[sectors_entry_idx*0x10 + i];
+        while (i < 0x10 && sector_read_target != EMPTY_SECTORS_ENTRY) {
+            clear(file_segment_buffer, SECTOR_SIZE);
+            readSector(file_segment_buffer, sector_read_target);
+            strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+            i++;
+            sector_read_target = sectors_buf[sectors_entry_idx*0x10 + i];
+        }
+    }
+
+
+
+
+    // Error code writing
+    if (!is_filename_match_found)
+        (*result) = -1;
+    else
+        (*result) = 0;
+}
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
-    // Error code list
-    // 0 - Exit successfully
-    // -1 - File exists
-    // -2 - Not enough entry in files filesystem
-    // -3 - Not enough empty sectors
-    // -4 - Invalid folder
     char map_buf[SECTOR_SIZE], files_buf[2][SECTOR_SIZE], sectors_buf[SECTOR_SIZE]; // Filesystem buffer
     char file_segment_buffer[SECTOR_SIZE]; // Buffer for writing to sector, always get clear()
-    char dbg[16]; // DEBUG
-    int idbg; // DEBUG
     char filename_buffer[16], adjusted_path[16];
-    char parent_entry_byte;
+    char parent_entry_byte; // Temporary "P" byte holder / parent index at files filesystem
     int i = 0, j = 0, segment_idx = 0; // Iterator index
     int f_entry_idx = 0, f_entry_sector_idx = 0, sectors_entry_idx = 0; // Targets Index
     int map_empty_bytes_sum = 0, buffer_size = 0, write_file_error_code = 0;
@@ -215,6 +272,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
     // Directory checking in files filesystem
     // valid_filename_length will represent validity of filename length
+    // while valid_filename representing whether file / folder is duplicate in single parent
     if (valid_filename_length) {
         readSector(files_buf[0], FILES_SECTOR);
         readSector(files_buf[1], FILES_SECTOR + 1);
@@ -225,20 +283,15 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                 if (files_buf[i][j+ENTRY_BYTE_OFFSET] == EMPTY_FILES_ENTRY && !f_target_found) {
                     f_entry_sector_idx = i;
                     f_entry_idx = j;
-                    f_target_found = true;
+                    f_target_found = true; // If empty dir entry exists, stop find new one (Pick first empty entry)
                     is_empty_dir_exist = true;
                 }
                 // Checking existing filename in same parent folder
-                // if (files_buf[i][j+PARENT_BYTE_OFFSET] != ROOT_PARENT_FOLDER) {
-                //     inttostr(dbg, files_buf[i][j+PARENT_BYTE_OFFSET]);
-                //     print(dbg);
-                // }
                 if (files_buf[i][j+PARENT_BYTE_OFFSET] == parentIndex) {
                     // Needed buffer because entry may ignoring null terminator
                     clear(filename_buffer, 16);
                     strcpybounded(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
-
-                    if (!strcmp(path, filename_buffer)) // FIXME : never executed
+                    if (!strcmp(path, filename_buffer))
                         valid_filename = false;
                 }
                 j += 0x10;
@@ -252,7 +305,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         buffer_type_is_file = false;
 
     // Checking whether folder located at parentIndex is valid
-    // parentIndex equal ROOT_PARENT_FOLDER always valid parent folder
+    // parentIndex == ROOT_PARENT_FOLDER always valid parent folder
     if (parentIndex != ROOT_PARENT_FOLDER) {
         // div(parentIndex,0x20) -> Because 1 files filesystem only contain 0x20 index
         // mod(parentIndex*0x10, SECTOR_SIZE)+ENTRY_BYTE_OFFSET ->
@@ -263,7 +316,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
             valid_parent_folder = false;
     }
 
-    // Writing a file
+    // Writing file / folder
     if (is_empty_dir_exist && valid_parent_folder && valid_filename) {
         // Updating files filesystem buffer
         files_buf[f_entry_sector_idx][f_entry_idx+PARENT_BYTE_OFFSET] = parentIndex;
@@ -345,14 +398,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                     clear(file_segment_buffer, SECTOR_SIZE);
                     strcpy(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE));
                     writeSector(file_segment_buffer, i);
-                    // DEBUG
-                    inttostr(dbg, i);
-                    print("Sector : ");
-                    print(dbg, BIOS_GREEN);
-                    print("\nValue : ");
-                    print(file_segment_buffer);
-                    print("\n");
-                    // END
                     segment_idx++;
                     buffer_size -= SECTOR_SIZE;
                 }
@@ -382,11 +427,10 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         (*sectors) = -1; // Filename too long or file exists
     else if (!is_empty_dir_exist)
         (*sectors) = -2; // Not enough entry in files filesystem
+    else if (!is_enough_sector && buffer_type_is_file)
+        (*sectors) = -3; // Not enough empty sectors, only for files
     else if (!valid_parent_folder)
         (*sectors) = -4; // Parent folder not valid
-    else if (!is_enough_sector && buffer_type_is_file)
-        (*sectors) = -3; // Not enough empty sectors
     else
         (*sectors) = 0;
-    // else if (!) // TODO : Completion
 }

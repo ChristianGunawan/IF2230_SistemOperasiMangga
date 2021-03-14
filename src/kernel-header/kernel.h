@@ -75,6 +75,8 @@ void writeSector(char *buffer, int sector);
 
 void readFile(char *buffer, char *path, int *result, char parentIndex);
 // Read file with relative path
+// -- Error code list --
+// -1 - File not found
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 // Writing file with relative path
