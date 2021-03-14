@@ -30,6 +30,10 @@ char strcmp(char *s1, char *s2);
 void strrev(char *string);
 // Reversing string at pointed location
 
+void strapp(char *string1, char* string2);
+// WARNING : No bound checking
+// Append string 1 with string 2
+
 void inttostr(char *buffer, int n);
 // WARNING : Naive implementation, no bound checking
 // Converting integer n to string pointed at buffer
@@ -48,3 +52,8 @@ void putchar(char a);
 
 int getFullKey();
 // Getting 1 keypress, blocking, no echo
+
+// --- File I/O ---
+void getDirectoryTable(char *buffer);
+// WARNING : No bound checking
+// Get all directory table, put in buffer

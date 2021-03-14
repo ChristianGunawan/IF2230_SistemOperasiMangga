@@ -9,7 +9,7 @@
 #define MAX_FILE_SIZE 8192 // 512*16 sectors
 
 // Actually ripping from kernel.h
-// TODO : Extra, split filesystem configuration
+// TODO : Extra, split filesystem configuration and include
 #define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry
 #define MAP_SECTOR 0x100
 #define FILES_SECTOR 0x101

@@ -62,46 +62,16 @@ char strcmp(char *s1, char *s2) {
     return 1;
 }
 
-
-
-void print(char *string, char color) {
-    // TODO : Extra, Maybe not safe (?)
-    // TODO : Extra, Including black color
-    if (BIOS_BLACK < color && color <= BIOS_WHITE)
-        interrupt(0x21, 0x00, string, 0x00, color);
-    else
-        interrupt(0x21, 0x00, string, 0x00, BIOS_GRAY);
+void strapp(char *string1, char *string2) {
+    int i = strlen(string1), j = 0;
+    while (string2[j] != CHAR_NULL) {
+        string1[i] = string2[j];
+        i++;
+        j++;
+    }
+    string1[i] = CHAR_NULL;
 }
 
-void gets(char *string) {
-    interrupt(0x21, 0x01, string, 0x00, 0);
-}
-
-void putchar(char a) {
-    int temp;
-    char tempstring[2];
-    tempstring[0] = a;
-    tempstring[1] = '\0';
-    if (a == CHAR_BACKSPACE)
-        interrupt(0x21, 0x00, 0, 0x01, 0);
-    else
-        interrupt(0x21, 0x00, tempstring, 0x00, BIOS_GRAY);
-
-}
-
-int getFullKey() {
-    int key;
-    interrupt(0x21, 0x01, &key, 0x01, 0);
-    return key;
-}
-
-// TODO : getRawCursorPos() wrapper
-// TODO : setCursorPos() wrapper
-
-
-// TODO : Extra, printf(), Extra Extra : Color escape sequence
-// TODO : Extra, simple string builder
-// TODO : Extra, strtoint / atoi and inttostr
 
 void inttostr(char *buffer, int n) {
     int i = 0;
@@ -135,3 +105,67 @@ void strrev(char *string) {
         i++;
     }
 }
+
+
+
+
+void print(char *string, char color) {
+    // TODO : Extra, Maybe not safe (?)
+    // TODO : Extra, Including black color
+    if (BIOS_BLACK < color && color <= BIOS_WHITE)
+        interrupt(0x21, 0x00, string, 0x00, color);
+    else
+        interrupt(0x21, 0x00, string, 0x00, BIOS_GRAY);
+}
+
+void gets(char *string) {
+    interrupt(0x21, 0x01, string, 0x00, 0);
+}
+
+void putchar(char a) {
+    int temp;
+    char tempstring[2];
+    tempstring[0] = a;
+    tempstring[1] = '\0';
+    if (a == CHAR_BACKSPACE)
+        interrupt(0x21, 0x00, 0, 0x01, 0);
+    else
+        interrupt(0x21, 0x00, tempstring, 0x00, BIOS_GRAY);
+
+}
+
+int getFullKey() {
+    int key;
+    interrupt(0x21, 0x01, &key, 0x01, 0);
+    return key;
+}
+
+
+
+void getDirectoryTable(char *buffer) {
+    // WARNING : Naive implementation
+    interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
+    interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
+}
+
+void write(char *buffer, char *path, int *returncode, char parentIndex) {
+    int AX = parentIndex << 8;
+    AX |= 0x04;
+    interrupt(0x21, AX, buffer, path, returncode);
+}
+
+void read(char *buffer, char *path, int *returncode, char parentIndex) {
+    int AX = parentIndex << 8;
+    AX |= 0x05;
+    interrupt(0x21, AX, buffer, path, returncode);
+}
+
+
+
+// TODO : getRawCursorPos() wrapper
+// TODO : setCursorPos() wrapper
+
+
+// TODO : Extra, printf(), Extra Extra : Color escape sequence
+// TODO : Extra, simple string builder
+// TODO : Extra, strtoint / atoi and inttostr

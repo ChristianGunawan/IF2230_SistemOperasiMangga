@@ -28,39 +28,20 @@ int main() {
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
 
-    // FS DEBUGGING
-    print("READING\n");
-    readFile(buf, "not found", &temp, ROOT_PARENT_FOLDER);
-    print("VALUES\n");
-    print(buf);
-    print("ERROR CODE : ");
-    inttostr(buf, temp);
-    print(buf);
-
-    print("\nWRITING\n");
-    writeFile("Entry kok byte gan", "Ininamanyafile", &temp, ROOT_PARENT_FOLDER);
-    inttostr(buf, temp);
-    print(buf);
-    print(": File return code\n");
-    writeFile(NULL, "Folder gan", &temp, ROOT_PARENT_FOLDER);
-    inttostr(buf, temp);
-    print(buf);
-    print(": Root folder return code\n");
-    writeFile(NULL, "Folder gagal", &temp, 2);
-    inttostr(buf, temp);
-    print(buf);
-    print(": Folder on fake folder return code\n");
-    writeFile(NULL, "Folder anak", &temp, 1);
-    inttostr(buf, temp);
-    print(buf);
-    print(": Folder on folder return code\n");
+    writeFile(NULL, "folder1", &temp, ROOT_PARENT_FOLDER);
+    writeFile(NULL, "fol r2", &temp, 0);
+    writeFile(NULL, "hoho    ow", &temp, 1);
+    writeFile(NULL, "fo er4", &temp, 2);
+    writeFile(NULL, "e 5s a", &temp, 3);
+    writeFile(NULL, "f r6", &temp, 4);
 
     shell();
     while (true);
 }
 
 void handleInterrupt21(int AX, int BX, int CX, int DX) {
-    switch (AX) {
+    char AH = AX >> 8, AL = AX & 0xFF;
+    switch (AL) {
         case 0x0:
             switch (CX) {
                 case 0x0:
@@ -89,6 +70,18 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
                 default:
                     printString("Invalid interrupt\n");
             }
+            break;
+        case 0x2:
+            readSector(BX, CX);
+            break;
+        case 0x3:
+            writeSector(BX, CX);
+            break;
+        case 0x4:
+            readFile(BX, CX, DX, AH);
+            break;
+        case 0x5:
+            writeFile(BX, CX, DX, AH);
             break;
         default:
             printString("Invalid interrupt\n");
@@ -311,7 +304,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         //      2 files filesystem span from 0 to 2*SECTOR_SIZE-1 bytes, 1 files only contain 1 SECTOR_SIZE.
         //      ENTRY_BYTE_OFFSET used for checking "S" byte / entry byte in files filesystem
         parent_entry_byte = files_buf[div(parentIndex,0x20)][mod(parentIndex*FILE_SECTOR_SIZE, SECTOR_SIZE)+ENTRY_BYTE_OFFSET];
-        if (parent_entry_byte == EMPTY_FILES_ENTRY)
+        if (parent_entry_byte != FOLDER_ENTRY)
             valid_parent_folder = false;
     }
 
@@ -357,7 +350,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                 // Inner loop checking is 1 file is all 0x00 byte or not
                 while (j < FILE_SECTOR_SIZE && is_empty) {
                     if (sectors_buf[i*FILE_SECTOR_SIZE + j] != EMPTY_SECTORS_ENTRY)
-                    is_empty = false;
+                        is_empty = false;
                     j++;
                 }
 
