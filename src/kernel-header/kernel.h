@@ -9,9 +9,9 @@
 #define KERNEL_SECTOR_SIZE 15
 // Macro for filesystem syscalls
 #define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry
-#define MAP_SECTOR 0x101
-#define FILES_SECTOR 0x102
-#define SECTORS_SECTOR 0x104
+#define MAP_SECTOR 0x100
+#define FILES_SECTOR 0x101
+#define SECTORS_SECTOR 0x103
 
 // Predefined values in map filesystem
 #define EMPTY_MAP_ENTRY 0x00 // For empty entry

@@ -31,14 +31,14 @@ int main() {
     interrupt(0x10, 0x0003, 0, 0, 0);
 
     // FS DEBUGGING
-    // readSector(buf, 2);
+    readSector(buf, 16);
     // while (buf[temp] != CHAR_NULL) {
     //     inttostr(&tp, buf[temp]);
     //     temp++;
-    //     print(tp,BIOS_BLUE);
+    //     print(tp, BIOS_BLUE);
     //     print("\n");
     // }
-    // print(buf);
+    print(buf);
 
     // if (buf[0] != '\0') {
     //     printString("early catch");
@@ -179,12 +179,12 @@ void clear(char *string, int length) {
 // Note : BIOS counting sector 0 as sector 1 in INT 13H
 // Note : Sector 0 is bootloader and 1-10 is kernel
 void readSector(char *buffer, int sector) {
-    interrupt(0x13, 0x0201, buffer, (div(sector, 36) << 8) + mod(sector, 18), mod(div(sector, 18), 2) << 8);
+    interrupt(0x13, 0x0201, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
 }
 
 void writeSector(char *buffer, int sector) {
     // TODO : Read more, CH = Track on AH 03H (?)
-    interrupt(0x13, 0x0301, buffer, (div(sector, 36) << 8) + mod(sector, 18), mod(div(sector, 18), 2) << 8);
+    interrupt(0x13, 0x0301, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
 }
 
 void readFile(char *buffer, char *path, int *result, char parentIndex);
@@ -201,7 +201,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     bool is_empty_sectors_idx_exist = false, is_empty = true;
     bool is_ready_to_write = false, is_done_write = false;
 
-
+    // TODO : Pathing (?)
     // Directory checking in files filesystem
     readSector(files_buf[0], FILES_SECTOR);
     readSector(files_buf[1], FILES_SECTOR + 1);
@@ -235,6 +235,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
     // Checking available entry in sectors filesystem
     if (is_enough_sector) {
+        readSector(sectors_buf, SECTORS_SECTOR);
         // Outer loop checking per files (1 file = 16 bytes in sectors filesystem)
         i = 0;
         while (i < 0x20 && !is_empty_sectors_idx_exist) {
@@ -284,9 +285,14 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                 clear(file_segment_buffer, SECTOR_SIZE);
                 strcpy(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE));
                 writeSector(file_segment_buffer, i);
+                // DEBUG
                 inttostr(dbg, i);
+                print("Sector : ");
                 print(dbg, BIOS_GREEN);
+                print("\nValue : ");
                 print(file_segment_buffer);
+                print("\n");
+                // END
                 segment_idx++;
                 buffer_size -= SECTOR_SIZE;
             }
