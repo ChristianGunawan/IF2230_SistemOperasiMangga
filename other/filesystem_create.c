@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 // Configuration
-#define KERNEL_MAX 16
+#define KERNEL_MAX 32
 #define FILES_ENTRY "\xFF\xFE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" // Entire 16 bytes of empty files entry
 
 #define FILESYSTEM_LOCATION 0x100

@@ -16,7 +16,7 @@
 
 // Kernel Maximum Size, if changed ensure dd commands in makefile,
 //                      bootloader.asm, and fscreator set properly
-#define KERNEL_SECTOR_SIZE 15
+#define KERNEL_SECTOR_SIZE 31
 
 // Macro for filesystem syscalls
 #define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry

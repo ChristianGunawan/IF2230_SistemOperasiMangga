@@ -28,7 +28,6 @@ int main() {
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
 
-    // TODO : Kernel size may need another expansion
     // FS DEBUGGING
     print("READING\n");
     readFile(buf, "not found", &temp, ROOT_PARENT_FOLDER);
@@ -181,7 +180,7 @@ void clear(char *string, int length) {
 // WARNING : It will read entire 512 bytes starting from buffer,
 //           ensure entire buffer is cleared first and not reading directly from .rodata
 // Note : BIOS counting sector 0 as sector 1 in INT 13H
-// Note : Sector 0 is bootloader and 1-10 is kernel
+// Note : Sector 0 is bootloader and 1-KERNEL_SIZE is kernel
 void readSector(char *buffer, int sector) {
     interrupt(0x13, 0x0201, buffer, (div(sector, 36) << 8) + mod(sector, 18) + 1, mod(div(sector, 18), 2) << 8);
 }

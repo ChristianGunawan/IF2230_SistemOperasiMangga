@@ -32,7 +32,7 @@ kernel:
 	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	@ld86 -o out/kernel -d out/*.o
 	# ------------ Compiled kernel stat ------------
-	# Max Kernel Size : 7680 bytes (15 sectors, 1 sector = 512 bytes)
+	# Max Kernel Size : 15872 bytes (31 sectors, 1 sector = 512 bytes)
 	@stat --printf="Kernel Size : %s bytes\n" out/kernel
 	# ----------------------------------------------
 	@dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1 status=noxfer
