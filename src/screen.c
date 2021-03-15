@@ -71,6 +71,8 @@ void scrollScreenSingleRow() {
     // AH -> Scroll up
     // AL -> lines to scroll
     // BH -> BIOS Color
+    // CX -> Upper - Left most location
+    // DX -> Lower - right most location
     interrupt(0x10, 0x0601, 0x0700, 0x0000, 0x2580);
 }
 

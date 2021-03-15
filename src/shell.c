@@ -212,10 +212,20 @@ void ls(char *dirtable, char current_dir) {
 
 void cd(); // TODO : Add
 
-void cat();
+void cat(char *filename, char current_dir) {
+    char file_read[FILE_SIZE_MAXIMUM];
+    int returncode = 0;
+    clear(file_read, FILE_SIZE_MAXIMUM);
+    readFile(file_read, filename, &returncode, current_dir);
+    if (returncode == -1)
+        print("cat: Error file not found\n");
+    else
+        print(file_read);
+}
 
 void ln();
 
+// TODO : Other misc command (mkdir, rm, etc)
 
 void shell() {
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
@@ -236,11 +246,14 @@ void shell() {
         directoryStringBuilder(directory_string, directory_table, current_dir_index);
         print(directory_string, BIOS_BLUE);
         print("$ ", BIOS_GRAY);
-        shellInput(commands_history);
+        shellInput(commands_history, current_dir_index);
+        // Scroll up if cursor at lower screen
         while (getCursorPos(1) > 20) {
             scrollScreen();
             setCursorPos(getCursorPos(1)-1, 0);
         }
+        cat("nope", ROOT_PARENT_FOLDER);
+
     }
 
 }

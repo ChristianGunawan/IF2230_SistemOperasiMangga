@@ -221,7 +221,8 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
         while (i < SECTORS_ENTRY_SIZE && sector_read_target != EMPTY_SECTORS_ENTRY) {
             clear(file_segment_buffer, SECTOR_SIZE);
             readSector(file_segment_buffer, sector_read_target);
-            memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+            strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+            // memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE); // FIXME : Extra, if fixing read binary file use memcpy
             i++;
             sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
         }
