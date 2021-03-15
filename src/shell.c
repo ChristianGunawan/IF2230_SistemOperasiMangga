@@ -53,16 +53,18 @@ void directoryStringBuilder(char *string, char *dirtable, char current_dir) {
 }
 
 void shellInput(char *commands_history) {
-    char string[BUFFER_SIZE]; // char as string
+    // char as string
+    char string[BUFFER_SIZE];
     char move_string_buffer_1[BUFFER_SIZE];
     char move_string_buffer_2[BUFFER_SIZE];
-    char c, scancode; // char as 1 byte integer
+    // char as 1 byte integer
+    char c, scancode;
     int i = 0, j = 0, max_i = 0, rawKey, dbg = 0;
     int selected_his_idx = 0;
-    int savedCursorRow = getCursorPos(1);
-    int savedCursorCol = getCursorPos(0);
+    int savedCursorRow = getKeyboardCursor(1);
+    int savedCursorCol = getKeyboardCursor(0); // TODO : Wrap
     bool is_modified = false;
-    enableKeyboardCursor(); // TODO : Wrap
+    showKeyboardCursor();
 
     // Move history up
     strcpybounded(move_string_buffer_1, commands_history, BUFFER_SIZE - 1);
@@ -73,21 +75,11 @@ void shellInput(char *commands_history) {
         i++;
     }
     clear(commands_history, BUFFER_SIZE); // Delete first entry
-    // DEBUG
-    dbg = 0;
-    setCursorPos(10, 0);
-    while (dbg < MAX_HISTORY) {
-        print("<", BIOS_YELLOW);
-        print(commands_history+dbg*BUFFER_SIZE, BIOS_YELLOW);
-        print(">", BIOS_YELLOW);
-        dbg++;
-    }
-    setCursorPos(savedCursorRow, savedCursorCol);
 
     i = 0;
     selected_his_idx = 0;
     do {
-        rawKey = getFullKeyPress(); // TODO : Wrapper
+        rawKey = getFullKey();
         c = rawKey & 0xFF;      // AL Value
         scancode = rawKey >> 8; // AH Value
         // Warning : Prioritizing ASCII before scancode
@@ -113,15 +105,16 @@ void shellInput(char *commands_history) {
 
                 string[max_i] = CHAR_SPACE; // For deleting last char
                 string[max_i+1] = CHAR_NULL;
-                setCursorPos(savedCursorRow, savedCursorCol);
-                printString(string);
+                setKeyboardCursor(savedCursorRow, savedCursorCol);
+                print(string, BIOS_GRAY);
 
-                setCursorPos(savedCursorRow, savedCursorCol + i);
+                setKeyboardCursor(savedCursorRow, savedCursorCol + i);
                 break;
             default:
                 // If char (AL) is not ASCII Control codes, check scancode (AH)
                 switch (scancode) {
                     case SCANCODE_TAB:
+                        // TODO : Auto complete here
                         break;
                     case SCANCODE_DOWN_ARROW:
                     case SCANCODE_UP_ARROW:
@@ -130,15 +123,14 @@ void shellInput(char *commands_history) {
                         else if (scancode == SCANCODE_UP_ARROW && selected_his_idx < MAX_HISTORY - 1)
                             selected_his_idx++;
 
-                        setCursorPos(savedCursorRow, savedCursorCol); // TODO : Wrap
+                        setKeyboardCursor(savedCursorRow, savedCursorCol);
                         print("                                                                ", BIOS_GRAY);
-                        setCursorPos(savedCursorRow, savedCursorCol); // TODO : Wrap
+                        setKeyboardCursor(savedCursorRow, savedCursorCol);
                         // Move current buffer to history first location, only if string is modified
                         if (is_modified) {
                             string[max_i] = CHAR_NULL;
                             strcpybounded(commands_history, string, BUFFER_SIZE - 1);
                         }
-
 
                         // Load command from history
                         strcpybounded(string, commands_history+(selected_his_idx*BUFFER_SIZE), BUFFER_SIZE - 1);
@@ -146,18 +138,7 @@ void shellInput(char *commands_history) {
                         i = strlen(string);
                         max_i = i;
 
-                        // DEBUG
-                        dbg = 0;
-                        setCursorPos(10, 0);
-                        while (dbg < MAX_HISTORY) {
-                            print("<", BIOS_YELLOW);
-                            print(commands_history+dbg*BUFFER_SIZE, BIOS_YELLOW);
-                            print(">", BIOS_YELLOW);
-                            dbg++;
-                        }
-                        setCursorPos(savedCursorRow, savedCursorCol);
-
-                        printString(commands_history+(selected_his_idx*BUFFER_SIZE)); // TODO : Change to print
+                        print(commands_history+(selected_his_idx*BUFFER_SIZE), BIOS_GRAY);
                         is_modified = false;
                         break;
                     case SCANCODE_LEFT_ARROW:
@@ -176,16 +157,18 @@ void shellInput(char *commands_history) {
                             max_i++;
                         i++;
                 }
-                setCursorPos(savedCursorRow, savedCursorCol + i); // TODO : Wrap
+                setKeyboardCursor(savedCursorRow, savedCursorCol + i);
         }
     } while (c != CHAR_INPUT_NEWLINE);
     string[max_i] = CHAR_NULL; // Terminating string
-    disableKeyboardCursor(); // TODO : Wrap
-    setCursorPos(savedCursorRow + 1, 0); // TODO : Interrupt
+    hideKeyboardCursor();
+    setKeyboardCursor(savedCursorRow + 1, 0); // TODO : Interrupt
 
     strcpybounded(commands_history, string, BUFFER_SIZE - 1);
 }
 
+
+// TODO : Split
 void ls(char *dirtable, char current_dir) {
     int i = 0;
     // char as string / char
@@ -223,6 +206,7 @@ void shell() {
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // Use it like "queue"
     // TODO : Extra, write to special sector dedicated for history or,
     // TODO : Extra, Extra, special sector for configuration
+    // TODO : Extra, finding ls, cd, cat, ln binary location
     char directory_string[BUFFER_SIZE];
     char directory_table[2][SECTOR_SIZE];
     char current_dir_index = ROOT_PARENT_FOLDER;

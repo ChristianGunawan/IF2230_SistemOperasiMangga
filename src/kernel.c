@@ -13,10 +13,6 @@
 #include "std-header/std.h"
 
 int main() {
-    char buf[1024]; // DEBUG
-    char tp[8];
-    int temp = 0;
-    clear(buf,1024);
     // Setup
     makeInterrupt21();
 
@@ -27,18 +23,9 @@ int main() {
 
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
+    disableKeyboardCursor();
 
-    writeFile(NULL, "folder1", &temp, ROOT_PARENT_FOLDER);
-    writeFile(NULL, "fol r2", &temp, 0);
-    writeFile(NULL, "hoho    ow", &temp, 1);
-    writeFile(NULL, "fo er4", &temp, 2);
-    writeFile(NULL, "uwu", &temp, ROOT_PARENT_FOLDER);
-    writeFile(NULL, "e 5s a", &temp, 3);
-    writeFile("ACTUAL FILE", "f int", &temp, 3);
-    writeFile(NULL, "- owo -", &temp, ROOT_PARENT_FOLDER);
-    writeFile(NULL, "f r6", &temp, 4);
-
-    shell();
+    shell(); // TODO : Extra, searching filename shell
     while (true);
 }
 
@@ -65,13 +52,17 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
                     getFullKeyWrapper(BX);
                     break;
                 case 0x2:
-                    setCursorPos(BX & 0xFF00, BX & 0x00FF);
+                    setCursorPos((BX & 0xFF00) >> 8, BX & 0x00FF);
                     break;
                 case 0x3:
                     getCursorPosWrapper(BX, DX);
                     break;
-                default:
-                    printString("Invalid interrupt\n");
+                case 0x4:
+                    enableKeyboardCursor();
+                    break;
+                case 0x5:
+                    disableKeyboardCursor();
+                    break;
             }
             break;
         case 0x2:

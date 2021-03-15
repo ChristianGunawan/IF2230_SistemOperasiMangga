@@ -57,7 +57,21 @@ void putchar(char a);
 int getFullKey();
 // Getting 1 keypress, blocking, no echo
 
+void showKeyboardCursor();
+// Showing keyboard cursor to screen
+
+void hideKeyboardCursor();
+// Disable keyboard cursor
+
+
+
 // --- File I/O ---
-void getDirectoryTable(char *buffer);
+void getDirectoryTable(char *buffer); // TODO : Move this from std
 // WARNING : No bound checking
 // Get all directory table, put in buffer
+
+void write(char *buffer, char *path, int *returncode, char parentIndex);
+// Write "buffer" with name "path" at "parentIndex" folder
+
+void read(char *buffer, char *path, int *returncode, char parentIndex);
+// Read file with name "path" at "parentIndex" folder and write to "buffer"

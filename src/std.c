@@ -4,6 +4,7 @@
 #include "std-header/boolean.h"
 #include "kernel-header/config.h"
 
+// ---------------- Standard string operation ----------------
 int strlen(char *string) {
     int i = 0;
     while (string[i] != '\0')
@@ -125,7 +126,7 @@ void strrev(char *string) {
 
 
 
-
+// ---------------- Standard I/O ----------------
 void print(char *string, char color) {
     // TODO : Extra, Maybe not safe (?)
     // TODO : Extra, Including black color
@@ -157,9 +158,29 @@ int getFullKey() {
     return key;
 }
 
+void showKeyboardCursor() {
+    interrupt(0x21, 0x0001, 0, 0x4, 0);
+}
+
+void hideKeyboardCursor() {
+    interrupt(0x21, 0x0001, 0, 0x5, 0);
+}
+
+void setKeyboardCursor(char r, char c) {
+    int BX = (r << 8);
+    BX |= c;
+    interrupt(0x21, 0x01, BX, 0x02, 0);
+}
+
+int getKeyboardCursor(bool isrow) {
+    int pos;
+    interrupt(0x21, 0x01, &pos, 0x3, isrow);
+    return pos;
+}
 
 
-void getDirectoryTable(char *buffer) {
+// ---------------- File I/O ----------------
+void getDirectoryTable(char *buffer) { // TODO : Move this from std
     // WARNING : Naive implementation
     interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
     interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
