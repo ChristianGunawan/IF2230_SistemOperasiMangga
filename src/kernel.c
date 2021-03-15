@@ -1,10 +1,10 @@
 // ------- Kernel -------
 // BCC notes
 // - Variable declaration must be put on top of code
-// - First defined function is starting function, not function called main()
+// - First defined function is starting function, not function called main() (Need more testing, either BCC or ld86)
 // - Pointer declaration syntax is strictly <type> *<varname>;
 // - #include weird behavior if directly next to comment (only 1 newline, 2 newline work fine)
-// - Bizzare filename behavior (cannot using filename starting with i (?)), no error & compiled normally but cannot start
+// - Bizarre filename behavior (cannot using filename starting with i (?)), no error & compiled normally but cannot start
 
 #include "kernel-header/kernel.h"
 #include "kernel-header/output.h"
@@ -13,7 +13,7 @@
 #include "std-header/std.h"
 
 int main() {
-    char buf[1024];
+    char buf[1024]; // DEBUG
     char tp[8];
     int temp = 0;
     clear(buf,1024);
@@ -32,7 +32,10 @@ int main() {
     writeFile(NULL, "fol r2", &temp, 0);
     writeFile(NULL, "hoho    ow", &temp, 1);
     writeFile(NULL, "fo er4", &temp, 2);
+    writeFile(NULL, "uwu", &temp, ROOT_PARENT_FOLDER);
     writeFile(NULL, "e 5s a", &temp, 3);
+    writeFile("ACTUAL FILE", "f int", &temp, 3);
+    writeFile(NULL, "- owo -", &temp, ROOT_PARENT_FOLDER);
     writeFile(NULL, "f r6", &temp, 4);
 
     shell();
@@ -159,14 +162,6 @@ void readString(char *string) {
     string[max_i] = CHAR_NULL; // Terminating string
     disableKeyboardCursor();
     setCursorPos(savedCursorRow + 1, 0);
-}
-
-void clear(char *string, int length) {
-    int i = 0;
-    while (i < length) {
-        string[i] = CHAR_NULL;
-        i++;
-    }
 }
 
 // I/O System Calls

@@ -38,7 +38,11 @@ void inttostr(char *buffer, int n);
 // WARNING : Naive implementation, no bound checking
 // Converting integer n to string pointed at buffer
 
+char isCharInString(char c, char *string);
+// Finding whether char c is in string
 
+void clear(char *buffer, int length);
+// Clearing string buffer
 
 // ---------------- Standard I/O ----------------
 void print(char *string, char color);

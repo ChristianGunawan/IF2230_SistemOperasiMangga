@@ -72,6 +72,23 @@ void strapp(char *string1, char *string2) {
     string1[i] = CHAR_NULL;
 }
 
+char isCharInString(char c, char *string) {
+    int i = 0;
+    while (string[i] != CHAR_NULL) {
+        if (string[i] == c)
+            return 1;
+        i++;
+    }
+    return 0;
+}
+
+void clear(char *string, int length) {
+    int i = 0;
+    while (i < length) {
+        string[i] = CHAR_NULL;
+        i++;
+    }
+}
 
 void inttostr(char *buffer, int n) {
     int i = 0;

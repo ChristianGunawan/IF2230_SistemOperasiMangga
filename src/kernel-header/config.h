@@ -17,6 +17,7 @@
 #define SCANCODE_LEFT_ARROW 0x4B
 #define SCANCODE_UP_ARROW 0x48
 #define SCANCODE_DOWN_ARROW 0x50
+#define SCANCODE_TAB 0x0F
 
 // BIOS Color Enum
 // Note : Probably bcc doesn't have enum keyword
@@ -55,7 +56,7 @@
 #define KERNEL_SECTOR_SIZE 31
 
 // Macro for filesystem syscalls
-#define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry
+#define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry // TODO : Renaming to ENTRY
 #define MAP_SECTOR 0x100
 #define FILES_SECTOR 0x101
 #define SECTORS_SECTOR 0x103

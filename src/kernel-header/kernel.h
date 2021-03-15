@@ -27,9 +27,6 @@ void printString(char *string);
 void readString(char *string);
 // System call for string input
 
-void clear(char *buffer, int length); // Fungsi untuk mengisi buffer dengan 0
-// Clearing string buffer
-
 void readSector(char *buffer, int sector);
 // Reading file at sector and copy to buffer
 
