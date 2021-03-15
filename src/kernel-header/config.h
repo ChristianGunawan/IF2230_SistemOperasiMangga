@@ -55,11 +55,19 @@
 //                      bootloader.asm, and fscreator set properly
 #define KERNEL_SECTOR_SIZE 31
 
+
 // Macro for filesystem syscalls
-#define FILE_SECTOR_SIZE 0x10 // 16 sectors (8192 bytes) for 1 file entry // TODO : Renaming to ENTRY
-#define MAP_SECTOR 0x100
-#define FILES_SECTOR 0x101
-#define SECTORS_SECTOR 0x103
+// Filesytem location
+#define MAP_SECTOR 0x100 // Map size -> 1 sector / 512 bytes
+#define FILES_SECTOR 0x101 // Files size -> 2 sectors / 1024 bytes
+#define SECTORS_SECTOR 0x103 // Sectors size -> 1 sector / 512 bytes
+
+#define FILES_ENTRY_SIZE 0x10 // 16 bytes for 1 entry in files filesystem
+#define SECTORS_ENTRY_SIZE 0x10 // 16 bytes for 1 entry in sectors filesystem
+#define FILE_SIZE_MAXIMUM SECTOR_SIZE*SECTORS_ENTRY_SIZE // 16 sectors (8192 bytes) for 1 file entry
+#define FILES_ENTRY_COUNT SECTOR_SIZE*2/FILES_ENTRY_SIZE
+#define SECTORS_ENTRY_COUNT SECTOR_SIZE/SECTORS_ENTRY_SIZE
+#define MAXIMUM_SECTOR_MAPPED 0x100 // Due 1 bytes representation in sectors filesystem
 
 // Predefined values in map filesystem
 #define EMPTY_MAP_ENTRY 0x00 // For empty entry

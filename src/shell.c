@@ -24,26 +24,26 @@ void directoryStringBuilder(char *string, char *dirtable, char current_dir) {
     // Use as string / char
     char filename_buffer[16];
     // Use as 1 bytes integer
-    char current_parent = 0, parent[64];
+    char current_parent = 0, parent[FILES_ENTRY_COUNT];
     // parent will contain indexes in reversed order
     int i = 0, parent_length = 0;
     if (current_dir == ROOT_PARENT_FOLDER)
         string[0] = '/';
     else {
-        clear(parent, 64);
+        clear(parent, FILES_ENTRY_COUNT);
         // Traversing folder until reaching root
-        current_parent = dirtable[current_dir*0x10+PARENT_BYTE_OFFSET];
+        current_parent = dirtable[current_dir*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
         while (current_parent != ROOT_PARENT_FOLDER) {
             parent[parent_length] = current_parent;
             parent_length++;
-            current_parent = dirtable[current_parent*0x10+PARENT_BYTE_OFFSET];
+            current_parent = dirtable[current_parent*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
         }
 
         i = parent_length - 1;
         while (i >= 0) {
             strapp(string, "/");
             clear(filename_buffer, 16);
-            strcpybounded(filename_buffer, dirtable+(parent[i]*0x10)+PATHNAME_BYTE_OFFSET, 14);
+            strcpybounded(filename_buffer, dirtable+(parent[i]*FILES_ENTRY_SIZE)+PATHNAME_BYTE_OFFSET, 14);
             strapp(string, filename_buffer);
 
             i--;
@@ -175,12 +175,12 @@ void ls(char *dirtable, char current_dir) {
     char filename_buffer[16];
     // Use char as 1 byte integer
     char parent_byte_entry, entry_byte_entry;
-    while (i < 0x40) {
-        parent_byte_entry = dirtable[0x10*i+PARENT_BYTE_OFFSET];
-        entry_byte_entry = dirtable[0x10*i+ENTRY_BYTE_OFFSET];
+    while (i < FILES_ENTRY_COUNT) {
+        parent_byte_entry = dirtable[FILES_ENTRY_SIZE*i+PARENT_BYTE_OFFSET];
+        entry_byte_entry = dirtable[FILES_ENTRY_SIZE*i+ENTRY_BYTE_OFFSET];
         if (parent_byte_entry == current_dir && entry_byte_entry != EMPTY_FILES_ENTRY) {
             clear(filename_buffer, 16);
-            strcpybounded(filename_buffer, dirtable+0x10*i+PATHNAME_BYTE_OFFSET, 14);
+            strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
             if (isCharInString(CHAR_SPACE, filename_buffer)) {
                 print("\"");
                 print(filename_buffer, BIOS_LIGHT_GREEN);
