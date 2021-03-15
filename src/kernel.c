@@ -47,6 +47,9 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
                     setCursorPos(getCursorPos(1), getCursorPos(0) - 1);
                     directCharPrint(CHAR_SPACE, BIOS_GRAY);
                     break;
+                case 0x2:
+                    scrollScreenSingleRow();
+                    break;
             }
             break;
         case 0x1:

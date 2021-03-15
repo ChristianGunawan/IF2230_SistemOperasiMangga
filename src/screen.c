@@ -67,6 +67,12 @@ int getCursorPos(bool isRow) {
         return getRawCursorPos() & 0xFF;
 }
 
+void scrollScreenSingleRow() {
+    // AH -> Scroll up
+    // AL -> lines to scroll
+    // BH -> BIOS Color
+    interrupt(0x10, 0x0601, 0x0700, 0x0000, 0x2580);
+}
 
 void directCharPrint(char a, char color) {
     // Check INT 10H with AH = 09H for references

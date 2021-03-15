@@ -188,6 +188,10 @@ int getKeyboardCursor(bool isrow) {
     return pos;
 }
 
+void scrollScreen() {
+    interrupt(0x21, 0x00, 0, 0x02, 0);
+}
+
 
 // ---------------- File I/O ----------------
 void write(char *buffer, char *path, int *returncode, char parentIndex) {

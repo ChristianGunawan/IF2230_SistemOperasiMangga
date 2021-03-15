@@ -15,6 +15,12 @@ void getDirectoryTable(char *buffer);
 // WARNING : No bound checking
 // Get all directory table, put in buffer
 
+
+
+
+
+
+
 void getDirectoryTable(char *buffer) {
     // WARNING : Naive implementation
     interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
@@ -171,7 +177,7 @@ void shellInput(char *commands_history) {
     } while (c != CHAR_INPUT_NEWLINE);
     string[max_i] = CHAR_NULL; // Terminating string
     hideKeyboardCursor();
-    setKeyboardCursor(savedCursorRow + 1, 0);
+    setKeyboardCursor(savedCursorRow + 1, 0); // TODO : Extra, for multi-line input, maybe can be adjusted
 
     strcpybounded(commands_history, string, BUFFER_SIZE - 1);
 }
@@ -231,9 +237,10 @@ void shell() {
         print(directory_string, BIOS_BLUE);
         print("$ ", BIOS_GRAY);
         shellInput(commands_history);
-
+        while (getCursorPos(1) > 20) {
+            scrollScreen();
+            setCursorPos(getCursorPos(1)-1, 0);
+        }
     }
 
-    // TODO : Check cursor position, handle out of screen case
-    // TODO : Extra, posibility of additional INT 10H in asm
 }

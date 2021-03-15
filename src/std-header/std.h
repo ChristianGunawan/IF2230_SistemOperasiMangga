@@ -65,7 +65,8 @@ void showKeyboardCursor();
 void hideKeyboardCursor();
 // Disable keyboard cursor
 
-
+void scrollScreen();
+// Scroll entire screen upward 1 row
 
 // --- File I/O ---
 void write(char *buffer, char *path, int *returncode, char parentIndex);
