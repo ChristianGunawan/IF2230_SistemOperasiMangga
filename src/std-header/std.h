@@ -5,12 +5,11 @@
 
 
 
+extern int interrupt(int number, int AX, int BX, int CX, int DX);
+
 // ---------------- Standard string operation ----------------
 int strlen(char *string);
 // Standard string length
-
-int mod(int a, int n);
-// Standard modulo function
 
 void strcpy(char *dest, char *src);
 // Standard strcpy without returning

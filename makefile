@@ -29,6 +29,7 @@ kernel:
 	@bcc -ansi -c -o out/screen.o src/screen.c
 	@bcc -ansi -c -o out/shell.o src/shell.c
 	@bcc -ansi -c -o out/output.o src/output.c
+	@bcc -ansi -c -o out/opr.o src/opr.c
 	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	@ld86 -o out/kernel -d out/*.o
 	# ------------ Compiled kernel stat ------------

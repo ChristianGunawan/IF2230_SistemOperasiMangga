@@ -9,11 +9,13 @@
 #include "kernel-header/kernel.h"
 #include "kernel-header/output.h"
 #include "kernel-header/screen.h"
+#include "basic-header/opr.h"
 #include "std-header/boolean.h"
 #include "std-header/std.h"
 
 int main() {
-    // char shell_program[F]
+    // char shell_program[FILE_SIZE_MAXIMUM];
+    // int (*exec)(void) = shell_program;
     // Setup
     int t;
     makeInterrupt21();
@@ -27,9 +29,13 @@ int main() {
     interrupt(0x10, 0x0003, 0, 0, 0);
     disableKeyboardCursor();
 
-    // readFile(, "")
-    writeFile("OI WOW", "filename1", &t, ROOT_PARENT_FOLDER);
     shell(); // TODO : Extra, searching filename shell
+    // readFile(shell_program, "shl", &t, ROOT_PARENT_FOLDER);
+    // writeFile("OI WOW", "filename1", &t, ROOT_PARENT_FOLDER);
+    // if (t != -1)
+    //     exec();
+    // else
+    //     printColoredString("Shell not found", BIOS_LIGHT_RED);
     while (true);
 }
 
@@ -247,6 +253,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     bool f_target_found = false;
     bool valid_parent_folder = true, valid_filename = true, valid_filename_length = true;
 
+    // FIXME : writeFile() may stop once find null byte due strlen and strcpy, check fileloader for fix
     // Filename length check
     if (strlen(path) > 14) {
         valid_filename_length = false;

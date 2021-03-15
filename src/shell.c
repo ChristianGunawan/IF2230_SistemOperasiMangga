@@ -7,8 +7,6 @@
 #define BUFFER_SIZE 256
 #define MAX_HISTORY 5
 
-
-
 // TODO : Extra, actually splitting to separate "app"
 // TODO : Extra, exec() for executing file at location as instruction
 
@@ -151,7 +149,7 @@ void shellInput(char *commands_history) {
                         break;
                     default:
                         is_modified = true;
-                        directCharPrint(c, BIOS_GRAY); // TODO : Wrap
+                        putchar(c);
                         string[i] = c;
                         if (i == max_i)
                             max_i++;
@@ -162,7 +160,7 @@ void shellInput(char *commands_history) {
     } while (c != CHAR_INPUT_NEWLINE);
     string[max_i] = CHAR_NULL; // Terminating string
     hideKeyboardCursor();
-    setKeyboardCursor(savedCursorRow + 1, 0); // TODO : Interrupt
+    setKeyboardCursor(savedCursorRow + 1, 0);
 
     strcpybounded(commands_history, string, BUFFER_SIZE - 1);
 }
@@ -203,7 +201,7 @@ void ln();
 
 
 void shell() {
-    char commands_history[MAX_HISTORY][BUFFER_SIZE]; // Use it like "queue"
+    char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
     // TODO : Extra, write to special sector dedicated for history or,
     // TODO : Extra, Extra, special sector for configuration
     // TODO : Extra, finding ls, cd, cat, ln binary location
@@ -225,10 +223,14 @@ void shell() {
         print(directory_string, BIOS_BLUE);
         print("$ ", BIOS_GRAY);
         shellInput(commands_history);
-        i = 0;
 
     }
 
     // TODO : Check cursor position, handle out of screen case
     // TODO : Extra, posibility of additional INT 10H in asm
+}
+
+int main() {
+    shell();
+    return 0;
 }
