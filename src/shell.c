@@ -129,7 +129,7 @@ void shellInput(char *commands_history) {
                 // If char (AL) is not ASCII Control codes, check scancode (AH)
                 switch (scancode) {
                     case SCANCODE_TAB:
-                        // TODO : Auto complete here
+                        // TODO : -Extra, Auto complete here
                         break;
                     case SCANCODE_DOWN_ARROW:
                     case SCANCODE_UP_ARROW:
@@ -214,18 +214,101 @@ void cd(); // TODO : Add
 
 void cat(char *filename, char current_dir) {
     char file_read[FILE_SIZE_MAXIMUM];
-    int returncode = 0;
+    int returncode = -1;
+    // TODO : Extra, modular cd relative path
     clear(file_read, FILE_SIZE_MAXIMUM);
     readFile(file_read, filename, &returncode, current_dir);
-    if (returncode == -1)
-        print("cat: Error file not found\n");
+    if (returncode == -1) {
+        print("cat: ", BIOS_GRAY);
+        print(filename, BIOS_GRAY);
+        print(": file not found", BIOS_GRAY);
+    }
     else
-        print(file_read);
+        print(file_read, BIOS_GRAY);
+    print("\n", BIOS_GRAY);
 }
 
-void ln();
+void ln(char *dirtable, char current_dir, char flags, char *target, char *linkname) {
+    // char as string / char
+    char filename_buffer[16];
+    // char as 1 byte integer
+    char file_read[FILE_SIZE_MAXIMUM];
+    char target_entry_byte = 0;
+    int returncode = 0;
+    int target_sector = div(current_dir, FILES_ENTRY_COUNT/FILES_SECTOR_SIZE);
+    int entry_idx_offset_in_sector = mod(current_dir, FILES_ENTRY_COUNT/FILES_SECTOR_SIZE);
+    bool is_write_success = false, valid_filename = true;
+    bool f_target_found = false, empty_entry_found = false;
+    int i = 0, j = 0;
+    int f_entry_idx = 0;
+    int f_entry_sector_idx = 0;
 
-// TODO : Other misc command (mkdir, rm, etc)
+    // For simplicity, only 2 flags either hard / soft link available
+    // For more fancy version, use bitmasking
+    clear(file_read, FILE_SIZE_MAXIMUM);
+    readFile(file_read, target, &returncode, current_dir);
+    if (returncode == -1) {
+        print("ln: ", BIOS_GRAY);
+        print(target, BIOS_GRAY);
+        print(": target not found\n", BIOS_GRAY);
+    }
+    else {
+        if (flags == 0) {
+            // Hardlink
+            // Assuming ln hardlink will only copy file
+            write(file_read, linkname, &returncode, current_dir);
+        }
+        else {
+            // Softlink
+            // Assuming softlink creating "shortcut"
+            while (i < 2 && valid_filename) {
+                j = 0;
+                while (j < SECTOR_SIZE && valid_filename) {
+                    // Needed buffer because entry may ignoring null terminator
+                    clear(filename_buffer, 16);
+                    strcpybounded(filename_buffer, dirtable+i*SECTOR_SIZE+j+PATHNAME_BYTE_OFFSET, 14);
+                    // Checking entry byte flag ("S" byte)
+                    if (dirtable[i*SECTOR_SIZE+j+ENTRY_BYTE_OFFSET] == EMPTY_FILES_ENTRY && !empty_entry_found) {
+                        f_entry_sector_idx = i;
+                        f_entry_idx = j;
+                        empty_entry_found = true;
+                    }
+                    // Getting entry byte flag of target
+                    if (!strcmp(target, filename_buffer) && dirtable[i*SECTOR_SIZE+j+PARENT_BYTE_OFFSET] == current_dir) {
+                        target_entry_byte = dirtable[i*SECTOR_SIZE+j+ENTRY_BYTE_OFFSET];
+                        f_target_found = true;
+                    }
+                    // Checking existing filename in same parent folder
+                    if (dirtable[i*SECTOR_SIZE+j+PARENT_BYTE_OFFSET] == current_dir) {
+                        if (!strcmp(linkname, filename_buffer))
+                            valid_filename = false;
+                    }
+                    j += FILES_ENTRY_SIZE;
+                }
+                i++;
+            }
+            if (valid_filename && f_target_found && empty_entry_found) {
+                dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PARENT_BYTE_OFFSET] = current_dir;
+                dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+ENTRY_BYTE_OFFSET] = target_entry_byte;
+                rawstrcpy((dirtable+f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PATHNAME_BYTE_OFFSET), linkname);
+                // Only update filesystem with file information
+                directSectorWrite(dirtable+SECTOR_SIZE*target_sector, FILES_SECTOR + target_sector);
+            }
+            else
+                print("Softlink error\n", BIOS_GRAY);
+        }
+
+
+        if (returncode == 0) {
+            print(linkname, BIOS_GRAY);
+            print(": link created\n", BIOS_GRAY);
+        }
+        else
+            print("File writing error\n", BIOS_GRAY);
+    }
+}
+
+// TODO : Extra, Other misc command (mkdir, rm, etc)
 
 void shell() {
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
@@ -246,13 +329,17 @@ void shell() {
         directoryStringBuilder(directory_string, directory_table, current_dir_index);
         print(directory_string, BIOS_BLUE);
         print("$ ", BIOS_GRAY);
+        ln(directory_table, 0x00, 1, "nope", "softlink");
+        ln(directory_table, 0x00, 0, "nope", "hink");
         shellInput(commands_history, current_dir_index);
+
+
         // Scroll up if cursor at lower screen
         while (getCursorPos(1) > 20) {
             scrollScreen();
             setCursorPos(getCursorPos(1)-1, 0);
         }
-        cat("nope", ROOT_PARENT_FOLDER);
+
 
     }
 

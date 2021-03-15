@@ -28,9 +28,11 @@ int main() {
     interrupt(0x10, 0x0003, 0, 0, 0);
     disableKeyboardCursor();
 
+    // DEBUG
     strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
     // TODO : Extra, Extra, executing shell
-    writeFile(buf, "nope", &t, ROOT_PARENT_FOLDER);
+    writeFile(FOLDER, "fold1", &t, ROOT_PARENT_FOLDER);
+    writeFile(buf, "nope", &t, 0);
     shell();
     while (true);
 }

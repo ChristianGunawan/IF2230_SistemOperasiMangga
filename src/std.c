@@ -196,14 +196,18 @@ void scrollScreen() {
 // ---------------- File I/O ----------------
 void write(char *buffer, char *path, int *returncode, char parentIndex) {
     int AX = parentIndex << 8;
-    AX |= 0x04;
+    AX |= 0x05;
     interrupt(0x21, AX, buffer, path, returncode);
 }
 
 void read(char *buffer, char *path, int *returncode, char parentIndex) {
     int AX = parentIndex << 8;
-    AX |= 0x05;
+    AX |= 0x04;
     interrupt(0x21, AX, buffer, path, returncode);
+}
+
+void directSectorWrite(char *buffer, int sector) {
+    interrupt(0x21, 0x03, buffer, sector, 0);
 }
 
 // ---------------- Misc ----------------

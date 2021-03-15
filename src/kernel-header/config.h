@@ -66,8 +66,12 @@
 #define SECTORS_ENTRY_SIZE 0x10 // 16 bytes for 1 entry in sectors filesystem
 #define FILE_SIZE_MAXIMUM SECTOR_SIZE*SECTORS_ENTRY_SIZE // 16 sectors (8192 bytes) for 1 file entry
 #define FILES_ENTRY_COUNT SECTOR_SIZE*2/FILES_ENTRY_SIZE
+#define FILES_SECTOR_SIZE 2
 #define SECTORS_ENTRY_COUNT SECTOR_SIZE/SECTORS_ENTRY_SIZE
 #define MAXIMUM_SECTOR_MAPPED 0x100 // Due 1 bytes representation in sectors filesystem
+
+// "buffer" parameter in writeFile()
+#define FOLDER NULL
 
 // Predefined values in map filesystem
 #define EMPTY_MAP_ENTRY 0x00 // For empty entry

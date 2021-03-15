@@ -75,6 +75,8 @@ void write(char *buffer, char *path, int *returncode, char parentIndex);
 void read(char *buffer, char *path, int *returncode, char parentIndex);
 // Read file with name "path" at "parentIndex" folder and write to "buffer"
 
+void directSectorWrite(char *buffer, int sector);
+// Direct writing to sector, no checking
 
 
 // --- Misc ---
