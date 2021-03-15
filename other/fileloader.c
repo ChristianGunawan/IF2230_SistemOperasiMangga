@@ -44,6 +44,14 @@ int modstrlen(unsigned char *string) {
     return i;
 }
 
+void memcpybounded(unsigned char *dest, const unsigned char *src, int bytes) {
+    int i = 0;
+    while (i < bytes) {
+        dest[i] = src[i];
+        i++;
+    }
+}
+
 bool modstrcmp(const unsigned char *s1, const unsigned char *s2) {
     int i = 0;
     if (modstrlen(s1) == modstrlen(s2)) {
@@ -107,6 +115,7 @@ int main(int argc, char const *argv[]) {
 
     clear(inputbuffer, MAX_FILE_SIZE);
     fread(inputbuffer, MAX_FILE_SIZE, 1, input);
+    int fileinput_bytesize = ftell(input);
 
     fclose(target);
     fclose(input);
@@ -134,7 +143,7 @@ int main(int argc, char const *argv[]) {
 
     bool is_enough_sector_in_map = false;
     if (exist_empty_file_entry && valid_filename) {
-        int free_bytes = 0, fileinput_bytesize = modstrlen(inputbuffer);
+        int free_bytes = 0;
         for (int i = 0; i < (SECTOR_SIZE >> 1); i++)
             if (targetbuffer[MAP_SECTOR][i] == EMPTY_MAP_ENTRY)
                 free_bytes += SECTOR_SIZE;
@@ -161,14 +170,14 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < 16; i++)
         sector_used[i] = -1;
     if (is_empty_sectors_entry_exist) {
-        int byte_left = modstrlen(inputbuffer);
+        int byte_left = fileinput_bytesize;
         int map_idx = 0, current_file_segment = 0, sector_idx = 0;
         while (byte_left > 0 && map_idx < (SECTOR_SIZE >> 1)) {
             if (targetbuffer[MAP_SECTOR][map_idx] == EMPTY_MAP_ENTRY) {
                 targetbuffer[MAP_SECTOR][map_idx] = FILLED_MAP_ENTRY;
                 targetbuffer[SECTORS_SECTOR][sectors_entry_idx*0x10+sector_idx] = map_idx;
                 sector_idx++;
-                rawstrcpybounded(targetbuffer[map_idx], inputbuffer+current_file_segment*SECTOR_SIZE, SECTOR_SIZE);
+                memcpybounded(targetbuffer[map_idx], inputbuffer+current_file_segment*SECTOR_SIZE, SECTOR_SIZE);
                 current_file_segment++;
                 sector_used[s_u_length++] = map_idx;
                 byte_left -= SECTOR_SIZE;
@@ -191,7 +200,7 @@ int main(int argc, char const *argv[]) {
 
     if (write_success) {
         printf("File write success\n");
-        printf("<%s> : %d bytes\n", argv[2], modstrlen(inputbuffer));
+        printf("<%s> : %d bytes\n", argv[2], fileinput_bytesize);
         printf("Stats\n");
         printf("Files - Entry sector : 0x%x\n", f_entry_sector_idx);
         printf("Files - Entry index  : 0x%x\n", f_entry_idx);
