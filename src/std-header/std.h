@@ -33,6 +33,9 @@ void strapp(char *string1, char* string2);
 // WARNING : No bound checking
 // Append string 1 with string 2
 
+void strtobytes(char *buffer, char *string, int bytecount);
+// Converting string to bytes with size "bytecount" at "buffer"
+
 void inttostr(char *buffer, int n);
 // WARNING : Naive implementation, no bound checking
 // Converting integer n to string pointed at buffer
@@ -65,12 +68,14 @@ void hideKeyboardCursor();
 
 
 // --- File I/O ---
-void getDirectoryTable(char *buffer); // TODO : Move this from std
-// WARNING : No bound checking
-// Get all directory table, put in buffer
-
 void write(char *buffer, char *path, int *returncode, char parentIndex);
 // Write "buffer" with name "path" at "parentIndex" folder
 
 void read(char *buffer, char *path, int *returncode, char parentIndex);
 // Read file with name "path" at "parentIndex" folder and write to "buffer"
+
+
+
+// --- Misc ---
+void memcpy(char *dest, char *src, int bytes);
+// Copying data from src to desc until bytes reached

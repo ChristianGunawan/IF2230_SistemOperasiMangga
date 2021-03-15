@@ -124,7 +124,17 @@ void strrev(char *string) {
     }
 }
 
-
+void strtobytes(char *buffer, char *string, int bytecount) {
+    int i = 0;
+    while (string[i] != CHAR_NULL && i < bytecount) {
+        buffer[i] = string[i];
+        i++;
+    }
+    while (i < bytecount) {
+        buffer[i] = 0x00;
+        i++;
+    }
+}
 
 // ---------------- Standard I/O ----------------
 void print(char *string, char color) {
@@ -180,12 +190,6 @@ int getKeyboardCursor(bool isrow) {
 
 
 // ---------------- File I/O ----------------
-void getDirectoryTable(char *buffer) { // TODO : Move this from std
-    // WARNING : Naive implementation
-    interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
-    interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
-}
-
 void write(char *buffer, char *path, int *returncode, char parentIndex) {
     int AX = parentIndex << 8;
     AX |= 0x04;
@@ -198,12 +202,12 @@ void read(char *buffer, char *path, int *returncode, char parentIndex) {
     interrupt(0x21, AX, buffer, path, returncode);
 }
 
-
-
-// TODO : getRawCursorPos() wrapper
-// TODO : setCursorPos() wrapper
-
-
+// ---------------- Misc ----------------
+void memcpy(char *dest, char *src, int bytes) {
+    int i = 0;
+    while (i < bytes) {
+        dest[i] = src[i];
+        i++;
+    }
+}
 // TODO : Extra, printf(), Extra Extra : Color escape sequence
-// TODO : Extra, simple string builder
-// TODO : Extra, strtoint / atoi and inttostr

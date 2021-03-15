@@ -22,7 +22,7 @@ Status load file akan ditulis pada akhir program.
 
 
 **TBA**
-<!-- 
+<!--
 # Tugas Besar 1 - Strategi Algoritma - IF2211
 **TBA**
 
@@ -187,7 +187,6 @@ Snapshot              | :green_square:
 ###### Ya, game ini merupakan direct reference untuk rogue. (Dengan mix-max spesifikasi tentunya)
 
 -->
- -->
 
 <!-- ALSA - Vcxsrv -
 - Bochs troubleshoot,

@@ -14,9 +14,8 @@
 #include "std-header/std.h"
 
 int main() {
-    // char shell_program[FILE_SIZE_MAXIMUM];
-    // int (*exec)(void) = shell_program;
     // Setup
+    char buf[SECTOR_SIZE];
     int t;
     makeInterrupt21();
 
@@ -29,13 +28,10 @@ int main() {
     interrupt(0x10, 0x0003, 0, 0, 0);
     disableKeyboardCursor();
 
-    shell(); // TODO : Extra, searching filename shell
-    // readFile(shell_program, "shl", &t, ROOT_PARENT_FOLDER);
-    // writeFile("OI WOW", "filename1", &t, ROOT_PARENT_FOLDER);
-    // if (t != -1)
-    //     exec();
-    // else
-    //     printColoredString("Shell not found", BIOS_LIGHT_RED);
+    strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
+    // TODO : Extra, Extra, executing shell
+    writeFile(buf, "nope", &t, ROOT_PARENT_FOLDER);
+    shell();
     while (true);
 }
 
@@ -222,7 +218,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
         while (i < SECTORS_ENTRY_SIZE && sector_read_target != EMPTY_SECTORS_ENTRY) {
             clear(file_segment_buffer, SECTOR_SIZE);
             readSector(file_segment_buffer, sector_read_target);
-            rawstrcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+            memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
             i++;
             sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
         }
@@ -239,6 +235,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
 }
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
+    // TODO : Extra, Extra, Extra, use multidimensional array damnit
     char map_buf[SECTOR_SIZE], files_buf[2][SECTOR_SIZE], sectors_buf[SECTOR_SIZE]; // Filesystem buffer
     char file_segment_buffer[SECTOR_SIZE]; // Buffer for writing to sector, always get clear()
     char filename_buffer[16], adjusted_path[16];
@@ -253,7 +250,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     bool f_target_found = false;
     bool valid_parent_folder = true, valid_filename = true, valid_filename_length = true;
 
-    // FIXME : writeFile() may stop once find null byte due strlen and strcpy, check fileloader for fix
     // Filename length check
     if (strlen(path) > 14) {
         valid_filename_length = false;
@@ -326,7 +322,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         if (buffer_type_is_file) {
             readSector(map_buf, MAP_SECTOR);
             i = 0;
-            buffer_size = strlen(buffer); // In bytes
+            buffer_size = strlen(buffer); // In bytes,
+            // FIXME : Extra, due to strlen() stop at null byte, it cannot write in pure binary mode
             while (i < (SECTOR_SIZE >> 1) && !is_enough_sector) {
                 // Finding empty sector in map
                 if (map_buf[i] == EMPTY_MAP_ENTRY)
@@ -386,7 +383,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
 
                     // Entry writing at sector
                     clear(file_segment_buffer, SECTOR_SIZE);
-                    rawstrcpybounded(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE), SECTOR_SIZE);
+                    memcpy(file_segment_buffer, (buffer+segment_idx*SECTOR_SIZE), SECTOR_SIZE);
                     writeSector(file_segment_buffer, i);
                     segment_idx++;
                     buffer_size -= SECTOR_SIZE;

@@ -1,4 +1,7 @@
 // 13519214 - Shell
+// TODO : Extra, write to special sector dedicated for history
+// TODO : Extra, Extra, special sector for configuration
+// Note : Need interrupt() if linked without kernel, check other/interrupt.asm
 
 #include "kernel-header/config.h" // Only for BIOS Color
 #include "std-header/boolean.h"
@@ -7,8 +10,16 @@
 #define BUFFER_SIZE 256
 #define MAX_HISTORY 5
 
-// TODO : Extra, actually splitting to separate "app"
-// TODO : Extra, exec() for executing file at location as instruction
+// TODO : Extra, Extra, actually splitting to separate "app"
+void getDirectoryTable(char *buffer);
+// WARNING : No bound checking
+// Get all directory table, put in buffer
+
+void getDirectoryTable(char *buffer) {
+    // WARNING : Naive implementation
+    interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
+    interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
+}
 
 void fillBuffer(char *buffer, int count, char filler) {
     int i = 0;
@@ -60,7 +71,7 @@ void shellInput(char *commands_history) {
     int i = 0, j = 0, max_i = 0, rawKey, dbg = 0;
     int selected_his_idx = 0;
     int savedCursorRow = getKeyboardCursor(1);
-    int savedCursorCol = getKeyboardCursor(0); // TODO : Wrap
+    int savedCursorCol = getKeyboardCursor(0);
     bool is_modified = false;
     showKeyboardCursor();
 
@@ -80,7 +91,7 @@ void shellInput(char *commands_history) {
         rawKey = getFullKey();
         c = rawKey & 0xFF;      // AL Value
         scancode = rawKey >> 8; // AH Value
-        // Warning : Prioritizing ASCII before scancode
+        // WARNING : Prioritizing ASCII before scancode
         switch (c) {
             case CHAR_INPUT_NEWLINE:
                 break;
@@ -166,7 +177,7 @@ void shellInput(char *commands_history) {
 }
 
 
-// TODO : Split
+// TODO : Extra, Split file
 void ls(char *dirtable, char current_dir) {
     int i = 0;
     // char as string / char
@@ -202,9 +213,6 @@ void ln();
 
 void shell() {
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
-    // TODO : Extra, write to special sector dedicated for history or,
-    // TODO : Extra, Extra, special sector for configuration
-    // TODO : Extra, finding ls, cd, cat, ln binary location
     char directory_string[BUFFER_SIZE];
     char directory_table[2][SECTOR_SIZE];
     char current_dir_index = ROOT_PARENT_FOLDER;
@@ -228,9 +236,4 @@ void shell() {
 
     // TODO : Check cursor position, handle out of screen case
     // TODO : Extra, posibility of additional INT 10H in asm
-}
-
-int main() {
-    shell();
-    return 0;
 }
