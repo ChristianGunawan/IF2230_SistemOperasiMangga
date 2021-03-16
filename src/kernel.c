@@ -15,8 +15,9 @@
 
 int main() {
     // Setup
-    char buf[SECTOR_SIZE];
-    int t;
+    // DEBUG
+    // char buf[SECTOR_SIZE];
+    // int t;
     makeInterrupt21();
 
     // Initial screen
@@ -29,17 +30,25 @@ int main() {
     disableKeyboardCursor();
 
     // DEBUG
-    // writeFile(FOLDER, "a", &t, ROOT_PARENT_FOLDER);
-    // writeFile(FOLDER, "fold2", &t, ROOT_PARENT_FOLDER);
-    // writeFile(FOLDER, "s1", &t, 0);
-    // writeFile(FOLDER, "ini bajakan", &t, 0);
-    // writeFile(FOLDER, "d1", &t, 2);
-
-    // strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
-    // writeFile(FOLDER, "m", &t, 0);
-    // writeFile(buf, "f1", &t, 0);
-    // strtobytes(buf, "rip man", SECTOR_SIZE);
+    // Testing folder structure
+    // folder 1
+    // |--> inside f1
+    //          |--> in in f1
+    // |--> another f1
+    // |--> not_a_file
+    // this_is_file
+    // folder 2
+    // writeFile(FOLDER, "folder 1", &t, ROOT_PARENT_FOLDER);
+    // writeFile(FOLDER, "folder 2", &t, ROOT_PARENT_FOLDER);
+    // writeFile(FOLDER, "inside f1", &t, 0);
+    // writeFile(FOLDER, "another f1", &t, 0);
+    // writeFile(FOLDER, "in in f1", &t, 2);
+    //
+    // strtobytes(buf, "ezhd or hddt", SECTOR_SIZE);
     // writeFile(buf, "this_is_file", &t, ROOT_PARENT_FOLDER);
+    // strtobytes(buf, "hd is cool", SECTOR_SIZE);
+    // writeFile(buf, "not_a_file", &t, 0);
+    // writeFile(FOLDER, "ok", &t, 0);
 
     shell();
     while (true);

@@ -83,6 +83,26 @@ char isCharInString(char c, char *string) {
     return 0;
 }
 
+int getLastMatchedCharIdx(char c, char *string) {
+    int i = 0, tp = -1;
+    while (string[i] != CHAR_NULL) {
+        if (string[i] == c)
+            tp = i;
+        i++;
+    }
+    return tp;
+}
+
+int getFirstMatchedCharIdx(char c, char *string) {
+    int i = 0, tp = -1;
+    while (string[i] != CHAR_NULL && tp == -1) {
+        if (string[i] == c)
+            tp = i;
+        i++;
+    }
+    return tp;
+}
+
 void clear(char *string, int length) {
     int i = 0;
     while (i < length) {

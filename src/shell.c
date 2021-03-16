@@ -157,18 +157,25 @@ void directoryStringBuilder(char *string, char *dirtable, char current_dir) {
     }
 }
 
-void shellInput(char *commands_history, char current_dir) {
+void shellInput(char *commands_history, char *dirtable, char current_dir) {
     // char as string
     char string[BUFFER_SIZE];
     char move_string_buffer_1[BUFFER_SIZE];
     char move_string_buffer_2[BUFFER_SIZE];
+    char arg_vector[ARGC_MAX][ARG_LENGTH];
+    char temp_eval[ARGC_MAX*ARG_LENGTH];
+    char to_be_completed[ARGC_MAX*ARG_LENGTH];
+    char filename_buffer[16];
     // char as 1 byte integer
     char c, scancode;
     int i = 0, j = 0, max_i = 0, rawKey, dbg = 0;
-    int selected_his_idx = 0;
+    int split_i, split_j, split_k;
+    int selected_his_idx = 0, current_eval_idx = 0;
     int savedCursorRow = getKeyboardCursor(1);
     int savedCursorCol = getKeyboardCursor(0);
-    bool is_modified = false;
+    bool is_modified = false, is_autocomplete_available = false;
+    bool is_between_quote_mark = false, autocomplete_found = false;
+    int argc = 0, returncode = 0, matched_idx = 0;
     showKeyboardCursor();
 
     // Move history up
@@ -219,7 +226,105 @@ void shellInput(char *commands_history, char current_dir) {
                 // If char (AL) is not ASCII Control codes, check scancode (AH)
                 switch (scancode) {
                     case SCANCODE_TAB:
-                        // TODO : -Extra, Auto complete here
+                        // Note : Currently autocomplete not available for inside quote
+                        // Part 1: command identification
+                        // TODO : Extra, need strsplit so badly :(
+                        // TODO : Extra, Extra, sometimes print failed (?)
+                        // Arguments splitting
+                        // Temporary cut string
+                        string[max_i] = CHAR_NULL;
+                        argc = 0;
+                        clear(arg_vector, ARGC_MAX*ARG_LENGTH);
+                        is_between_quote_mark = false;
+                        split_i = 0;
+                        split_j = 0;
+                        split_k = 0;
+
+                        while (string[split_i] != CHAR_NULL) {
+                            // TODO : Extra, Extra, mixing double and single quote
+                            // If found space in commands and not within double quote mark, make new
+                            if (string[split_i] == CHAR_SPACE && split_j < ARGC_MAX && !is_between_quote_mark) {
+                                split_k = 0;
+                                split_j++;
+                            }
+                            else if (string[split_i] == CHAR_DOUBLE_QUOTE) {
+                                // Toggling is_between_quote_mark
+                                is_between_quote_mark = !is_between_quote_mark;
+                            }
+                            else {
+                                // Only copy if char is not double quote
+                                // and space outside double quote
+                                arg_vector[split_j][split_k] = string[split_i];
+                                split_k++;
+                            }
+
+                            split_i++;
+                        }
+                        argc = split_j + 1; // Due split_j is between counting space between 2 args
+
+                        is_autocomplete_available = false;
+                        if (!strcmp("ls",arg_vector[0]) || !strcmp("cat",arg_vector[0]) || !strcmp("cd",arg_vector[0]))
+                            is_autocomplete_available = true;
+
+                        if (!is_between_quote_mark && is_autocomplete_available) {
+                            // Part 2: current index evaluation
+
+                            current_eval_idx = current_dir;
+                            matched_idx = getLastMatchedCharIdx(CHAR_SLASH, arg_vector[1]);
+                            // If argv[1] is only single name, use original dir
+                            if (matched_idx != -1) {
+                                clear(temp_eval,ARGC_MAX*ARG_LENGTH);
+                                strcpybounded(temp_eval, arg_vector[1], returncode);
+                                current_eval_idx = directoryEvaluator(dirtable, temp_eval, &returncode, current_dir);
+                            }
+
+                            // Part 3: command autocompletion
+                            // "To be completed" command (ex. cat mnt/abc/pqr -> pqr)
+                            clear(to_be_completed, ARGC_MAX*ARG_LENGTH);
+                            strcpy(to_be_completed, arg_vector[1]+matched_idx+1);
+                            // Searching from directory table
+                            autocomplete_found = false;
+                            split_i = 0;
+                            while (split_i < FILES_ENTRY_COUNT && !autocomplete_found) {
+                                clear(filename_buffer, 16);
+                                strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*split_i+PATHNAME_BYTE_OFFSET, 14);
+                                if (current_eval_idx == dirtable[FILES_ENTRY_SIZE*split_i+PARENT_BYTE_OFFSET]) {
+                                    // Partial string comparation
+                                    split_j = 0;
+                                    autocomplete_found = true;
+                                    // Set autocomplete_found as found, if string comparation below failed
+                                    //       cancel searching status to not found
+                                    while (to_be_completed[split_j] != CHAR_NULL && autocomplete_found) {
+                                        if (to_be_completed[split_j] != filename_buffer[split_j])
+                                            autocomplete_found = false;
+                                        split_j++;
+                                    }
+                                }
+                                split_i++;
+                            }
+
+                            if (autocomplete_found) {
+                                if (matched_idx != -1) {
+                                    // If using relative pathing, then find last slash location and insert completion
+                                    strcpy(string+getLastMatchedCharIdx(CHAR_SLASH, string)+1, filename_buffer);
+                                }
+                                else {
+                                    // If not using relative pathing, use space as insertion location
+                                    strcpy(string+getFirstMatchedCharIdx(CHAR_SPACE, string)+1, filename_buffer);
+                                }
+                            }
+
+                            // Autocomplete printing
+                            setKeyboardCursor(savedCursorRow, savedCursorCol);
+                            print("                                                                ", BIOS_GRAY);
+                            setKeyboardCursor(savedCursorRow, savedCursorCol);
+
+                            // Change proper i and max_i values
+                            i = strlen(string);
+                            max_i = i;
+
+                            print(string, BIOS_GRAY);
+                        }
                         break;
                     case SCANCODE_DOWN_ARROW:
                     case SCANCODE_UP_ARROW:
@@ -525,7 +630,7 @@ void shell() {
         directoryStringBuilder(directory_string, directory_table, current_dir_index);
         print(directory_string, BIOS_LIGHT_BLUE);
         print("$ ", BIOS_GRAY);
-        shellInput(commands_history, current_dir_index);
+        shellInput(commands_history, directory_table, current_dir_index);
 
         // Scroll up if cursor at lower screen
         while (getCursorPos(1) > 20) {
@@ -617,26 +722,6 @@ void shell() {
                     print(" exist ", BIOS_WHITE);
                 }
             }
-        }
-        else if (!strcmp("dbg", arg_vector[0])) {
-            // DEBUG
-            temp = directoryEvaluator(directory_table, "fold1/d1/../d1/g1", &returncode, ROOT_PARENT_FOLDER);
-            inttostr(dbg, temp);
-            print(dbg, BIOS_BLUE);
-            print("\n", BIOS_BLUE);
-            temp = directoryEvaluator(directory_table, "d1", &returncode, 0);
-            inttostr(dbg, temp);
-            print(dbg, BIOS_BLUE);
-            print("\n", BIOS_BLUE);
-            temp = directoryEvaluator(directory_table, "fold2", &returncode, ROOT_PARENT_FOLDER);
-            inttostr(dbg, temp);
-            print(dbg, BIOS_BLUE);
-            print("\n", BIOS_BLUE);
-            temp = directoryEvaluator(directory_table, "fold1", &returncode, ROOT_PARENT_FOLDER);
-            inttostr(dbg, temp);
-            print(dbg, BIOS_BLUE);
-            print("\n", BIOS_BLUE);
-
         }
         else if (!strcmp("", arg_vector[0])) {
             // WARNING : Multiple space in single block will count as multiple argument due to argsplit above

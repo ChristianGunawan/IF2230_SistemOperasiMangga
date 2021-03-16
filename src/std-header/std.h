@@ -43,6 +43,12 @@ void inttostr(char *buffer, int n);
 char isCharInString(char c, char *string);
 // Finding whether char c is in string
 
+int getLastMatchedCharIdx(char c, char *string);
+// Get last index of matching char
+
+int getFirstMatchedCharIdx(char c, char *string);
+// Get first index of matching char
+
 void clear(char *buffer, int length);
 // Clearing string buffer
 
