@@ -11,6 +11,8 @@
 #define CHAR_NULL 0x0
 #define CHAR_SPACE 0x20
 #define CHAR_NUMBER_0 0x30
+#define CHAR_DOUBLE_QUOTE 0x22
+#define CHAR_SINGLE_QUOTE 0x27
 
 // BIOS Scancodes
 #define SCANCODE_RIGHT_ARROW 0x4D

@@ -35,6 +35,7 @@ void writeSector(char *buffer, int sector);
 
 void readFile(char *buffer, char *path, int *result, char parentIndex);
 // Read file with relative path
+// If type is folder, return NULL char at position "buffer"
 // -- Error code list --
 // -1 - File not found
 

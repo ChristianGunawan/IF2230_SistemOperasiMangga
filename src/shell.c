@@ -7,6 +7,8 @@
 #include "std-header/boolean.h"
 #include "std-header/std.h"
 
+#define ARG_LENGTH 32
+#define ARGC_MAX 8
 #define BUFFER_SIZE 256
 #define MAX_HISTORY 5
 
@@ -25,6 +27,12 @@ void getDirectoryTable(char *buffer) {
     // WARNING : Naive implementation
     interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
     interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
+}
+
+char directoryEvaluator(char *dirtable, char *dirstr, char current_dir) {
+    // TODO : Make
+    char evaluated_dir = current_dir;
+
 }
 
 void fillBuffer(char *buffer, int count, char filler) {
@@ -184,7 +192,7 @@ void shellInput(char *commands_history) {
 
 
 // TODO : Extra, Split file
-void ls(char *dirtable, char current_dir) {
+void ls(char *dirtable, char target_dir) {
     int i = 0;
     // char as string / char
     char filename_buffer[16];
@@ -193,7 +201,7 @@ void ls(char *dirtable, char current_dir) {
     while (i < FILES_ENTRY_COUNT) {
         parent_byte_entry = dirtable[FILES_ENTRY_SIZE*i+PARENT_BYTE_OFFSET];
         entry_byte_entry = dirtable[FILES_ENTRY_SIZE*i+ENTRY_BYTE_OFFSET];
-        if (parent_byte_entry == current_dir && entry_byte_entry != EMPTY_FILES_ENTRY) {
+        if (parent_byte_entry == target_dir && entry_byte_entry != EMPTY_FILES_ENTRY) {
             clear(filename_buffer, 16);
             strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
             if (isCharInString(CHAR_SPACE, filename_buffer)) {
@@ -212,12 +220,12 @@ void ls(char *dirtable, char current_dir) {
 
 void cd(); // TODO : Add
 
-void cat(char *filename, char current_dir) {
+void cat(char *filename, char target_dir) {
     char file_read[FILE_SIZE_MAXIMUM];
     int returncode = -1;
     // TODO : Extra, modular cd relative path
     clear(file_read, FILE_SIZE_MAXIMUM);
-    readFile(file_read, filename, &returncode, current_dir);
+    readFile(file_read, filename, &returncode, target_dir);
     if (returncode == -1) {
         print("cat: ", BIOS_GRAY);
         print(filename, BIOS_GRAY);
@@ -228,15 +236,15 @@ void cat(char *filename, char current_dir) {
     print("\n", BIOS_GRAY);
 }
 
-void ln(char *dirtable, char current_dir, char flags, char *target, char *linkname) {
+void ln(char *dirtable, char target_dir, char flags, char *target, char *linkname) {
     // char as string / char
     char filename_buffer[16];
     // char as 1 byte integer
     char file_read[FILE_SIZE_MAXIMUM];
     char target_entry_byte = 0;
     int returncode = 0;
-    int target_sector = div(current_dir, FILES_ENTRY_COUNT/FILES_SECTOR_SIZE);
-    int entry_idx_offset_in_sector = mod(current_dir, FILES_ENTRY_COUNT/FILES_SECTOR_SIZE);
+    int target_sector = div(target_dir, FILES_ENTRY_COUNT/FILES_SECTOR_SIZE);
+    int entry_idx_offset_in_sector = mod(target_dir, FILES_ENTRY_COUNT/FILES_SECTOR_SIZE);
     bool is_write_success = false, valid_filename = true;
     bool f_target_found = false, empty_entry_found = false;
     int i = 0, j = 0;
@@ -246,7 +254,7 @@ void ln(char *dirtable, char current_dir, char flags, char *target, char *linkna
     // For simplicity, only 2 flags either hard / soft link available
     // For more fancy version, use bitmasking
     clear(file_read, FILE_SIZE_MAXIMUM);
-    readFile(file_read, target, &returncode, current_dir);
+    readFile(file_read, target, &returncode, target_dir);
     if (returncode == -1) {
         print("ln: ", BIOS_GRAY);
         print(target, BIOS_GRAY);
@@ -256,11 +264,16 @@ void ln(char *dirtable, char current_dir, char flags, char *target, char *linkna
         if (flags == 0) {
             // Hardlink
             // Assuming ln hardlink will only copy file
-            write(file_read, linkname, &returncode, current_dir);
+            write(file_read, linkname, &returncode, target_dir);
+            // FIXME : Extra, weird behavior on folder
+            // FIXME : Extra, if sectors entry actually empty, it will be indistinguishable with empty entry
+            //       ^ Change empty sectors bytes with something else on writeFile()
         }
         else {
             // Softlink
             // Assuming softlink creating "shortcut"
+            // TODO : Check again on files and folder
+            i = 0;
             while (i < 2 && valid_filename) {
                 j = 0;
                 while (j < SECTOR_SIZE && valid_filename) {
@@ -269,17 +282,17 @@ void ln(char *dirtable, char current_dir, char flags, char *target, char *linkna
                     strcpybounded(filename_buffer, dirtable+i*SECTOR_SIZE+j+PATHNAME_BYTE_OFFSET, 14);
                     // Checking entry byte flag ("S" byte)
                     if (dirtable[i*SECTOR_SIZE+j+ENTRY_BYTE_OFFSET] == EMPTY_FILES_ENTRY && !empty_entry_found) {
-                        f_entry_sector_idx = i;
+                        f_entry_sector_idx = i; // FIXME : Here
                         f_entry_idx = j;
                         empty_entry_found = true;
                     }
                     // Getting entry byte flag of target
-                    if (!strcmp(target, filename_buffer) && dirtable[i*SECTOR_SIZE+j+PARENT_BYTE_OFFSET] == current_dir) {
+                    if (!strcmp(target, filename_buffer) && dirtable[i*SECTOR_SIZE+j+PARENT_BYTE_OFFSET] == target_dir) {
                         target_entry_byte = dirtable[i*SECTOR_SIZE+j+ENTRY_BYTE_OFFSET];
                         f_target_found = true;
                     }
                     // Checking existing filename in same parent folder
-                    if (dirtable[i*SECTOR_SIZE+j+PARENT_BYTE_OFFSET] == current_dir) {
+                    if (dirtable[i*SECTOR_SIZE+j+PARENT_BYTE_OFFSET] == target_dir) {
                         if (!strcmp(linkname, filename_buffer))
                             valid_filename = false;
                     }
@@ -288,14 +301,20 @@ void ln(char *dirtable, char current_dir, char flags, char *target, char *linkna
                 i++;
             }
             if (valid_filename && f_target_found && empty_entry_found) {
-                dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PARENT_BYTE_OFFSET] = current_dir;
+                print("ln: ", BIOS_GRAY);
+                print(linkname, BIOS_GRAY);
+                print(" softlink created\n", BIOS_GRAY);
+
+                inttostr(filename_buffer, f_entry_sector_idx*SECTOR_SIZE+f_entry_idx);
+                print(filename_buffer, BIOS_RED);
+                dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PARENT_BYTE_OFFSET] = target_dir; // FIXME : Not writing
                 dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+ENTRY_BYTE_OFFSET] = target_entry_byte;
                 rawstrcpy((dirtable+f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PATHNAME_BYTE_OFFSET), linkname);
                 // Only update filesystem with file information
                 directSectorWrite(dirtable+SECTOR_SIZE*target_sector, FILES_SECTOR + target_sector);
             }
             else
-                print("Softlink error\n", BIOS_GRAY);
+                print("softlink error\n", BIOS_GRAY);
         }
 
 
@@ -313,9 +332,13 @@ void ln(char *dirtable, char current_dir, char flags, char *target, char *linkna
 void shell() {
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
     char directory_string[BUFFER_SIZE];
+    char arg_vector[ARGC_MAX][ARG_LENGTH];
     char directory_table[2][SECTOR_SIZE];
     char current_dir_index = ROOT_PARENT_FOLDER;
-    int i = 0;
+    char is_between_quote_mark = false;
+    char dbg[SECTOR_SIZE]; // DEBUG
+    int tp; // DEBUG
+    int i = 0, j = 0, k = 0, argc = 0;
 
     getDirectoryTable(directory_table);
 
@@ -323,24 +346,93 @@ void shell() {
     clear(directory_string, BUFFER_SIZE);
 
     while (true) {
+        clear(arg_vector, ARGC_MAX*ARG_LENGTH);
+        clear(directory_string, BUFFER_SIZE);
         print("mangga", BIOS_GREEN);
         print(":", BIOS_GRAY);
-        clear(directory_string, BUFFER_SIZE);
         directoryStringBuilder(directory_string, directory_table, current_dir_index);
         print(directory_string, BIOS_BLUE);
         print("$ ", BIOS_GRAY);
-        ln(directory_table, 0x00, 1, "nope", "softlink");
-        ln(directory_table, 0x00, 0, "nope", "hink");
         shellInput(commands_history, current_dir_index);
-
 
         // Scroll up if cursor at lower screen
         while (getCursorPos(1) > 20) {
             scrollScreen();
             setCursorPos(getCursorPos(1)-1, 0);
+            showKeyboardCursor();
         }
 
+        // Arguments splitting
+        i = 0;
+        j = 0;
+        k = 0;
+        while (commands_history[0][i] != CHAR_NULL) {
+            // TODO : Extra, Extra, mixing double and single quote
+            // If found space in commands and not within double quote mark, make new
+            if (commands_history[0][i] == CHAR_SPACE && j < ARGC_MAX && !is_between_quote_mark) {
+                k = 0;
+                j++;
+            }
+            else if (commands_history[0][i] == CHAR_DOUBLE_QUOTE) {
+                // Toggling is_between_quote_mark
+                is_between_quote_mark = !is_between_quote_mark;
+            }
+            else {
+                // Only copy if char is not double quote
+                // and space outside double quote
+                arg_vector[j][k] = commands_history[0][i];
+                k++;
+            }
 
+            i++;
+        }
+        argc = j + 1; // Due j is between counting space between 2 args
+
+
+        // Command evaluation
+        // TODO : Extra, relative ls, additional args
+        if (!strcmp("ls", arg_vector[0]))  {
+            if (argc == 1)
+                ls(directory_table, current_dir_index);
+            else
+                print("Usage : ls\n", BIOS_WHITE);
+        }
+        // TODO : Extra, relative cat, additional args
+        else if (!strcmp("cat", arg_vector[0])) {
+            if (argc == 2)
+                cat(arg_vector[1], current_dir_index);
+            else
+                print("Usage : cat <filename>\n", BIOS_WHITE);
+        }
+        else if (!strcmp("ln", arg_vector[0])) {
+            if (argc >= 3) {
+                if (!strcmp("-s", arg_vector[1]))
+                    ln(directory_table, current_dir_index, 1, arg_vector[2], arg_vector[3]);
+                else
+                    ln(directory_table, current_dir_index, 0, arg_vector[1], arg_vector[2]);
+            }
+            else
+                print("Usage : ln [-s] <target> <linkname>\n", BIOS_WHITE);
+        }
+        else if (!strcmp("dbg", arg_vector[0])) {
+            // clear(dbg, SECTOR_SIZE);
+            // read(dbg, "fold1", &tp, ROOT_PARENT_FOLDER);
+            // if (dbg[0] == NULL) {
+            //     print("SUCCESS\n", BIOS_CYAN);
+            // }
+            // else {
+            //     print("FAIL\n", BIOS_CYAN);
+            //     tp = dbg;
+            //     inttostr(dbg, tp);
+            //     print(dbg, BIOS_RED);
+            //     print("FAIL\n", BIOS_CYAN);
+            // }
+            ln(directory_table, current_dir_index, 0, arg_vector[1], arg_vector[2]);
+        }
+        else {
+            print(arg_vector[0], BIOS_WHITE);
+            print(": command not found\n", BIOS_WHITE);
+        }
     }
 
 }

@@ -30,9 +30,12 @@ int main() {
 
     // DEBUG
     strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
-    // TODO : Extra, Extra, executing shell
     writeFile(FOLDER, "fold1", &t, ROOT_PARENT_FOLDER);
+    writeFile(FOLDER, "fold2", &t, ROOT_PARENT_FOLDER);
     writeFile(buf, "nope", &t, 0);
+    strtobytes(buf, "rip man", SECTOR_SIZE);
+    writeFile(buf, "this_is_file", &t, ROOT_PARENT_FOLDER);
+
     shell();
     while (true);
 }
@@ -187,6 +190,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     int i = 0, j = 0;
     int sectors_entry_idx = 0, sector_read_target = 0;
     bool valid_parent_folder = true, is_filename_match_found = false, valid_filename_length = true;
+    bool is_type_is_file = true;
 
     readSector(files_buf[0], FILES_SECTOR);
     readSector(files_buf[1], FILES_SECTOR + 1);
@@ -209,6 +213,8 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
                         is_filename_match_found = true;
                         sectors_entry_idx = files_buf[i][j+ENTRY_BYTE_OFFSET];
                     }
+                    if (files_buf[i][j*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] == FOLDER_ENTRY)
+                        is_type_is_file = false;
                 }
                 j += FILES_ENTRY_SIZE;
             }
@@ -217,16 +223,21 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
     }
 
     if (is_filename_match_found) {
-        readSector(sectors_buf, SECTORS_SECTOR);
-        i = 0;
-        sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
-        while (i < SECTORS_ENTRY_SIZE && sector_read_target != EMPTY_SECTORS_ENTRY) {
-            clear(file_segment_buffer, SECTOR_SIZE);
-            readSector(file_segment_buffer, sector_read_target);
-            strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
-            // memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE); // FIXME : Extra, if fixing read binary file use memcpy
-            i++;
+        if (is_type_is_file) {
+            readSector(sectors_buf, SECTORS_SECTOR);
+            i = 0;
             sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
+            while (i < SECTORS_ENTRY_SIZE && sector_read_target != EMPTY_SECTORS_ENTRY) {
+                clear(file_segment_buffer, SECTOR_SIZE);
+                readSector(file_segment_buffer, sector_read_target);
+                strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+                // memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE); // FIXME : Extra, if fixing read binary file use memcpy
+                i++;
+                sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
+            }
+        }
+        else {
+            (*buffer) = NULL;
         }
     }
 
