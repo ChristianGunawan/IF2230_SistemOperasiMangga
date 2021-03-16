@@ -29,9 +29,16 @@ int main() {
     disableKeyboardCursor();
 
     // DEBUG
-    strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
-    writeFile(FOLDER, "fold1", &t, ROOT_PARENT_FOLDER);
+    writeFile(FOLDER, "a1", &t, ROOT_PARENT_FOLDER);
     writeFile(FOLDER, "fold2", &t, ROOT_PARENT_FOLDER);
+    writeFile(FOLDER, "s1", &t, 0);
+    writeFile(FOLDER, "ini bajakan", &t, 0);
+    writeFile(FOLDER, "d1", &t, 2);
+
+
+
+    strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
+    writeFile(FOLDER, "m", &t, 0);
     writeFile(buf, "nope", &t, 0);
     strtobytes(buf, "rip man", SECTOR_SIZE);
     writeFile(buf, "this_is_file", &t, ROOT_PARENT_FOLDER);
