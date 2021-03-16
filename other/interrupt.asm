@@ -1,10 +1,7 @@
-;lib.asm
-;Michael Black, 2007
-;Modified by Asisten Sister, 2021
-
-;lib.asm contains assembly functions that you can use in the shell
+; Only interrupt function
 
 global _interrupt
+
 
 ;int interrupt (int number, int AX, int BX, int CX, int DX)
 _interrupt:

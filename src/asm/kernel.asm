@@ -7,6 +7,8 @@
 global _putInMemory
 global _interrupt
 global _makeInterrupt21
+global _getRawCursorPos
+global _getFullKeyPress
 extern _handleInterrupt21
 
 ;void putInMemory (int segment, int address, char character)
@@ -47,7 +49,7 @@ intr:	int 0x00	;call the interrupt (00 will be changed above)
 
 ;void makeInterrupt21()
 ;this sets up the interrupt 0x21 vector
-;when an interrupt 0x21 is called in the future, 
+;when an interrupt 0x21 is called in the future,
 ;_interrupt21ServiceRoutine will run
 
 _makeInterrupt21:
@@ -62,6 +64,30 @@ _makeInterrupt21:
 	mov [si],dx	;set up our vector
 	pop ds
 	ret
+
+;int getRawCursorPos()
+;returning integer with higher 8 bit as row, lower 8 bit as column
+_getRawCursorPos:
+	push   bx
+	push   cx
+	push   dx
+	mov    ax,0x0300 ; using INT 10H with AH = 03H
+	mov    bx,0x0    ; page number = 0, BH = 0x00H
+	int    0x10      ; direct int call
+	mov    ax,dx ; return %dx;
+	pop    dx
+	pop    cx
+	pop    bx
+	ret
+
+
+;int getFullKeyPress()
+;returning integer with raw return, check INT 16H for references
+_getFullKeyPress:
+    xor   ax,ax  ;AH = 00H
+	int   0x16
+	ret
+
 
 ;this is called when interrupt 21 happens
 ;it will call your function:
