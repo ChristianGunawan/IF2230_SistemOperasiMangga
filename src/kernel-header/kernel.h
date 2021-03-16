@@ -3,8 +3,7 @@
 #include "config.h"
 
 // INT 21H Handler
-// TODO : Add
-
+// TODO : Extra, Add
 
 // --- Kernel Behavior ---
 // ~ Kernel will assume exists external procedure called shell()
@@ -38,6 +37,11 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
 // If type is folder, return NULL char at position "buffer"
 // -- Error code list --
 // -1 - File not found
+// -- readFile() services --
+// buffer is pointer to location which will be used for reading file
+// path is filename, only maximum 14 char
+// result will be used as error code container
+// parentIndex used as "P" byte value / parent index at files filesystem entry
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 // Writing file with relative path
@@ -54,4 +58,3 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 // sectors will be used as error code container
 // parentIndex used as "P" byte value / parent index at files filesystem entry
 // If buffer == NULL, creating folder instead file
-// TODO : Add service list

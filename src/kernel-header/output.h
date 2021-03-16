@@ -1,5 +1,5 @@
 // 13519214 - Input-output related function
-// FIXME : Extra, Bizarre filename behavior, cannot using io.h
+// FIXME : Extra, Bizarre bcc filename behavior, cannot using io.h
 
 // Implemented in assembly
 extern int getFullKeyPress();

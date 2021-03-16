@@ -22,26 +22,24 @@ int main() {
     // Initial screen
     clearScreen();
     // DEBUG
-    // drawBootLogo();     // Note : drawBootLogo() does not revert video mode
+    drawBootLogo();     // Note : drawBootLogo() does not revert video mode
 
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
     disableKeyboardCursor();
 
     // DEBUG
-    writeFile(FOLDER, "a1", &t, ROOT_PARENT_FOLDER);
-    writeFile(FOLDER, "fold2", &t, ROOT_PARENT_FOLDER);
-    writeFile(FOLDER, "s1", &t, 0);
-    writeFile(FOLDER, "ini bajakan", &t, 0);
-    writeFile(FOLDER, "d1", &t, 2);
+    // writeFile(FOLDER, "a", &t, ROOT_PARENT_FOLDER);
+    // writeFile(FOLDER, "fold2", &t, ROOT_PARENT_FOLDER);
+    // writeFile(FOLDER, "s1", &t, 0);
+    // writeFile(FOLDER, "ini bajakan", &t, 0);
+    // writeFile(FOLDER, "d1", &t, 2);
 
-
-
-    strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
-    writeFile(FOLDER, "m", &t, 0);
-    writeFile(buf, "nope", &t, 0);
-    strtobytes(buf, "rip man", SECTOR_SIZE);
-    writeFile(buf, "this_is_file", &t, ROOT_PARENT_FOLDER);
+    // strtobytes(buf, "xzxzzxzxzxzxzxzxzxzxzxzzxzxzzxzxzxzzxzzzzzzxzzxzxxzxz", SECTOR_SIZE);
+    // writeFile(FOLDER, "m", &t, 0);
+    // writeFile(buf, "f1", &t, 0);
+    // strtobytes(buf, "rip man", SECTOR_SIZE);
+    // writeFile(buf, "this_is_file", &t, ROOT_PARENT_FOLDER);
 
     shell();
     while (true);

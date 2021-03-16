@@ -31,20 +31,19 @@ void getDirectoryTable(char *buffer) {
 }
 
 char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char current_dir) {
-    // TODO : Make
     char evaluated_dir = current_dir;
     char parent_byte_buffer = -1;
-    char directoryName[ARGC_MAX][ARG_LENGTH];
+    char directory_name[ARGC_MAX][ARG_LENGTH];
     char filename_buffer[16];
     int i, j, k, dirnamecount;
     bool is_valid_args = true, is_folder_found = false;
-    clear(directoryName, ARGC_MAX*ARG_LENGTH);
+    clear(directory_name, ARGC_MAX*ARG_LENGTH);
 
     // TODO : Extra, maybe std -> strsplit()
     // Arguments splitting -> From argv in shell(), with some modification
     i = 0;
     j = 0;
-    k = 0; // TODO : Add ignore slash in end
+    k = 0;
     while (dirstr[i] != CHAR_NULL) {
         // If found slash in commands and not within double quote mark, make new
         if (dirstr[i] == CHAR_SLASH && j < ARGC_MAX) {
@@ -54,12 +53,17 @@ char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char curr
         else {
             // Only copy if char is not double quote
             // and space outside double quote
-            directoryName[j][k] = dirstr[i];
+            directory_name[j][k] = dirstr[i];
             k++;
         }
         i++;
     }
     dirnamecount = j + 1; // Due j is between counting space between 2 args
+
+    // Deleting last slash (ex. mnt/a/b/ -> argv entries = {mnt, a, b, ""} to argv = {mnt, a, b})
+    if (!strcmp(directory_name[dirnamecount-1], ""))
+        dirnamecount--;
+
 
     // Parsing priority :
     // 1. If found "." -> change evaluated dir to current dir, will ignoring previous evaluation
@@ -67,9 +71,9 @@ char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char curr
     // 3. If found foldername -> search foldername in evaluated dir
     i = 0;
     while (i < dirnamecount && is_valid_args) {
-        if (!strcmp(directoryName[i], "."))
+        if (!strcmp(directory_name[i], "."))
             evaluated_dir = current_dir;
-        else if (!strcmp(directoryName[i], "..")) {
+        else if (!strcmp(directory_name[i], "..")) {
             // If evaluated dir is NOT in between files entry count and 0 (or valid files index), do nothing
             // (Root flag by default is on 0xFF which is by default not in range)
             // else, change evaluated dir to parent evaluated dir
@@ -85,7 +89,7 @@ char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char curr
                 strcpybounded(filename_buffer, dirtable+j*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
                 // If within same parent folder and pathname match, change evaluated_dir
                 parent_byte_buffer = dirtable[j*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
-                if (!strcmp(directoryName[i], filename_buffer) && parent_byte_buffer == evaluated_dir) {
+                if (!strcmp(directory_name[i], filename_buffer) && parent_byte_buffer == evaluated_dir) {
                     is_folder_found = true;
                     evaluated_dir = j; // NOTE : j represent files entry index
                 }
@@ -126,7 +130,7 @@ void directoryStringBuilder(char *string, char *dirtable, char current_dir) {
     else {
         clear(parent, FILES_ENTRY_COUNT);
         // Traversing folder until reaching root
-        current_parent = dirtable[current_dir*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET]; // FIXME : Forget app ing
+        current_parent = dirtable[current_dir*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
         while (current_parent != ROOT_PARENT_FOLDER) {
             parent[parent_length] = current_parent;
             parent_length++;
@@ -308,19 +312,66 @@ char cd(char *dirtable, char *dirstr, char current_dir) {
     }
 }
 
-void cat(char *filename, char target_dir) {
+void cat(char *dirtable, char *filename, char target_dir) {
     char file_read[FILE_SIZE_MAXIMUM];
-    int returncode = -1;
-    // TODO : Extra, modular cd relative path
+    char directory_name[ARGC_MAX][ARG_LENGTH];
+    char evaluator_temp[ARGC_MAX*ARG_LENGTH];
+    char eval_dir = target_dir;
+    int returncode = -1, eval_returncode = -1;
+    int dirnamecount;
+    int i, j, k;
+    char dbg[128];
+
+    // Another splitter stealing
+    clear(directory_name, ARGC_MAX*ARG_LENGTH);
+    clear(evaluator_temp, ARGC_MAX*ARG_LENGTH);
+    i = 0;
+    j = 0;
+    k = 0;
+    while (filename[i] != CHAR_NULL) {
+        // If found slash in commands and not within double quote mark, make new
+        if (filename[i] == CHAR_SLASH && j < ARGC_MAX) {
+            k = 0;
+            j++;
+        }
+        else {
+            // Only copy if char is not double quote
+            // and space outside double quote
+            directory_name[j][k] = filename[i];
+            k++;
+        }
+        i++;
+    }
+    dirnamecount = j + 1; // Due j is between counting space between 2 args
+
+    i = 0;
+    // Note : Entry directory_name[dirnamecount - 1] is a FILENAME, not folder
+    while (i < dirnamecount - 1) {
+        strapp(evaluator_temp, directory_name[i]);
+        strapp(evaluator_temp, "/");
+        i++;
+    }
+
+    if (dirnamecount > 1)
+        eval_dir = directoryEvaluator(dirtable, evaluator_temp, &eval_returncode, target_dir);
+
     clear(file_read, FILE_SIZE_MAXIMUM);
-    readFile(file_read, filename, &returncode, target_dir);
+    // Take last argv, use it as filename
+    readFile(file_read, directory_name[dirnamecount-1], &returncode, eval_dir);
     if (returncode == -1) {
         print("cat: ", BIOS_GRAY);
-        print(filename, BIOS_GRAY);
+        print(directory_name[dirnamecount-1], BIOS_GRAY);
         print(": file not found", BIOS_GRAY);
     }
-    else
-        print(file_read, BIOS_GRAY);
+    else {
+        if (file_read[0] == NULL) {
+            print("cat: ", BIOS_WHITE);
+            print(directory_name[dirnamecount-1], BIOS_WHITE);
+            print(" is a folder", BIOS_WHITE);
+        }
+        else
+            print(file_read, BIOS_GRAY);
+    }
     print("\n", BIOS_GRAY);
 }
 
@@ -369,7 +420,6 @@ void ln(char *dirtable, char target_dir, char flags, char *target, char *linknam
         else {
             // Softlink
             // Assuming softlink creating "shortcut"
-            // TODO : Check again on files and folder
             i = 0;
             while (i < 2 && valid_filename) {
                 j = 0;
@@ -438,7 +488,7 @@ void shell() {
     char current_dir_index = ROOT_PARENT_FOLDER;
     char is_between_quote_mark = false;
     char dbg[FILE_SIZE_MAXIMUM]; // DEBUG
-    int tp, rc; // DEBUG
+    int temp, returncode;
     int i = 0, j = 0, k = 0, argc = 0;
 
     getDirectoryTable(directory_table);
@@ -451,7 +501,7 @@ void shell() {
         print("mangga", BIOS_GREEN);
         print(":", BIOS_GRAY);
         directoryStringBuilder(directory_string, directory_table, current_dir_index);
-        print(directory_string, BIOS_BLUE);
+        print(directory_string, BIOS_LIGHT_BLUE);
         print("$ ", BIOS_GRAY);
         shellInput(commands_history, current_dir_index);
 
@@ -490,17 +540,22 @@ void shell() {
 
 
         // Command evaluation
-        // TODO : Extra, relative ls, additional args
         if (!strcmp("ls", arg_vector[0]))  {
             if (argc == 1)
                 ls(directory_table, current_dir_index);
+            else if (argc > 1) {
+                temp = directoryEvaluator(directory_table, arg_vector[1], &returncode, current_dir_index);
+                if (returncode == 0)
+                    ls(directory_table, temp);
+                else
+                    print("ls: path not found\n", BIOS_WHITE);
+            }
             else
                 print("Usage : ls\n", BIOS_WHITE);
         }
-        // TODO : Extra, relative cat, additional args
         else if (!strcmp("cat", arg_vector[0])) {
             if (argc == 2)
-                cat(arg_vector[1], current_dir_index);
+                cat(directory_table, arg_vector[1], current_dir_index);
             else
                 print("Usage : cat <filename>\n", BIOS_WHITE);
         }
@@ -522,20 +577,20 @@ void shell() {
         }
         else if (!strcmp("dbg", arg_vector[0])) {
             // DEBUG
-            tp = directoryEvaluator(directory_table, "fold1/d1/../d1/g1", &rc, ROOT_PARENT_FOLDER); // FIXME : second arg failed (?)
-            inttostr(dbg, tp);
+            temp = directoryEvaluator(directory_table, "fold1/d1/../d1/g1", &returncode, ROOT_PARENT_FOLDER);
+            inttostr(dbg, temp);
             print(dbg, BIOS_BLUE);
             print("\n", BIOS_BLUE);
-            tp = directoryEvaluator(directory_table, "d1", &rc, 0); // FIXME : Failed
-            inttostr(dbg, tp);
+            temp = directoryEvaluator(directory_table, "d1", &returncode, 0);
+            inttostr(dbg, temp);
             print(dbg, BIOS_BLUE);
             print("\n", BIOS_BLUE);
-            tp = directoryEvaluator(directory_table, "fold2", &rc, ROOT_PARENT_FOLDER);
-            inttostr(dbg, tp);
+            temp = directoryEvaluator(directory_table, "fold2", &returncode, ROOT_PARENT_FOLDER);
+            inttostr(dbg, temp);
             print(dbg, BIOS_BLUE);
             print("\n", BIOS_BLUE);
-            tp = directoryEvaluator(directory_table, "fold1", &rc, ROOT_PARENT_FOLDER);
-            inttostr(dbg, tp);
+            temp = directoryEvaluator(directory_table, "fold1", &returncode, ROOT_PARENT_FOLDER);
+            inttostr(dbg, temp);
             print(dbg, BIOS_BLUE);
             print("\n", BIOS_BLUE);
 
