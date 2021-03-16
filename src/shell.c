@@ -2,6 +2,7 @@
 // TODO : Extra, write to special sector dedicated for history
 // TODO : Extra, Extra, special sector for configuration
 // TODO : Extra, Extra, Extra, use struct if bcc support struct keyword
+// TODO : Extra, Extra, Extra, redirection
 // Note : Need interrupt() if linked without kernel, check other/interrupt.asm
 
 #include "kernel-header/config.h" // Only for BIOS Color
@@ -499,10 +500,13 @@ void mkdir(char *foldername, char current_dir_index) {
 // TODO : Extra, Other misc command (mkdir, rm, etc), ... or redirection
 
 void shell() {
+    // char as string / char
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
     char directory_string[BUFFER_SIZE];
     char arg_vector[ARGC_MAX][ARG_LENGTH];
     char directory_table[2][SECTOR_SIZE];
+    // char as 1 byte integer
+    char io_buffer[SECTOR_SIZE];
     char current_dir_index = ROOT_PARENT_FOLDER;
     char is_between_quote_mark = false;
     char dbg[FILE_SIZE_MAXIMUM]; // DEBUG
@@ -598,6 +602,21 @@ void shell() {
                 mkdir(arg_vector[1], current_dir_index);
             else
                 print("Usage : mkdir <name>\n", BIOS_WHITE);
+        }
+        else if (!strcmp("echo", arg_vector[0])) {
+            // Because shell structure is simple, just handle echo here
+            if (argc <= 2)
+                print(arg_vector[1], BIOS_WHITE);
+            else if (!strcmp(">", arg_vector[2])) { // Sad redirection
+                clear(io_buffer, SECTOR_SIZE);
+                strcpybounded(io_buffer, arg_vector[1], SECTOR_SIZE);
+                write(io_buffer, arg_vector[3], &returncode, current_dir_index);
+                if (returncode == -1) {
+                    print("echo: ", BIOS_WHITE);
+                    print(arg_vector[3], BIOS_WHITE);
+                    print(" exist ", BIOS_WHITE);
+                }
+            }
         }
         else if (!strcmp("dbg", arg_vector[0])) {
             // DEBUG
