@@ -1,6 +1,7 @@
 // 13519214 - Shell
 // TODO : Extra, write to special sector dedicated for history
 // TODO : Extra, Extra, special sector for configuration
+// TODO : Extra, Extra, Extra, use struct if bcc support struct keyword
 // Note : Need interrupt() if linked without kernel, check other/interrupt.asm
 
 #include "kernel-header/config.h" // Only for BIOS Color
@@ -263,8 +264,17 @@ void ln(char *dirtable, char target_dir, char flags, char *target, char *linknam
     else {
         if (flags == 0) {
             // Hardlink
-            // Assuming ln hardlink will only copy file
-            write(file_read, linkname, &returncode, target_dir);
+            // Assuming ln hardlink will only copy file data, refuse folder target
+            if (file_read[0] != NULL) {
+                write(file_read, linkname, &returncode, target_dir);
+                getDirectoryTable(dirtable);
+            }
+            else {
+                print("ln: error: ", BIOS_WHITE);
+                print(target, BIOS_WHITE);
+                print(" is a folder\n", BIOS_WHITE);
+                returncode = -1;
+            }
             // FIXME : Extra, weird behavior on folder
             // FIXME : Extra, if sectors entry actually empty, it will be indistinguishable with empty entry
             //       ^ Change empty sectors bytes with something else on writeFile()
@@ -300,34 +310,38 @@ void ln(char *dirtable, char target_dir, char flags, char *target, char *linknam
                 }
                 i++;
             }
+
             if (valid_filename && f_target_found && empty_entry_found) {
                 print("ln: ", BIOS_GRAY);
                 print(linkname, BIOS_GRAY);
                 print(" softlink created\n", BIOS_GRAY);
-
-                inttostr(filename_buffer, f_entry_sector_idx*SECTOR_SIZE+f_entry_idx);
-                print(filename_buffer, BIOS_RED);
                 dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PARENT_BYTE_OFFSET] = target_dir; // FIXME : Not writing
                 dirtable[f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+ENTRY_BYTE_OFFSET] = target_entry_byte;
                 rawstrcpy((dirtable+f_entry_sector_idx*SECTOR_SIZE+f_entry_idx+PATHNAME_BYTE_OFFSET), linkname);
-                // Only update filesystem with file information
-                directSectorWrite(dirtable+SECTOR_SIZE*target_sector, FILES_SECTOR + target_sector);
+                // Update files filesystem in memory (dirtable) and write to disk
+                i = 0;
+                while (i < FILES_SECTOR_SIZE) {
+                    directSectorWrite(dirtable+SECTOR_SIZE*i, FILES_SECTOR + i);
+                    i++;
+                }
             }
-            else
-                print("softlink error\n", BIOS_GRAY);
+            else {
+                print("ln: softlink error\n", BIOS_GRAY);
+                returncode = -1;
+            }
         }
-
 
         if (returncode == 0) {
             print(linkname, BIOS_GRAY);
             print(": link created\n", BIOS_GRAY);
         }
         else
-            print("File writing error\n", BIOS_GRAY);
+            print("ln: file writing error\n", BIOS_GRAY);
     }
 }
+// TODO : Extra, ln will have problem if target dir and link dir is not equal
 
-// TODO : Extra, Other misc command (mkdir, rm, etc)
+// TODO : Extra, Other misc command (mkdir, rm, etc), ... or redirection
 
 void shell() {
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
@@ -336,7 +350,7 @@ void shell() {
     char directory_table[2][SECTOR_SIZE];
     char current_dir_index = ROOT_PARENT_FOLDER;
     char is_between_quote_mark = false;
-    char dbg[SECTOR_SIZE]; // DEBUG
+    char dbg[FILE_SIZE_MAXIMUM]; // DEBUG
     int tp; // DEBUG
     int i = 0, j = 0, k = 0, argc = 0;
 
@@ -415,19 +429,7 @@ void shell() {
                 print("Usage : ln [-s] <target> <linkname>\n", BIOS_WHITE);
         }
         else if (!strcmp("dbg", arg_vector[0])) {
-            // clear(dbg, SECTOR_SIZE);
-            // read(dbg, "fold1", &tp, ROOT_PARENT_FOLDER);
-            // if (dbg[0] == NULL) {
-            //     print("SUCCESS\n", BIOS_CYAN);
-            // }
-            // else {
-            //     print("FAIL\n", BIOS_CYAN);
-            //     tp = dbg;
-            //     inttostr(dbg, tp);
-            //     print(dbg, BIOS_RED);
-            //     print("FAIL\n", BIOS_CYAN);
-            // }
-            ln(directory_table, current_dir_index, 0, arg_vector[1], arg_vector[2]);
+
         }
         else {
             print(arg_vector[0], BIOS_WHITE);

@@ -66,10 +66,10 @@
 
 #define FILES_ENTRY_SIZE 0x10 // 16 bytes for 1 entry in files filesystem
 #define SECTORS_ENTRY_SIZE 0x10 // 16 bytes for 1 entry in sectors filesystem
-#define FILE_SIZE_MAXIMUM SECTOR_SIZE*SECTORS_ENTRY_SIZE // 16 sectors (8192 bytes) for 1 file entry
-#define FILES_ENTRY_COUNT SECTOR_SIZE*2/FILES_ENTRY_SIZE
+#define FILE_SIZE_MAXIMUM (SECTOR_SIZE*SECTORS_ENTRY_SIZE) // 16 sectors (8192 bytes) for 1 file entry
 #define FILES_SECTOR_SIZE 2
-#define SECTORS_ENTRY_COUNT SECTOR_SIZE/SECTORS_ENTRY_SIZE
+#define FILES_ENTRY_COUNT (SECTOR_SIZE*FILES_SECTOR_SIZE/FILES_ENTRY_SIZE)
+#define SECTORS_ENTRY_COUNT (SECTOR_SIZE/SECTORS_ENTRY_SIZE)
 #define MAXIMUM_SECTOR_MAPPED 0x100 // Due 1 bytes representation in sectors filesystem
 
 // "buffer" parameter in writeFile()
@@ -88,4 +88,6 @@
 #define PATHNAME_BYTE_OFFSET 0x2 // 14 bytes, filled with pathnames
 
 // Predefined values in sectors filesystem
-#define EMPTY_SECTORS_ENTRY 0x00 // For empty entry
+// Due sector 0x0-KERNEL_SECTOR_SIZE is filled with kernel and bootloader, we can use as flag
+#define EMPTY_SECTORS_ENTRY 0x00 // For empty entry (ex. entry "00 00 00 00 ..." is empty-entry) // TODO : Extra, rename to _byte
+#define FILLED_EMPTY_SECTORS_BYTE 0x01 // For empty bytes in non-empty entry (ex. entry "24 2F 22 01 01 01 01 01 ..." is non-empty entry)

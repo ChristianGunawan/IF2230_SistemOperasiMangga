@@ -212,9 +212,9 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
                     if (!strcmp(path, filename_buffer)) {
                         is_filename_match_found = true;
                         sectors_entry_idx = files_buf[i][j+ENTRY_BYTE_OFFSET];
+                        if (files_buf[i][j*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] == FOLDER_ENTRY)
+                            is_type_is_file = false;
                     }
-                    if (files_buf[i][j*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] == FOLDER_ENTRY)
-                        is_type_is_file = false;
                 }
                 j += FILES_ENTRY_SIZE;
             }
@@ -227,7 +227,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
             readSector(sectors_buf, SECTORS_SECTOR);
             i = 0;
             sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
-            while (i < SECTORS_ENTRY_SIZE && sector_read_target != EMPTY_SECTORS_ENTRY) {
+            while (i < SECTORS_ENTRY_SIZE && sector_read_target != FILLED_EMPTY_SECTORS_BYTE) {
                 clear(file_segment_buffer, SECTOR_SIZE);
                 readSector(file_segment_buffer, sector_read_target);
                 strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
@@ -237,7 +237,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
             }
         }
         else {
-            (*buffer) = NULL;
+            buffer[0] = NULL;
         }
     }
 
@@ -253,6 +253,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
 
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     // TODO : Extra, Extra, Extra, use multidimensional array damnit
+    // TODO : Extra, special flag for link
     char map_buf[SECTOR_SIZE], files_buf[2][SECTOR_SIZE], sectors_buf[SECTOR_SIZE]; // Filesystem buffer
     char file_segment_buffer[SECTOR_SIZE]; // Buffer for writing to sector, always get clear()
     char filename_buffer[16], adjusted_path[16];
@@ -412,6 +413,12 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                 i++;
             }
 
+            // If theres still not-filled sectors bytes, fill with FILLED_EMPTY_SECTORS_BYTE
+            while (j < SECTORS_ENTRY_SIZE) {
+                sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE+j] = FILLED_EMPTY_SECTORS_BYTE;
+                j++;
+            }
+
         }
 
 
@@ -438,3 +445,5 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     else
         (*sectors) = 0;
 }
+
+// FIXME : Extra, softlink ln can cause many weird behavior with commands other than readFile and cat
