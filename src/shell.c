@@ -478,6 +478,24 @@ void ln(char *dirtable, char target_dir, char flags, char *target, char *linknam
 }
 // TODO : Extra, ln will have problem if target dir and link dir is not equal
 
+// TODO : Extra, Extra, Extra relative pathing mkdir
+void mkdir(char *foldername, char current_dir_index) {
+    int returncode;
+    write(FOLDER, foldername, &returncode, current_dir_index);
+    switch (returncode) {
+        case 0:
+            // Do nothing
+            break;
+        case -1:
+            print("mkdir: ", BIOS_WHITE);
+            print(foldername, BIOS_WHITE);
+            print(" exist\n", BIOS_WHITE);
+            break;
+        default:
+            print("Usage : mkdir <name>\n");
+    }
+}
+
 // TODO : Extra, Other misc command (mkdir, rm, etc), ... or redirection
 
 void shell() {
@@ -574,6 +592,12 @@ void shell() {
                 current_dir_index = cd(directory_table, arg_vector[1], current_dir_index);
             else
                 print("Usage : cd <path>\n", BIOS_WHITE);
+        }
+        else if (!strcmp("mkdir", arg_vector[0])) {
+            if (argc == 2)
+                mkdir(arg_vector[1], current_dir_index);
+            else
+                print("Usage : mkdir <name>\n", BIOS_WHITE);
         }
         else if (!strcmp("dbg", arg_vector[0])) {
             // DEBUG
