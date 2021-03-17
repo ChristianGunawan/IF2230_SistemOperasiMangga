@@ -39,6 +39,7 @@ Milestone I dan II juga menggunakan beberapa fungsi pendukung yang terdapat di b
 3. screen.c
 4. shell.c
 5. std.c
+dan beberapa header yang juga menjadi header atas .c tersebut.
 
 ## System Requirements
 > * Ubuntu 18 or latest version
