@@ -20,6 +20,12 @@ folder other dengan nama **loadFile**.
 Program menerima argumen pertama sebagai direktori target dan argumen kedua sebagai input file.
 Status load file akan ditulis pada akhir program.
 
+## Bonus
+Semua bonus berhasil untuk diimplementasikan dalam milestone ini, meliputi:
+1. Symbolic link (ln) dalam mode soft link dengan menggunakan flag "-s"
+2. Autocomplete file yang tersedia untuk cd, ls, dan cat
+3. Autocomplete folder saat melakukan cd
+4. Shell memiliki history (4 command)
 
 ## System Requirements
 > * Ubuntu 18 or latest version
