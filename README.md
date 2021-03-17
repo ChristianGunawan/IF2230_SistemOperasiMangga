@@ -27,6 +27,11 @@ Semua bonus berhasil untuk diimplementasikan dalam milestone ini, meliputi:
 3. Autocomplete folder saat melakukan cd
 4. Shell memiliki history (4 command)
 
+## Reference
+1. Silberschatz, Galvin, Gagne. "Operating System Concepts", Chapter 10.
+2. Asisten Sistem Terdistribusi. "Milestone 2 - 2021".
+3. stanislavs.org/helppc/int_13.html
+
 ## System Requirements
 > * Ubuntu 18 or latest version
 
