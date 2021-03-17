@@ -32,6 +32,14 @@ Semua bonus berhasil untuk diimplementasikan dalam milestone ini, meliputi:
 2. Asisten Sistem Terdistribusi. "Milestone 2 - 2021".
 3. stanislavs.org/helppc/int_13.html
 
+## Note
+Milestone I dan II juga menggunakan beberapa fungsi pendukung yang terdapat di beberapa file selain kernel.c seperti:
+1. opr.c
+2. output.c
+3. screen.c
+4. shell.c
+5. std.c
+
 ## System Requirements
 > * Ubuntu 18 or latest version
 
