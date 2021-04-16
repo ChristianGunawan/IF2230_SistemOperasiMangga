@@ -39,6 +39,7 @@ kernel:
 	@dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1 status=noxfer
 
 createfilesystem:
+	if [ ! -d "out/fs" ]; then mkdir out/fs; fi
 	@./other/fscreate out/fs/map.img out/fs/files.img out/fs/sectors.img
 
 insertfilesystem:

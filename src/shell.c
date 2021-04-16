@@ -703,8 +703,10 @@ void shell() {
                 print("Usage : cd <path>\n", BIOS_WHITE);
         }
         else if (!strcmp("mkdir", arg_vector[0])) {
-            if (argc == 2)
+            if (argc == 2) {
                 mkdir(arg_vector[1], current_dir_index);
+                getDirectoryTable(directory_table);
+            }
             else
                 print("Usage : mkdir <name>\n", BIOS_WHITE);
         }
@@ -720,6 +722,10 @@ void shell() {
                     print("echo: ", BIOS_WHITE);
                     print(arg_vector[3], BIOS_WHITE);
                     print(" exist ", BIOS_WHITE);
+                }
+                else {
+                    // If success writing to file, load new updated dirtable
+                    getDirectoryTable(directory_table);
                 }
             }
         }
