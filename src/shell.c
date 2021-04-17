@@ -409,8 +409,15 @@ char cd(char *dirtable, char *dirstr, char current_dir) {
     int returncode = 0;
     char new_dir_idx = directoryEvaluator(dirtable, dirstr, &returncode, current_dir);
     // If success return new dir index
-    if (returncode == 0)
-        return new_dir_idx;
+    if (returncode == 0) {
+        if (dirtable[new_dir_idx*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] == FOLDER_ENTRY)
+            return new_dir_idx;
+        else {
+            // Else, entry is not folder
+            print("cd: target type is a file\n", BIOS_WHITE);
+            return current_dir;
+        }
+    }
     else {
         // Else, return original dir
         print("cd: path not found\n", BIOS_WHITE);
