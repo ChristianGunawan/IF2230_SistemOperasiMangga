@@ -16,4 +16,4 @@ jobs:
     - name: Get tools
       run: sudo apt install nasm bcc gcc bin86 bochs bochs-x make
     - name: Building
-      run: make all
+      run: sudo make all
