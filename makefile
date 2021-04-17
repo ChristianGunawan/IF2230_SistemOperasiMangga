@@ -40,7 +40,7 @@ kernel:
 
 createfilesystem:
 	if [ ! -d "out/fs" ]; then mkdir out/fs; fi
-	@sudo ./other/fscreate out/fs/map.img out/fs/files.img out/fs/sectors.img
+	@./other/fscreate out/fs/map.img out/fs/files.img out/fs/sectors.img
 
 insertfilesystem:
 	# -- Filesystem insertion --
