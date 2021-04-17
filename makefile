@@ -50,6 +50,7 @@ insertfilesystem:
 
 filesystemcreator:
 	@gcc -Wall -Wextra -O3 -o other/fscreate other/filesystem_create.c
+	chmod +x other/fscreate
 
 fileloader:
 	@gcc -Wall -Wextra -O3 -o other/loadFile other/fileloader.c
