@@ -482,8 +482,15 @@ void cat(char *dirtable, char *filename, char target_dir) {
             print(directory_name[dirnamecount-1], BIOS_WHITE);
             print(" is a folder", BIOS_WHITE);
         }
-        else
+        else {
+            i = 0;
+            while (i < FILE_SIZE_MAXIMUM && file_read[i] != CHAR_NULL) {
+                if (file_read[i] == CHAR_CARRIAGE_RETURN)
+                    file_read[i] = CHAR_SPACE;
+                i++;
+            }
             print(file_read, BIOS_GRAY);
+        }
     }
     print("\n", BIOS_GRAY);
 }
