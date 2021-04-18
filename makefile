@@ -10,7 +10,14 @@ test: kernelgcc
 
 cleantest: cleangcc
 
-
+# shellprogram: fileloader, DEBUG : Disabled temporary
+shellprogram:
+	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
+	@bcc -ansi -c -o out/shell/shell.o src/shell.c
+	@bcc -ansi -c -o out/shell/std.o src/std.c
+	@bcc -ansi -c -o out/shell/opr.o src/opr.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/interrupt.o
+	@ld86 -o out/mash -d out/shell/*.o
 
 # Main recipes
 diskimage:

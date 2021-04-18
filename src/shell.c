@@ -18,10 +18,13 @@
 void getDirectoryTable(char *buffer);
 // WARNING : No bound checking
 // Get all directory table, put in buffer
+void shell();
 
 
-
-
+// int main() {
+//     shell();
+//     return 0;
+// }
 
 
 
@@ -470,7 +473,7 @@ void cat(char *dirtable, char *filename, char target_dir) {
 
     clear(file_read, FILE_SIZE_MAXIMUM);
     // Take last argv, use it as filename
-    readFile(file_read, directory_name[dirnamecount-1], &returncode, eval_dir);
+    read(file_read, directory_name[dirnamecount-1], &returncode, eval_dir);
     if (returncode == -1) {
         print("cat: ", BIOS_GRAY);
         print(directory_name[dirnamecount-1], BIOS_GRAY);
@@ -513,7 +516,7 @@ void ln(char *dirtable, char target_dir, char flags, char *target, char *linknam
     // For simplicity, only 2 flags either hard / soft link available
     // For more fancy version, use bitmasking
     clear(file_read, FILE_SIZE_MAXIMUM);
-    readFile(file_read, target, &returncode, target_dir);
+    read(file_read, target, &returncode, target_dir);
     if (returncode == -1) {
         print("ln: ", BIOS_GRAY);
         print(target, BIOS_GRAY);
@@ -647,9 +650,9 @@ void shell() {
         shellInput(commands_history, directory_table, current_dir_index);
 
         // Scroll up if cursor at lower screen
-        while (getCursorPos(1) > 20) {
+        while (getKeyboardCursor(1) > 20) {
             scrollScreen();
-            setCursorPos(getCursorPos(1)-1, 0);
+            setKeyboardCursor(getKeyboardCursor(1)-1, 0);
             showKeyboardCursor();
         }
 

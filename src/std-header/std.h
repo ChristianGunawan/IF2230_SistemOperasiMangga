@@ -71,6 +71,12 @@ void showKeyboardCursor();
 void hideKeyboardCursor();
 // Disable keyboard cursor
 
+void setKeyboardCursor(char r, char c);
+// Set keyboard cursor position to row r and column c
+
+int getKeyboardCursor(bool isrow);
+// Get current keyboard cursor position
+
 void scrollScreen();
 // Scroll entire screen upward 1 row
 
