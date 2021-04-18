@@ -13,6 +13,7 @@
 extern void putInMemory(int segment, int address, char character);
 extern void makeInterrupt21();
 extern int interrupt(int number, int AX, int BX, int CX, int DX);
+extern void launchProgram(int segment);
 
 // External procedure call
 extern void shell();
@@ -58,3 +59,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 // sectors will be used as error code container
 // parentIndex used as "P" byte value / parent index at files filesystem entry
 // If buffer == NULL, creating folder instead file
+
+
+void executeProgram(char *filename, int segment, int *success, char parentIndex);
+// Executing program from file

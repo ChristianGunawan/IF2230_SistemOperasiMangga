@@ -50,7 +50,9 @@ int main() {
     // writeFile(buf, "not_a_file", &t, 0);
     // writeFile(FOLDER, "ok", &t, 0);
 
-    shell();
+    // DEBUG SHELL DISABLED
+    // shell();
+    print("SHELL DISABLED", BIOS_WHITE);
     while (true);
 }
 
@@ -458,6 +460,24 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         (*sectors) = -4; // Parent folder not valid
     else
         (*sectors) = 0;
+}
+
+void executeProgram(char *filename, int segment, int *success, char parentIndex) {
+    // Buat buffer
+    int return_code;
+    char fileBuffer[SECTOR_SIZE*SECTORS_ENTRY_SIZE];
+    // Buka file dengan readFile
+    readFile(&fileBuffer, filename, &return_code, parentIndex);
+    // If success, salin dengan putInMemory
+    if (return_code == 0) {
+        // launchProgram
+        int i = 0;
+        for (i = 0; i < SECTOR_SIZE*SECTORS_ENTRY_SIZE; i++)
+            putInMemory(segment, i, fileBuffer[i]);
+        launchProgram(segment);
+    }
+    else
+        interrupt(0x21, 0, "File not found!", 0,0);
 }
 
 // FIXME : Extra, softlink ln can cause many weird behavior with commands other than readFile and cat
