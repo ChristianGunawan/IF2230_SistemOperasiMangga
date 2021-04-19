@@ -139,7 +139,7 @@ int main(int argc, char const *argv[]) {
                     f_entry_sector_idx = i;
                     f_entry_idx = j;
                 }
-                if (!modstrcmp(argv[2], targetbuffer[i]+PATHNAME_BYTE_OFFSET+j) && (targetbuffer[i][+PARENT_BYTE_OFFSET+j] == atoi(argv[3])))
+                if (!modstrcmp(argv[2], targetbuffer[i]+PATHNAME_BYTE_OFFSET+j) && (targetbuffer[i][PARENT_BYTE_OFFSET+j] == atoi(argv[3])))
                     valid_filename = false;
             }
         }

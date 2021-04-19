@@ -17,8 +17,8 @@ int main() {
     // Setup
     // DEBUG
     int ret_code;
-    char buf[32];
-    clear(buf, 32);
+    char buf[SECTOR_SIZE*4];
+    clear(buf, SECTOR_SIZE*4);
     makeInterrupt21();
 
     // Initial screen
@@ -60,7 +60,9 @@ int main() {
     readFile(&buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == 0)
         print("todo, rm cache", BIOS_GREEN);
-
+    else
+        writeFile("_NULL", "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+    print("here!", BIOS_BLUE);
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
 
     while (true);
@@ -483,6 +485,7 @@ void executeProgram(char *filename, int segment, int *success, char parentIndex)
     // If success, salin dengan putInMemory
     if (return_code == 0) {
         // launchProgram
+        print("Executing!", BIOS_LIGHT_RED); // DEBUG
         for (i = 0; i < SECTOR_SIZE*SECTORS_ENTRY_SIZE; i++)
             putInMemory(segment, i, fileBuffer[i]);
         launchProgram(segment);
