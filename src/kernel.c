@@ -61,10 +61,13 @@ int main() {
     readFile(buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == 0)
         print("todo, rm cache", BIOS_GREEN);
-    else
-        writeFile("_NULL", "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+    writeFile("_NULL", "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+
+    // DEBUG
     print("here!", BIOS_BLUE);
     gets(buf);
+
+    // Shell executing
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
 
     while (true);
@@ -120,6 +123,9 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             break;
         case 0x5:
             writeFile(BX, CX, DX, AH);
+            break;
+        case 0x6:
+            executeProgram(BX, CX, DX, AH);
             break;
         default:
             printString("Invalid interrupt\n");

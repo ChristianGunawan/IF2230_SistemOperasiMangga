@@ -12,14 +12,16 @@ test: kernelgcc
 
 cleantest: cleangcc
 
-# shellprogram: fileloader, DEBUG : Disabled temporary
-shellprogram:
+mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
-	@bcc -ansi -c -o out/shell/shell.o src/shell.c
-	@bcc -ansi -c -o out/shell/std.o src/std.c
-	@bcc -ansi -c -o out/shell/opr.o src/opr.c
-	@nasm -f as86 src/asm/interrupt.asm -o out/shell/interrupt.o
-	@ld86 -o out/mash -d out/shell/*.o
+	@bcc -ansi -c -o out/shell/mash.o src/mash.c
+	@bcc -ansi -c -o out/shell/std_stringio.o src/std_stringio.c
+	@bcc -ansi -c -o out/shell/std_fileio.o src/std_fileio.c
+	@bcc -ansi -c -o out/shell/std_opr.o src/std_opr.c
+	if [ ! -d "out/shell/asm" ]; then mkdir out/shell/asm; fi
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/mash -d out/shell/*.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img mash 0
 
 # Main recipes
 diskimage:
@@ -66,7 +68,7 @@ filesystemcreator:
 	chmod +x other/fscreate
 
 fileloader:
-	@gcc -Wall -Wextra -O3 -o other/loadFile other/fileloader.c
+	@gcc -Wall -Wextra -O3 -o out/loadFile other/fileloader.c
 
 
 # Test recipes
