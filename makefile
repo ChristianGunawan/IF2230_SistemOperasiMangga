@@ -45,7 +45,7 @@ kernel:
 	@nasm -f as86 src/asm/interrupt.asm -o out/asm/interrupt.o
 	ld86 -o out/kernel -d out/*.o out/asm/interrupt.o
 	# ------------ Compiled kernel stat ------------
-	# Max Kernel Size : 15872 bytes (31 sectors, 1 sector = 512 bytes)
+	# Max Kernel Size : 8192 bytes (16 sectors, 1 sector = 512 bytes)
 	@stat --printf="Kernel Size : %s bytes\n" out/kernel
 	# ----------------------------------------------
 	@dd if=out/kernel of=out/mangga.img bs=512 conv=notrunc seek=1 status=noxfer

@@ -56,7 +56,7 @@
 
 // Kernel Maximum Size, if changed ensure dd commands in makefile,
 //                      bootloader.asm, and fscreator set properly
-#define KERNEL_SECTOR_SIZE 31
+#define KERNEL_SECTOR_SIZE 16
 
 
 // Macro for filesystem syscalls
