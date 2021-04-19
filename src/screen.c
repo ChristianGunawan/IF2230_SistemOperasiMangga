@@ -2,7 +2,7 @@
 
 #include "kernel-header/kernel.h"
 #include "kernel-header/screen.h"
-#include "basic-header/opr.h"
+#include "basic-header/std_opr.h"
 #include "std-header/boolean.h"
 
 void drawPixel(int x, int y, int color) {

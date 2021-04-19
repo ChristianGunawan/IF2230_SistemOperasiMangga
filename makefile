@@ -35,10 +35,11 @@ bootloader:
 kernel:
 	# -- Source Compilation --
 	@bcc -ansi -c -o out/kernel.o src/kernel.c
-	@bcc -ansi -c -o out/std.o src/std.c
+	@bcc -ansi -c -o out/std_stringio.o src/std_stringio.c
+	@bcc -ansi -c -o out/std_fileio.o src/std_fileio.c
 	@bcc -ansi -c -o out/screen.o src/screen.c
 	@bcc -ansi -c -o out/output.o src/output.c
-	@bcc -ansi -c -o out/opr.o src/opr.c
+	@bcc -ansi -c -o out/std_opr.o src/std_opr.c
 	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
 	if [ ! -d "out/asm" ]; then mkdir out/asm; fi
 	@nasm -f as86 src/asm/interrupt.asm -o out/asm/interrupt.o

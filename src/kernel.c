@@ -9,9 +9,10 @@
 #include "kernel-header/kernel.h"
 #include "kernel-header/output.h"
 #include "kernel-header/screen.h"
-#include "basic-header/opr.h"
+#include "basic-header/std_opr.h"
 #include "std-header/boolean.h"
-#include "std-header/std.h"
+#include "std-header/std_fileio.h"
+#include "std-header/std_stringio.h"
 
 int main() {
     // Setup
@@ -52,17 +53,18 @@ int main() {
     // writeFile(FOLDER, "ok", &t, 0);
 
     // Check if /bin exists or not, if not create new
-    readFile(&buf, "bin", &ret_code, ROOT_PARENT_FOLDER);
+    readFile(buf, "bin", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == -1)
         writeFile(CHAR_NULL, "bin", &ret_code, ROOT_PARENT_FOLDER);
 
     // Check if _mash_cache exist, if exists delete old record
-    readFile(&buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+    readFile(buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == 0)
         print("todo, rm cache", BIOS_GREEN);
     else
         writeFile("_NULL", "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
     print("here!", BIOS_BLUE);
+    gets(buf);
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
 
     while (true);
