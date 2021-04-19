@@ -40,11 +40,11 @@ int main() {
     // |--> not_a_file
     // this_is_file
     // folder 2
-    // writeFile(FOLDER, "folder 1", &t, ROOT_PARENT_FOLDER);
-    // writeFile(FOLDER, "folder 2", &t, ROOT_PARENT_FOLDER);
-    // writeFile(FOLDER, "inside f1", &t, 0);
-    // writeFile(FOLDER, "another f1", &t, 0);
-    // writeFile(FOLDER, "in in f1", &t, 2);
+    // writeFile(FOLDER, "folder 1", &ret_code, ROOT_PARENT_FOLDER);
+    // writeFile(FOLDER, "folder 2", &ret_code, ROOT_PARENT_FOLDER);
+    // writeFile(FOLDER, "inside f1", &ret_code, 0);
+    // writeFile(FOLDER, "another f1", &ret_code, 0);
+    // writeFile(FOLDER, "in in f1", &ret_code, 2);
     //
     // strtobytes(buf, "ezhd or hddt", SECTOR_SIZE);
     // writeFile(buf, "this_is_file", &t, ROOT_PARENT_FOLDER);

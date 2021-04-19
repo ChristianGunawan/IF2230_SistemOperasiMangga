@@ -1,5 +1,7 @@
 # 13519214 - Makefile
-all: diskimage bootloader kernel createfilesystem insertfilesystem fileloader mash logoinsert
+all: diskimage bootloader kernel createfilesystem \
+	 insertfilesystem fileloader mash logoinsert \
+	 insertls
 
 clean:
 	# -- Cleaning output files --

@@ -437,15 +437,20 @@ void shell(char *cache) {
 
         // Command evaluation
         if (!strcmp("ls", arg_vector[0]))  {
-            if (argc == 1)
-                exec("ls", 0x3000, BIN_PARENT_FOLDER); // TODO : Update evaluator
-                // print("TBA", BIOS_RED);
-                // ls(directory_table, current_dir_index);
-            else if (argc > 1) {
-                temp = directoryEvaluator(directory_table, arg_vector[1], &returncode, current_dir_index);
+            if (argc == 1 || argc > 1) {
+                if (argc > 1) {
+                    temp = directoryEvaluator(directory_table, arg_vector[1], &returncode, current_dir_index);
+                    cache[1] = (char) temp;
+                }
+                else {
+                    cache[1] = ROOT_PARENT_FOLDER;
+                    returncode = 0;
+                }
+
+                setShellCache(cache);
+
                 if (returncode == 0)
-                    print("TBA", BIOS_RED);
-                    // ls(directory_table, temp);
+                    exec("ls", 0x3000, BIN_PARENT_FOLDER);
                 else
                     print("ls: path not found\n", BIOS_WHITE);
             }

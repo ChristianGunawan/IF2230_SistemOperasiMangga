@@ -14,7 +14,7 @@ int main() {
     getShellCache(shell_cache);
     ls(directory_table, shell_cache[LS_TARGET_DIR_CACHE_OFFSET]);
     shell_cache[LS_TARGET_DIR_CACHE_OFFSET] = CHAR_NULL;
-    // TODO : Update
+    setShellCache(shell_cache);
     shellReturn();
 }
 
