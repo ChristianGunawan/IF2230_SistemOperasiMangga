@@ -23,6 +23,13 @@ mash:
 	@ld86 -o out/mash -d out/shell/*.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img mash 0
 
+insertls:
+	if [ ! -d "out/shell/ls" ]; then mkdir out/shell/ls; fi
+	@bcc -ansi -c -o out/shell/ls/ls.o src/ls.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/ls -d out/shell/ls/*.o out/shell/std_stringio.o out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img ls 0
+
 logoinsert:
 	@cp other/logo.hoho out/logo.hoho
 	@cd out; ./loadFile mangga.img logo.hoho 255

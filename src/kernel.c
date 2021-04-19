@@ -61,7 +61,7 @@ int main() {
     readFile(buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == 0)
         print("todo, rm cache", BIOS_GREEN);
-    writeFile("_NULL", "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+    writeFile(EMPTY_CACHE, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
 
     // Shell executing
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);

@@ -29,3 +29,10 @@ void memcpy(char *dest, char *src, int bytes) {
         i++;
     }
 }
+
+void exec(char *filename, int segment, char parentIndex) {
+    int AX = parentIndex << 8;
+    int ret_code;
+    AX |= 0x06;
+    interrupt(0x21, AX, filename, segment, &ret_code);
+}

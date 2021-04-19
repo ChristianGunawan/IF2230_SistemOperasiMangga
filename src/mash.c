@@ -15,9 +15,20 @@ void getDirectoryTable(char *buffer);
 void shell();
 
 int main() {
-    // TODO : Get cache
-    shell();
+    char cache_buffer[SECTOR_SIZE];
+    int returncode;
+    // Cache reading
+    clear(cache_buffer, SECTOR_SIZE);
+    read(cache_buffer, "_mash_cache", &returncode, ROOT_PARENT_FOLDER);
+
+    // Empty cache case
+    if (!strcmp(EMPTY_CACHE, cache_buffer))
+        cache_buffer[0] = ROOT_PARENT_FOLDER;
+
+    shell(cache_buffer);
     // TODO : Message pass setup
+    // TODO : Get cache
+    // TODO : Return to shell
     while (1);
 }
 
@@ -365,17 +376,16 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
     strcpybounded(commands_history, string, BUFFER_SIZE - 1);
 }
 
-void shell() {
+void shell(char *cache) {
     // char as string / char
-    char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FILO" data type for commands
+    char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FIFO" data type for commands
     char directory_string[BUFFER_SIZE];
     char arg_vector[ARGC_MAX][ARG_LENGTH];
     char directory_table[2][SECTOR_SIZE];
     // char as 1 byte integer
     char io_buffer[SECTOR_SIZE];
-    char current_dir_index = ROOT_PARENT_FOLDER;
+    char current_dir_index = cache[0];
     char is_between_quote_mark = false;
-    char dbg[FILE_SIZE_MAXIMUM]; // DEBUG
     int temp, returncode;
     int i = 0, j = 0, k = 0, argc = 0;
 
@@ -430,7 +440,8 @@ void shell() {
         // Command evaluation
         if (!strcmp("ls", arg_vector[0]))  {
             if (argc == 1)
-                print("TBA", BIOS_RED);
+                exec("ls", 0x3000, BIN_PARENT_FOLDER);
+                // print("TBA", BIOS_RED);
                 // ls(directory_table, current_dir_index);
             else if (argc > 1) {
                 temp = directoryEvaluator(directory_table, arg_vector[1], &returncode, current_dir_index);

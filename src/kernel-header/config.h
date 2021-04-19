@@ -60,7 +60,7 @@
 
 // Logo filename, put file on ROOT_PARENT_FOLDER
 #define LOGO_FILENAME "logo.hoho"
-
+#define EMPTY_CACHE "_NULL"
 
 // Macro for filesystem syscalls
 // Filesytem location
