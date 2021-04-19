@@ -17,6 +17,8 @@ int main() {
     // Setup
     // DEBUG
     int t;
+    char buf[SECTORS_ENTRY_SIZE*SECTOR_SIZE];
+    clear(buf, SECTORS_ENTRY_SIZE*SECTOR_SIZE);
     makeInterrupt21();
 
     // Initial screen
@@ -49,11 +51,22 @@ int main() {
     // writeFile(buf, "not_a_file", &t, 0);
     // writeFile(FOLDER, "ok", &t, 0);
 
-
-    executeProgram("mash", 1, &t, ROOT_PARENT_FOLDER);
+    readFile(&buf, "mash", &t, ROOT_PARENT_FOLDER);
+    if (t == 0) {
+        t = 0;
+        while (t < SECTOR_SIZE) {
+            putInMemory(0x2000, t, buf[t]);
+            t++;
+        }
+        print("Launch", BIOS_WHITE);
+        launchProgram(0x2000);
+        print("Exit", BIOS_WHITE);
+    }
+    else
+        print("SHELL DISABLED", BIOS_WHITE);
+    // executeProgram("mash", 0x2000, &t, ROOT_PARENT_FOLDER);
     // DEBUG SHELL DISABLED
     // shell();
-    // print("SHELL DISABLED", BIOS_WHITE);
     while (true);
 }
 
@@ -247,8 +260,8 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
             while (i < SECTORS_ENTRY_SIZE && sector_read_target != FILLED_EMPTY_SECTORS_BYTE) {
                 clear(file_segment_buffer, SECTOR_SIZE);
                 readSector(file_segment_buffer, sector_read_target);
-                strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
-                // memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE); // FIXME : Extra, if fixing read binary file use memcpy
+                // strcpybounded((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE);
+                memcpy((buffer+i*SECTOR_SIZE), file_segment_buffer, SECTOR_SIZE); // FIXME : Extra, if fixing read binary file use memcpy
                 i++;
                 sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
             }
@@ -469,13 +482,18 @@ void executeProgram(char *filename, int segment, int *success, char parentIndex)
     int i = 0;
     char fileBuffer[SECTOR_SIZE*SECTORS_ENTRY_SIZE];
     // Buka file dengan readFile
+    clear(fileBuffer, SECTOR_SIZE*SECTORS_ENTRY_SIZE);
     readFile(&fileBuffer, filename, &return_code, parentIndex);
     // If success, salin dengan putInMemory
     if (return_code == 0) {
         // launchProgram
-        for (i = 0; i < SECTOR_SIZE*SECTORS_ENTRY_SIZE; i++)
+        print(fileBuffer, BIOS_YELLOW);
+        print("copying", BIOS_RED);
+        for (i = 0; i < SECTOR_SIZE; i++)
             putInMemory(segment, i, fileBuffer[i]);
+        print("found", BIOS_BLUE);
         launchProgram(segment);
+        print("out", BIOS_WHITE);
     }
     else
         print("File not found!", BIOS_LIGHT_RED);

@@ -4,6 +4,8 @@ all: diskimage bootloader kernel createfilesystem insertfilesystem
 clean:
 	# -- Cleaning output files --
 	@rm out/fs/*;
+	@rm out/shell/*;
+	@rm out/asm/*;
 	@rm out/*
 
 test: kernelgcc
@@ -22,6 +24,7 @@ shellprogram:
 # Main recipes
 diskimage:
 	# -- Initial mangga.img --
+	if [ ! -d "out" ]; then mkdir out; fi
 	@dd if=/dev/zero of=out/mangga.img bs=512 count=2880 status=noxfer
 
 bootloader:
@@ -38,7 +41,9 @@ kernel:
 	@bcc -ansi -c -o out/output.o src/output.c
 	@bcc -ansi -c -o out/opr.o src/opr.c
 	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
-	@ld86 -o out/kernel -d out/*.o
+	if [ ! -d "out/asm" ]; then mkdir out/asm; fi
+	@nasm -f as86 src/asm/interrupt.asm -o out/asm/interrupt.o
+	ld86 -o out/kernel -d out/*.o out/asm/interrupt.o
 	# ------------ Compiled kernel stat ------------
 	# Max Kernel Size : 15872 bytes (31 sectors, 1 sector = 512 bytes)
 	@stat --printf="Kernel Size : %s bytes\n" out/kernel
@@ -56,6 +61,7 @@ insertfilesystem:
 	@dd if=out/fs/sectors.img of=out/mangga.img bs=512 count=1 seek=259 conv=notrunc status=noxfer
 
 filesystemcreator:
+	if [ ! -d "other" ]; then mkdir other; fi
 	@gcc -Wall -Wextra -O3 -o other/fscreate other/filesystem_create.c
 	chmod +x other/fscreate
 
