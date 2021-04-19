@@ -3,39 +3,34 @@
 #include "basic-header/std_opr.h"
 #include "kernel-header/config.h"
 #include "std-header/boolean.h"
+#include "std-header/shell_common.h"
 
 #define ARG_LENGTH 32
 #define ARGC_MAX 8
 #define BUFFER_SIZE 256
 #define MAX_HISTORY 5
 
-void getDirectoryTable(char *buffer);
-// WARNING : No bound checking
-// Get all directory table, put in buffer
 void shell();
+
+// Shell convention
+// cache[0] is
 
 int main() {
     char cache_buffer[SECTOR_SIZE];
     int returncode;
     // Cache reading
     clear(cache_buffer, SECTOR_SIZE);
-    read(cache_buffer, "_mash_cache", &returncode, ROOT_PARENT_FOLDER);
+    getShellCache(cache_buffer);
 
     // Empty cache case
     if (!strcmp(EMPTY_CACHE, cache_buffer))
-        cache_buffer[0] = ROOT_PARENT_FOLDER;
+        cache_buffer[CURRENT_DIR_CACHE_OFFSET] = ROOT_PARENT_FOLDER;
 
     shell(cache_buffer);
     // TODO : Message pass setup
     // TODO : Get cache
     // TODO : Return to shell
     while (1);
-}
-
-void getDirectoryTable(char *buffer) {
-    // WARNING : Naive implementation
-    interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
-    interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
 }
 
 char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char current_dir) {
@@ -440,7 +435,7 @@ void shell(char *cache) {
         // Command evaluation
         if (!strcmp("ls", arg_vector[0]))  {
             if (argc == 1)
-                exec("ls", 0x3000, BIN_PARENT_FOLDER);
+                exec("ls", 0x3000, BIN_PARENT_FOLDER); // TODO : Update evaluator
                 // print("TBA", BIOS_RED);
                 // ls(directory_table, current_dir_index);
             else if (argc > 1) {

@@ -17,6 +17,7 @@ mash:
 	@bcc -ansi -c -o out/shell/mash.o src/mash.c
 	@bcc -ansi -c -o out/shell/std_stringio.o src/std_stringio.c
 	@bcc -ansi -c -o out/shell/std_fileio.o src/std_fileio.c
+	@bcc -ansi -c -o out/shell/shell_common.o src/shell_common.c
 	@bcc -ansi -c -o out/shell/std_opr.o src/std_opr.c
 	if [ ! -d "out/shell/asm" ]; then mkdir out/shell/asm; fi
 	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
@@ -27,7 +28,9 @@ insertls:
 	if [ ! -d "out/shell/ls" ]; then mkdir out/shell/ls; fi
 	@bcc -ansi -c -o out/shell/ls/ls.o src/ls.c
 	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
-	@ld86 -o out/ls -d out/shell/ls/*.o out/shell/std_stringio.o out/shell/std_opr.o out/shell/asm/interrupt.o
+	@ld86 -o out/ls -d out/shell/ls/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img ls 0
 
 logoinsert:

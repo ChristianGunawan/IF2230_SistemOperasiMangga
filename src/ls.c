@@ -1,24 +1,21 @@
 #include "kernel-header/config.h"
 #include "std-header/std_stringio.h"
+#include "std-header/shell_common.h"
 #include "basic-header/std_opr.h"
 
-void getDirectoryTable(char *buffer);
 void ls(char *dirtable, char target_dir);
 
 int main() {
     char directory_table[FILES_SECTOR_SIZE*SECTOR_SIZE];
+    char shell_cache[SECTOR_SIZE];
+    clear(shell_cache, SECTOR_SIZE);
     getDirectoryTable(directory_table);
 
-    ls(directory_table, ROOT_PARENT_FOLDER); // TODO : Completion
-    print("waiting here\n", BIOS_LIGHT_BLUE);
-    while (1);
-}
-
-void getDirectoryTable(char *buffer) {
-    // WARNING : Naive implementation
-    // TODO : Shell pack
-    interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
-    interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
+    getShellCache(shell_cache);
+    ls(directory_table, shell_cache[LS_TARGET_DIR_CACHE_OFFSET]);
+    shell_cache[LS_TARGET_DIR_CACHE_OFFSET] = CHAR_NULL;
+    // TODO : Update
+    shellReturn();
 }
 
 void ls(char *dirtable, char target_dir) {
