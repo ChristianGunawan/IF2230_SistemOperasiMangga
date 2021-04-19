@@ -63,10 +63,6 @@ int main() {
         print("todo, rm cache", BIOS_GREEN);
     writeFile("_NULL", "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
 
-    // DEBUG
-    print("here!", BIOS_BLUE);
-    gets(buf);
-
     // Shell executing
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
 
