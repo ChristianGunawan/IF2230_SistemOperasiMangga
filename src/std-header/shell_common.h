@@ -1,5 +1,6 @@
 // Commonly used function or procedures in shell
 #define CURRENT_DIR_CACHE_OFFSET 0
+#define HISTORY_CACHE_OFFSET 0x10
 
 #define LS_TARGET_DIR_CACHE_OFFSET 1
 

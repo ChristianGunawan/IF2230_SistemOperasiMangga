@@ -7,13 +7,17 @@
 
 #define ARG_LENGTH 32
 #define ARGC_MAX 8
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 64
 #define MAX_HISTORY 5
 
 void shell();
 
 // Shell convention
-// cache[0] is
+// cache 0-0xF reserved for argv passing and shell state
+// cache[0] used as current working directory
+// cache 1-0xF will filled with evaluated argv
+// cache 0x10-0x4F, 0x50-0x8F, 0x90-0xCF, 0xD0-0x10F, 0x110-0x14F
+//      used as shell history
 
 int main() {
     char cache_buffer[SECTOR_SIZE];
@@ -32,17 +36,23 @@ int main() {
 
     setShellCache(cache_buffer);
     shell(cache_buffer);
-    // TODO : Message pass setup
     while (1);
 }
 
 char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char current_dir) {
+    // FIXME : Extra, will have problem with file & folder with same name on same directory
+    // -- Evaluator return code --
+    // -1 - Path not found
+    // 0 - Evaluator find folder
+    // 1 - Evaluator find file
     char evaluated_dir = current_dir;
     char parent_byte_buffer = -1;
+    char entry_byte_buffer = -1;
     char directory_name[ARGC_MAX][ARG_LENGTH];
     char filename_buffer[16];
     int i, j, k, dirnamecount;
     bool is_valid_args = true, is_folder_found = false;
+    bool is_type_is_folder = false;
     clear(directory_name, ARGC_MAX*ARG_LENGTH);
 
     // TODO : Extra, maybe std -> strsplit()
@@ -95,8 +105,10 @@ char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char curr
                 strcpybounded(filename_buffer, dirtable+j*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
                 // If within same parent folder and pathname match, change evaluated_dir
                 parent_byte_buffer = dirtable[j*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
+                entry_byte_buffer = dirtable[j*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET];
                 if (!strcmp(directory_name[i], filename_buffer) && parent_byte_buffer == evaluated_dir) {
                     is_folder_found = true;
+                    is_type_is_folder = (entry_byte_buffer == FOLDER_ENTRY);
                     evaluated_dir = j; // NOTE : j represent files entry index
                 }
                 j++;
@@ -110,8 +122,10 @@ char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char curr
 
     if (!is_valid_args)
         *returncode = -1;
-    else
+    else if (is_type_is_folder)
         *returncode = 0;
+    else
+        *returncode = 1;
 
     return evaluated_dir;
 }
@@ -390,6 +404,7 @@ void shell(char *cache) {
     getDirectoryTable(directory_table);
 
     clear(commands_history, BUFFER_SIZE*MAX_HISTORY);
+    memcpy(commands_history, cache+HISTORY_CACHE_OFFSET, BUFFER_SIZE*MAX_HISTORY);
 
     while (true) {
         clear(arg_vector, ARGC_MAX*ARG_LENGTH);
@@ -400,6 +415,7 @@ void shell(char *cache) {
         print(directory_string, BIOS_LIGHT_BLUE);
         print("$ ", BIOS_GRAY);
         shellInput(commands_history, directory_table, current_dir_index);
+        memcpy(cache+HISTORY_CACHE_OFFSET, commands_history, BUFFER_SIZE*MAX_HISTORY);
 
         // Scroll up if cursor at lower screen
         while (getKeyboardCursor(1) > 20) {
@@ -451,6 +467,8 @@ void shell(char *cache) {
 
                 if (returncode == 0)
                     exec("ls", 0x3000, BIN_PARENT_FOLDER);
+                else if (returncode == 1)
+                    print("ls: target is file\n", BIOS_WHITE);
                 else
                     print("ls: path not found\n", BIOS_WHITE);
             }
