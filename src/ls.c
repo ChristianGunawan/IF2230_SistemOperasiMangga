@@ -1,6 +1,6 @@
 #include "kernel-header/config.h"
 #include "std-header/std_stringio.h"
-#include "std-header/shell_common.h"
+#include "shell-header/shell_common.h"
 #include "basic-header/std_opr.h"
 
 void ls(char *dirtable, char target_dir);

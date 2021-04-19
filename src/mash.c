@@ -3,18 +3,13 @@
 #include "basic-header/std_opr.h"
 #include "kernel-header/config.h"
 #include "std-header/boolean.h"
-#include "std-header/shell_common.h"
-
-#define ARG_LENGTH 32
-#define ARGC_MAX 8
-#define BUFFER_SIZE 64
-#define MAX_HISTORY 5
+#include "shell-header/shell_common.h"
 
 void shell();
 
 // Shell convention
 // cache 0-0xF reserved for argv passing and shell state
-// cache[0] used as current working directory
+// cache[0xF] used as current working directory
 // cache 1-0xF will filled with evaluated argv
 // cache 0x10-0x4F, 0x50-0x8F, 0x90-0xCF, 0xD0-0x10F, 0x110-0x14F
 //      used as shell history
@@ -30,6 +25,7 @@ int main() {
     if (!forcestrcmp(EMPTY_CACHE, cache_buffer)) {
         clear(cache_buffer, SECTOR_SIZE);
         cache_buffer[CURRENT_DIR_CACHE_OFFSET] = ROOT_PARENT_FOLDER;
+        cache_buffer[CACHE_SIGNATURE_OFFSET] = CACHE_SIGNATURE;
     }
 
     // TODO : Previous cache case
@@ -37,97 +33,6 @@ int main() {
     setShellCache(cache_buffer);
     shell(cache_buffer);
     while (1);
-}
-
-char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char current_dir) {
-    // FIXME : Extra, will have problem with file & folder with same name on same directory
-    // -- Evaluator return code --
-    // -1 - Path not found
-    // 0 - Evaluator find folder
-    // 1 - Evaluator find file
-    char evaluated_dir = current_dir;
-    char parent_byte_buffer = -1;
-    char entry_byte_buffer = -1;
-    char directory_name[ARGC_MAX][ARG_LENGTH];
-    char filename_buffer[16];
-    int i, j, k, dirnamecount;
-    bool is_valid_args = true, is_folder_found = false;
-    bool is_type_is_folder = false;
-    clear(directory_name, ARGC_MAX*ARG_LENGTH);
-
-    // TODO : Extra, maybe std -> strsplit()
-    // Arguments splitting -> From argv in shell(), with some modification
-    i = 0;
-    j = 0;
-    k = 0;
-    while (dirstr[i] != CHAR_NULL) {
-        // If found slash in commands and not within double quote mark, make new
-        if (dirstr[i] == CHAR_SLASH && j < ARGC_MAX) {
-            k = 0;
-            j++;
-        }
-        else {
-            // Only copy if char is not double quote
-            // and space outside double quote
-            directory_name[j][k] = dirstr[i];
-            k++;
-        }
-        i++;
-    }
-    dirnamecount = j + 1; // Due j is between counting space between 2 args
-
-    // Deleting last slash (ex. mnt/a/b/ -> argv entries = {mnt, a, b, ""} to argv = {mnt, a, b})
-    if (!strcmp(directory_name[dirnamecount-1], ""))
-        dirnamecount--;
-
-
-    // Parsing priority :
-    // 1. If found "." -> change evaluated dir to current dir, will ignoring previous evaluation
-    // 2. If found ".." -> move to parent folder
-    // 3. If found foldername -> search foldername in evaluated dir
-    i = 0;
-    while (i < dirnamecount && is_valid_args) {
-        if (!strcmp(directory_name[i], "."))
-            evaluated_dir = current_dir;
-        else if (!strcmp(directory_name[i], "..")) {
-            // If evaluated dir is NOT in between files entry count and 0 (or valid files index), do nothing
-            // (Root flag by default is on 0xFF which is by default not in range)
-            // else, change evaluated dir to parent evaluated dir
-            if (0 <= evaluated_dir && evaluated_dir < FILES_ENTRY_COUNT)
-                evaluated_dir = dirtable[evaluated_dir*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
-        }
-        else {
-            // If string matching not found, break loop return -1 as failed evaluation
-            j = 0;
-            is_folder_found = false;
-            while (j < FILES_ENTRY_COUNT && !is_folder_found) {
-                clear(filename_buffer, 16);
-                strcpybounded(filename_buffer, dirtable+j*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
-                // If within same parent folder and pathname match, change evaluated_dir
-                parent_byte_buffer = dirtable[j*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET];
-                entry_byte_buffer = dirtable[j*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET];
-                if (!strcmp(directory_name[i], filename_buffer) && parent_byte_buffer == evaluated_dir) {
-                    is_folder_found = true;
-                    is_type_is_folder = (entry_byte_buffer == FOLDER_ENTRY);
-                    evaluated_dir = j; // NOTE : j represent files entry index
-                }
-                j++;
-            }
-
-            if (!is_folder_found)
-                is_valid_args = false;
-        }
-        i++;
-    }
-
-    if (!is_valid_args)
-        *returncode = -1;
-    else if (is_type_is_folder)
-        *returncode = 0;
-    else
-        *returncode = 1;
-
-    return evaluated_dir;
 }
 
 void directoryStringBuilder(char *string, char *dirtable, char current_dir) {
@@ -396,7 +301,7 @@ void shell(char *cache) {
     char directory_table[2][SECTOR_SIZE];
     // char as 1 byte integer
     char io_buffer[SECTOR_SIZE];
-    char current_dir_index = cache[0];
+    char current_dir_index = cache[CURRENT_DIR_CACHE_OFFSET];
     char is_between_quote_mark = false;
     int temp, returncode;
     int i = 0, j = 0, k = 0, argc = 0;
@@ -453,13 +358,14 @@ void shell(char *cache) {
 
         // Command evaluation
         if (!strcmp("ls", arg_vector[0]))  {
+            // TODO : Extra, split argv evaluator to program itself
             if (argc == 1 || argc > 1) {
                 if (argc > 1) {
                     temp = directoryEvaluator(directory_table, arg_vector[1], &returncode, current_dir_index);
-                    cache[1] = (char) temp;
+                    cache[LS_TARGET_DIR_CACHE_OFFSET] = (char) temp;
                 }
                 else {
-                    cache[1] = ROOT_PARENT_FOLDER;
+                    cache[LS_TARGET_DIR_CACHE_OFFSET] = current_dir_index;
                     returncode = 0;
                 }
 
@@ -494,9 +400,10 @@ void shell(char *cache) {
                 print("Usage : ln [-s] <target> <linkname>\n", BIOS_WHITE);
         }
         else if (!strcmp("cd", arg_vector[0])) {
-            if (argc == 2)
-                print("TBA", BIOS_RED);
-                // current_dir_index = cd(directory_table, arg_vector[1], current_dir_index);
+            if (argc == 2) {
+                setShellCache(cache);
+                exec("cd", 0x3000, BIN_PARENT_FOLDER);
+            }
             else
                 print("Usage : cd <path>\n", BIOS_WHITE);
         }
