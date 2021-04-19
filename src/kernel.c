@@ -16,9 +16,9 @@
 int main() {
     // Setup
     // DEBUG
-    int t;
-    char buf[SECTORS_ENTRY_SIZE*SECTOR_SIZE];
-    clear(buf, SECTORS_ENTRY_SIZE*SECTOR_SIZE);
+    int ret_code;
+    char buf[32];
+    clear(buf, 32);
     makeInterrupt21();
 
     // Initial screen
@@ -51,22 +51,18 @@ int main() {
     // writeFile(buf, "not_a_file", &t, 0);
     // writeFile(FOLDER, "ok", &t, 0);
 
-    readFile(&buf, "mash", &t, ROOT_PARENT_FOLDER);
-    if (t == 0) {
-        t = 0;
-        while (t < SECTOR_SIZE) {
-            putInMemory(0x2000, t, buf[t]);
-            t++;
-        }
-        print("Launch", BIOS_WHITE);
-        launchProgram(0x2000);
-        print("Exit", BIOS_WHITE);
-    }
-    else
-        print("SHELL DISABLED", BIOS_WHITE);
-    // executeProgram("mash", 0x2000, &t, ROOT_PARENT_FOLDER);
-    // DEBUG SHELL DISABLED
-    // shell();
+    // Check if /bin exists or not, if not create new
+    readFile(&buf, "bin", &ret_code, ROOT_PARENT_FOLDER);
+    if (ret_code == -1)
+        writeFile(CHAR_NULL, "bin", &ret_code, ROOT_PARENT_FOLDER);
+
+    // Check if _mash_cache exist, if exists delete old record
+    readFile(&buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+    if (ret_code == 0)
+        print("todo, rm cache", BIOS_GREEN);
+
+    executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
+
     while (true);
 }
 
@@ -487,13 +483,9 @@ void executeProgram(char *filename, int segment, int *success, char parentIndex)
     // If success, salin dengan putInMemory
     if (return_code == 0) {
         // launchProgram
-        print(fileBuffer, BIOS_YELLOW);
-        print("copying", BIOS_RED);
-        for (i = 0; i < SECTOR_SIZE; i++)
+        for (i = 0; i < SECTOR_SIZE*SECTORS_ENTRY_SIZE; i++)
             putInMemory(segment, i, fileBuffer[i]);
-        print("found", BIOS_BLUE);
         launchProgram(segment);
-        print("out", BIOS_WHITE);
     }
     else
         print("File not found!", BIOS_LIGHT_RED);

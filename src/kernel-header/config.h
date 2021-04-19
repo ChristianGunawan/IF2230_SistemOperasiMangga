@@ -82,6 +82,7 @@
 
 // Flags in files filesystem
 #define ROOT_PARENT_FOLDER 0xFF // Flag for "P" byte
+#define BIN_PARENT_FOLDER 0x00 // Flag for "P" byte
 #define EMPTY_FILES_ENTRY 0xFE // Flag for "S" byte
 #define FOLDER_ENTRY 0xFF // Flag for "S" byte
 #define PARENT_BYTE_OFFSET 0x0 // "P" byte, parent folder index

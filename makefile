@@ -3,10 +3,10 @@ all: diskimage bootloader kernel createfilesystem insertfilesystem
 
 clean:
 	# -- Cleaning output files --
-	@rm out/fs/*;
-	@rm out/shell/*;
-	@rm out/asm/*;
+	@rm out/fs/*
 	@rm out/*
+	@rm out/asm/*
+	@rm out/shell/*
 
 test: kernelgcc
 
@@ -37,7 +37,6 @@ kernel:
 	@bcc -ansi -c -o out/kernel.o src/kernel.c
 	@bcc -ansi -c -o out/std.o src/std.c
 	@bcc -ansi -c -o out/screen.o src/screen.c
-	@bcc -ansi -c -o out/shell.o src/shell.c
 	@bcc -ansi -c -o out/output.o src/output.c
 	@bcc -ansi -c -o out/opr.o src/opr.c
 	@nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
