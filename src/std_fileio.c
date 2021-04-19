@@ -41,4 +41,12 @@ void exec(char *filename, int segment, char parentIndex) {
     int ret_code;
     AX |= 0x06;
     interrupt(0x21, AX, filename, segment, &ret_code);
+    if (ret_code == -1) {
+        print(filename, BIOS_LIGHT_RED);
+        print(" not found!\n", BIOS_LIGHT_RED);
+    }
+}
+
+void remove(char *filename, int *returncode, char parentIndex) {
+    interrupt(0x21, 0x07, filename, returncode, parentIndex);
 }

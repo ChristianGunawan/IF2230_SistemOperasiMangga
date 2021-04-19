@@ -63,6 +63,19 @@ char strcmp(char *s1, char *s2) {
     return 1;
 }
 
+char forcestrcmp(char *s1, char *s2) {
+    int i = 0;
+    // If string length matches, check every char
+    while (s1[i] != '\0') {
+        if (s1[i] != s2[i])
+            return 1;
+        i++;
+    }
+
+    // If both string matches
+    return 0;
+}
+
 void strapp(char *string1, char *string2) {
     int i = strlen(string1), j = 0;
     while (string2[j] != CHAR_NULL) {

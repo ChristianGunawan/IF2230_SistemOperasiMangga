@@ -26,6 +26,9 @@ void rawstrcpybounded(char *dest, char *src, int n);
 char strcmp(char *s1, char *s2);
 // Standard strcmp function
 
+char forcestrcmp(char *s1, char *s2);
+// strcmp function, but ignoring strlen until s1 terminated
+
 void strrev(char *string);
 // Reversing string at pointed location
 

@@ -23,13 +23,16 @@ int main() {
     getShellCache(cache_buffer);
 
     // Empty cache case
-    if (!strcmp(EMPTY_CACHE, cache_buffer))
+    if (!forcestrcmp(EMPTY_CACHE, cache_buffer)) {
+        clear(cache_buffer, SECTOR_SIZE);
         cache_buffer[CURRENT_DIR_CACHE_OFFSET] = ROOT_PARENT_FOLDER;
+    }
 
+    // TODO : Previous cache case
+
+    setShellCache(cache_buffer);
     shell(cache_buffer);
     // TODO : Message pass setup
-    // TODO : Get cache
-    // TODO : Return to shell
     while (1);
 }
 

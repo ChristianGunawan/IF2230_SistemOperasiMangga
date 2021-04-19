@@ -60,8 +60,11 @@ int main() {
     // Check if _mash_cache exist, if exists delete old record
     readFile(buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == 0)
-        print("todo, rm cache", BIOS_GREEN);
-    writeFile(EMPTY_CACHE, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+        deleteFile("_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+
+    clear(buf, SECTOR_SIZE*SECTORS_ENTRY_SIZE);
+    strcpybounded(buf, EMPTY_CACHE, 32);
+    writeFile(buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
 
     // Shell executing
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
@@ -122,6 +125,9 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             break;
         case 0x6:
             executeProgram(BX, CX, DX, AH);
+            break;
+        case 0x7:
+            deleteFile(BX, CX, DX);
             break;
         default:
             printString("Invalid interrupt\n");
@@ -478,6 +484,96 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         (*sectors) = 0;
 }
 
+void deleteFile(char *path, int *returncode, char parentIndex) {
+    // TODO : Extra, Extra, Extra, use multidimensional array damnit
+    char files_buf[2][SECTOR_SIZE], map_buf[SECTOR_SIZE], sectors_buf[SECTOR_SIZE]; // Filesystem buffer
+    char file_segment_buffer[SECTOR_SIZE];
+    char filename_buffer[16];
+    int i = 0, j = 0;
+    int sectors_entry_idx = 0, sector_read_target = 0, files_entry_idx = 0;
+    int files_entry_sector_idx = 0;
+    bool valid_parent_folder = true, is_filename_match_found = false, valid_filename_length = true;
+    bool is_type_is_file = true;
+
+    readSector(files_buf[0], FILES_SECTOR);
+    readSector(files_buf[1], FILES_SECTOR + 1);
+
+    // Filename length check
+    if (strlen(path) > 14)
+        valid_filename_length = false;
+
+    // Find matching filename
+    if (valid_filename_length) {
+        while (i < 2 && !is_filename_match_found) {
+            j = 0;
+            while (j < SECTOR_SIZE && !is_filename_match_found) {
+                // Checking existing filename in same parent folder
+                if (files_buf[i][j+PARENT_BYTE_OFFSET] == parentIndex) {
+                    // Needed buffer because entry may ignoring null terminator
+                    clear(filename_buffer, 16);
+                    strcpybounded(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
+                    if (!strcmp(path, filename_buffer)) {
+                        is_filename_match_found = true;
+                        sectors_entry_idx = files_buf[i][j+ENTRY_BYTE_OFFSET];
+                        files_entry_sector_idx = i;
+                        files_entry_idx = j;
+                        if (files_buf[i][j*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] == FOLDER_ENTRY)
+                            is_type_is_file = false;
+                    }
+                }
+                j += FILES_ENTRY_SIZE;
+            }
+            i++;
+        }
+    }
+
+    if (is_filename_match_found) {
+        if (is_type_is_file) {
+            i = 0;
+            // Deleting entry on files filesystem
+            files_buf[files_entry_sector_idx][files_entry_idx + ENTRY_BYTE_OFFSET] = EMPTY_FILES_ENTRY;
+            files_buf[files_entry_sector_idx][files_entry_idx + PARENT_BYTE_OFFSET] = ROOT_PARENT_FOLDER;
+            while (i < 14) {
+                files_buf[files_entry_sector_idx][files_entry_idx + PATHNAME_BYTE_OFFSET + i] = '\0';
+                i++;
+            }
+
+            readSector(sectors_buf, SECTORS_SECTOR);
+            readSector(map_buf, MAP_SECTOR);
+
+            i = 0;
+            sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
+            // Deleting entry on sectors and map filesystem
+            while (i < SECTORS_ENTRY_SIZE) {
+                if (sector_read_target > KERNEL_SECTOR_SIZE)
+                    map_buf[sector_read_target] = EMPTY_MAP_ENTRY;
+                sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i] = EMPTY_SECTORS_ENTRY;
+                i++;
+                sector_read_target = sectors_buf[sectors_entry_idx*SECTORS_ENTRY_SIZE + i];
+            }
+        }
+
+        // Filesystem records update
+        writeSector(files_buf[0], FILES_SECTOR);
+        writeSector(files_buf[1], FILES_SECTOR + 1);
+        if (is_type_is_file) {
+            writeSector(map_buf, MAP_SECTOR);
+            writeSector(sectors_buf, SECTORS_SECTOR);
+        }
+    }
+
+
+
+
+    // Error code writing
+    if (!is_filename_match_found)
+        (*returncode) = -1;
+    else if (is_type_is_file)
+        (*returncode) = 0;
+    else
+        (*returncode) = 1;
+}
+
 void executeProgram(char *filename, int segment, int *success, char parentIndex) {
     // Buat buffer
     int return_code;
@@ -489,13 +585,12 @@ void executeProgram(char *filename, int segment, int *success, char parentIndex)
     // If success, salin dengan putInMemory
     if (return_code == 0) {
         // launchProgram
-        print("Executing!", BIOS_LIGHT_RED); // DEBUG
         for (i = 0; i < SECTOR_SIZE*SECTORS_ENTRY_SIZE; i++)
             putInMemory(segment, i, fileBuffer[i]);
         launchProgram(segment);
     }
     else
-        print("File not found!", BIOS_LIGHT_RED);
+        *success = -1;
 }
 
 // FIXME : Extra, softlink ln can cause many weird behavior with commands other than readFile and cat

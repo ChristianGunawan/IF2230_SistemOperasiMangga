@@ -60,6 +60,16 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 // parentIndex used as "P" byte value / parent index at files filesystem entry
 // If buffer == NULL, creating folder instead file
 
+void deleteFile(char *path, int *returncode, char parentIndex);
+// Delete file with relative path
+// -- Error code list --
+// 1 - Exit successfully, deleted object is folder
+// 0 - Exit successfully, deleted object is file
+// -1 - File not found
+// -- deleteFile() services --
+// path is filename, only maximum 14 char
+// parentIndex used as "P" byte value / parent index at files filesystem entry
+// Will delete both file and folder
 
 void executeProgram(char *filename, int segment, int *success, char parentIndex);
 // Executing program from file

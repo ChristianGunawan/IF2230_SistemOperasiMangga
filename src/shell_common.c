@@ -22,6 +22,7 @@ void getShellCache(char *buffer) {
 }
 
 void setShellCache(char *buffer) {
-    // int returncode;
-    // write(buffer, "_mash_cache", &returncode, ROOT_PARENT_FOLDER);
+    int returncode;
+    remove("_mash_cache", &returncode, ROOT_PARENT_FOLDER);
+    write(buffer, "_mash_cache", &returncode, ROOT_PARENT_FOLDER);
 }
