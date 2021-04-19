@@ -1,5 +1,5 @@
 # 13519214 - Makefile
-all: diskimage bootloader kernel createfilesystem insertfilesystem
+all: diskimage bootloader kernel createfilesystem insertfilesystem fileloader mash logoinsert
 
 clean:
 	# -- Cleaning output files --
@@ -22,6 +22,10 @@ mash:
 	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
 	@ld86 -o out/mash -d out/shell/*.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img mash 0
+
+logoinsert:
+	@cp other/logo.hoho out/logo.hoho
+	@cd out; ./loadFile mangga.img logo.hoho 255
 
 # Main recipes
 diskimage:

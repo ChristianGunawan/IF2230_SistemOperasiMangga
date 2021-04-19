@@ -58,6 +58,9 @@
 //                      bootloader.asm, and fscreator set properly
 #define KERNEL_SECTOR_SIZE 16
 
+// Logo filename, put file on ROOT_PARENT_FOLDER
+#define LOGO_FILENAME "logo.hoho"
+
 
 // Macro for filesystem syscalls
 // Filesytem location

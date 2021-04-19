@@ -18,14 +18,14 @@ int main() {
     // Setup
     // DEBUG
     int ret_code;
-    char buf[SECTOR_SIZE*4];
-    clear(buf, SECTOR_SIZE*4);
+    char buf[SECTOR_SIZE*SECTORS_ENTRY_SIZE];
+    clear(buf, SECTOR_SIZE*SECTORS_ENTRY_SIZE);
     makeInterrupt21();
 
     // Initial screen
     clearScreen();
     // DEBUG
-    // drawBootLogo();     // Note : drawBootLogo() does not revert video mode
+    // drawBootLogo(buf);     // Note : drawBootLogo() does not revert video mode
 
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
