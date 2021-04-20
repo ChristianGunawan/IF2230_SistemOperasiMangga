@@ -184,15 +184,15 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
 
                         if (!is_between_quote_mark && is_autocomplete_available) {
                             // Part 2: current index evaluation
-
                             current_eval_idx = current_dir;
                             matched_idx = getLastMatchedCharIdx(CHAR_SLASH, arg_vector[1]);
                             // If argv[1] is only single name, use original dir
                             if (matched_idx != -1) {
                                 clear(temp_eval,ARGC_MAX*ARG_LENGTH);
-                                strcpybounded(temp_eval, arg_vector[1], returncode);
+                                strcpybounded(temp_eval, arg_vector[1], matched_idx);
                                 current_eval_idx = directoryEvaluator(dirtable, temp_eval, &returncode, current_dir);
                             }
+
 
                             // Part 3: command autocompletion
                             // "To be completed" command (ex. cat mnt/abc/pqr -> pqr)
