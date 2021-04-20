@@ -24,6 +24,8 @@ int main() {
         new_index = cd(directory_table, dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
         shell_cache[CURRENT_DIR_CACHE_OFFSET] = new_index;
     }
+    else if (argc == 1)
+        shell_cache[CURRENT_DIR_CACHE_OFFSET] = ROOT_PARENT_FOLDER;
     else
         print("Usage : cd <path>\n", BIOS_WHITE);
 
