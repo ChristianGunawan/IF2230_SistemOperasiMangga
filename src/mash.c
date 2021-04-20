@@ -92,6 +92,7 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
     bool is_modified = false, is_autocomplete_available = false;
     bool is_between_quote_mark = false, autocomplete_found = false;
     int argc = 0, returncode = 0, matched_idx = 0;
+    int target_copy_arg_idx;
     showKeyboardCursor();
 
     // Move history up
@@ -179,17 +180,23 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                         argc = split_j + 1; // Due split_j is between counting space between 2 args
 
                         is_autocomplete_available = false;
-                        if (!strcmp("ls",arg_vector[0]) || !strcmp("cat",arg_vector[0]) || !strcmp("cd",arg_vector[0]))
+                        if (isLastSubstring(arg_vector[0], "ls") || isLastSubstring(arg_vector[0], "cat") || isLastSubstring(arg_vector[0], "cd")) {
+                            target_copy_arg_idx = 1;
                             is_autocomplete_available = true;
+                        }
+                        else if (!forcestrcmp("./", arg_vector[0]) && argc == 1) {
+                            target_copy_arg_idx = 0;
+                            is_autocomplete_available = true;
+                        }
 
                         if (!is_between_quote_mark && is_autocomplete_available) {
                             // Part 2: current index evaluation
                             current_eval_idx = current_dir;
-                            matched_idx = getLastMatchedCharIdx(CHAR_SLASH, arg_vector[1]);
+                            matched_idx = getLastMatchedCharIdx(CHAR_SLASH, arg_vector[target_copy_arg_idx]);
                             // If argv[1] is only single name, use original dir
                             if (matched_idx != -1) {
                                 clear(temp_eval,ARGC_MAX*ARG_LENGTH);
-                                strcpybounded(temp_eval, arg_vector[1], matched_idx);
+                                strcpybounded(temp_eval, arg_vector[target_copy_arg_idx], matched_idx);
                                 current_eval_idx = directoryEvaluator(dirtable, temp_eval, &returncode, current_dir);
                             }
 
@@ -197,7 +204,7 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                             // Part 3: command autocompletion
                             // "To be completed" command (ex. cat mnt/abc/pqr -> pqr)
                             clear(to_be_completed, ARGC_MAX*ARG_LENGTH);
-                            strcpy(to_be_completed, arg_vector[1]+matched_idx+1);
+                            strcpy(to_be_completed, arg_vector[target_copy_arg_idx]+matched_idx+1);
                             // Searching from directory table
                             autocomplete_found = false;
                             split_i = 0;

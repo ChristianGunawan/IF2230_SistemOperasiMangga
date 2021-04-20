@@ -169,6 +169,28 @@ void strtobytes(char *buffer, char *string, int bytecount) {
     }
 }
 
+bool isLastSubstring(char *source_string, char *substring) {
+    bool is_substring = true;
+    int i, j;
+    int source_count = strlen(source_string);
+    int substring_count = strlen(substring);
+
+    if (source_count < substring_count)
+        is_substring = false;
+    else {
+        i = source_count - substring_count;
+        j = 0;
+        while (i < source_count && is_substring) {
+            if (source_string[i] != substring[j])
+                is_substring = false;
+            j++;
+            i++;
+        }
+    }
+
+    return is_substring;
+}
+
 // ---------------- Standard I/O ----------------
 void print(char *string, char color) {
     // TODO : Extra, Maybe not safe (?)

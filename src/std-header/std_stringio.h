@@ -55,7 +55,9 @@ int getFirstMatchedCharIdx(char c, char *string);
 void clear(char *buffer, int length);
 // Clearing string buffer
 
-
+char isLastSubstring(char *source_string, char *substring);
+// Returning whether substring is substring of source_string
+// located at last element
 
 // ---------------- Standard I/O ----------------
 void print(char *string, char color);
