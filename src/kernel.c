@@ -380,8 +380,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
         if (buffer_type_is_file) {
             readSector(map_buf, MAP_SECTOR);
             i = 0;
-            buffer_size = strlen(buffer); // In bytes,
-            // FIXME : Extra, due to strlen() stop at null byte, it cannot write in pure binary mode
+            buffer_size = strlenbin(buffer); // In bytes,
+            // WARNING : strlenbin only stop if found n-consecutive null terminator, may cause some problem
             while (i < (SECTOR_SIZE >> 1) && !is_enough_sector) {
                 // Finding empty sector in map
                 if (map_buf[i] == EMPTY_MAP_ENTRY)

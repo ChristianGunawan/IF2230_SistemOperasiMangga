@@ -88,6 +88,8 @@
 #define BIN_PARENT_FOLDER 0x00 // Flag for "P" byte
 #define EMPTY_FILES_ENTRY 0xFE // Flag for "S" byte
 #define FOLDER_ENTRY 0xFF // Flag for "S" byte
+#define SOFTLINK_ENTRY 0xFD // Flag for "S" byte
+#define HARDLINK_ENTRY 0xFC // Flag for "S" byte
 #define PARENT_BYTE_OFFSET 0x0 // "P" byte, parent folder index
 #define ENTRY_BYTE_OFFSET 0x1 // "S" byte, entry index at sectors filesystem
 #define PATHNAME_BYTE_OFFSET 0x2 // 14 bytes, filled with pathnames

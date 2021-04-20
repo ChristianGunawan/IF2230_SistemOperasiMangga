@@ -12,6 +12,20 @@ int strlen(char *string) {
     return i;
 }
 
+int strlenbin(char *string) {
+    int i = 0;
+    int null_count = 0;
+    // Only stop if found 5 consecutive null terminator
+    while (null_count < 5) {
+        if (string[i] == '\0')
+            null_count++;
+        else
+            null_count = 0;
+        i++;
+    }
+    return i;
+}
+
 void strcpy(char *dest, char *src) {
     int i = 0;
     while (src[i] != '\0') {

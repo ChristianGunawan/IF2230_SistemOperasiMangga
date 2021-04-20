@@ -13,6 +13,7 @@ void shell();
 // cache 1-0xF will filled with evaluated argv
 // cache 0x10-0x4F, 0x50-0x8F, 0x90-0xCF, 0xD0-0x10F, 0x110-0x14F
 //      used as shell history
+// rest of cache used as argv
 
 int main() {
     char cache_buffer[SECTOR_SIZE];
@@ -367,6 +368,8 @@ void shell(char *cache) {
 
         clear(cache+ARGV_OFFSET, ARG_LENGTH);
         memcpy(cache+ARGV_OFFSET, arg_vector[1], ARG_LENGTH);
+        memcpy(cache+ARGV_2_OFFSET, arg_vector[2], ARG_LENGTH);
+        memcpy(cache+ARGV_3_OFFSET, arg_vector[3], ARG_LENGTH);
         cache[ARGC_OFFSET] = argc;
         setShellCache(cache);
         // Command evaluation, TODO : Move to program itself
