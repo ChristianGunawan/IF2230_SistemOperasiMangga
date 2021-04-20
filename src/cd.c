@@ -10,16 +10,23 @@ int main() {
     char shell_cache[SECTOR_SIZE];
     char dirstr[BUFFER_SIZE];
     char new_index;
+    int argc;
 
     clear(shell_cache, SECTOR_SIZE);
     getDirectoryTable(directory_table);
     getShellCache(shell_cache);
 
     clear(dirstr, BUFFER_SIZE);
-    memcpy(dirstr, shell_cache+HISTORY_CACHE_OFFSET+3, BUFFER_SIZE-3);
-    // | +3 due "cd " is 3 character length on shell history
-    new_index = cd(directory_table, dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
-    shell_cache[CURRENT_DIR_CACHE_OFFSET] = new_index;
+    memcpy(dirstr, shell_cache+ARGV_OFFSET, ARG_LENGTH);
+    argc = shell_cache[ARGC_OFFSET];
+
+    if (argc == 2) {
+        new_index = cd(directory_table, dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
+        shell_cache[CURRENT_DIR_CACHE_OFFSET] = new_index;
+    }
+    else
+        print("Usage : cd <path>\n", BIOS_WHITE);
+
     setShellCache(shell_cache);
     shellReturn();
 }

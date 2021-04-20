@@ -13,7 +13,7 @@ test: kernelgcc
 
 cleantest: cleangcc
 
-shellpackage: fileloader mash insertls insertcd
+shellpackage: fileloader mash insertls insertcd insertmkdir
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
@@ -44,6 +44,15 @@ insertcd:
 			out/shell/std_stringio.o out/shell/shell_common.o \
 	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img cd 0
+
+insertmkdir:
+	if [ ! -d "out/shell/mkdir" ]; then mkdir out/shell/mkdir; fi
+	@bcc -ansi -c -o out/shell/mkdir/mkdir.o src/mkdir.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/mkdir -d out/shell/mkdir/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img mkdir 0
 
 logoinsert:
 	@cp other/logo.hoho out/logo.hoho

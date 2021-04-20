@@ -355,33 +355,12 @@ void shell(char *cache) {
         }
         argc = j + 1; // Due j is between counting space between 2 args
 
-
-        // Command evaluation
-        if (!strcmp("ls", arg_vector[0]))  {
-            // TODO : Extra, split argv evaluator to program itself
-            if (argc == 1 || argc > 1) {
-                if (argc > 1) {
-                    temp = directoryEvaluator(directory_table, arg_vector[1], &returncode, current_dir_index);
-                    cache[LS_TARGET_DIR_CACHE_OFFSET] = (char) temp;
-                }
-                else {
-                    cache[LS_TARGET_DIR_CACHE_OFFSET] = current_dir_index;
-                    returncode = 0;
-                }
-
-                setShellCache(cache);
-
-                if (returncode == 0)
-                    exec("ls", 0x3000, BIN_PARENT_FOLDER);
-                else if (returncode == 1)
-                    print("ls: target is file\n", BIOS_WHITE);
-                else
-                    print("ls: path not found\n", BIOS_WHITE);
-            }
-            else
-                print("Usage : ls\n", BIOS_WHITE);
-        }
-        else if (!strcmp("cat", arg_vector[0])) {
+        clear(cache+ARGV_OFFSET, ARG_LENGTH);
+        memcpy(cache+ARGV_OFFSET, arg_vector[1], ARG_LENGTH);
+        cache[ARGC_OFFSET] = argc;
+        setShellCache(cache);
+        // Command evaluation, TODO : Move to program itself
+        if (!strcmp("cat", arg_vector[0])) {
             if (argc == 2)
                 print("TBA", BIOS_RED);
                 // cat(directory_table, arg_vector[1], current_dir_index);
@@ -398,23 +377,6 @@ void shell(char *cache) {
             }
             else
                 print("Usage : ln [-s] <target> <linkname>\n", BIOS_WHITE);
-        }
-        else if (!strcmp("cd", arg_vector[0])) {
-            if (argc == 2) {
-                setShellCache(cache);
-                exec("cd", 0x3000, BIN_PARENT_FOLDER);
-            }
-            else
-                print("Usage : cd <path>\n", BIOS_WHITE);
-        }
-        else if (!strcmp("mkdir", arg_vector[0])) {
-            if (argc == 2) {
-                print("TBA", BIOS_RED);
-                // mkdir(arg_vector[1], current_dir_index);
-                getDirectoryTable(directory_table);
-            }
-            else
-                print("Usage : mkdir <name>\n", BIOS_WHITE);
         }
         else if (!strcmp("echo", arg_vector[0])) {
             // Because shell structure is simple, just handle echo here
@@ -441,6 +403,7 @@ void shell(char *cache) {
             // Empty string -> doing nothing
         }
         else {
+            exec(arg_vector[0], 0x3000, BIN_PARENT_FOLDER);
             print(arg_vector[0], BIOS_WHITE);
             print(": command not found\n", BIOS_WHITE);
         }
