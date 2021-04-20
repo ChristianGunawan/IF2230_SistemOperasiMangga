@@ -21,13 +21,13 @@ void shellReturn() {
 
 void getShellCache(char *buffer) {
     int returncode;
-    read(buffer, "_mash_cache", &returncode, ROOT_PARENT_FOLDER);
+    read(buffer, "_mash_cache\0\0\0", &returncode, ROOT_PARENT_FOLDER);
 }
 
 void setShellCache(char *buffer) {
     int returncode;
     remove("_mash_cache", &returncode, ROOT_PARENT_FOLDER);
-    write(buffer, "_mash_cache", &returncode, ROOT_PARENT_FOLDER);
+    write(buffer, "_mash_cache\0\0\0", &returncode, ROOT_PARENT_FOLDER);
 }
 
 

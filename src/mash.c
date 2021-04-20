@@ -181,11 +181,29 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                         argc = split_j + 1; // Due split_j is between counting space between 2 args
 
                         is_autocomplete_available = false;
-                        if (isLastSubstring(arg_vector[0], "ls") || isLastSubstring(arg_vector[0], "cat") || isLastSubstring(arg_vector[0], "cd")) {
+                        if (isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv")
+                            || isLastSubstring(arg_vector[0], "ln")
+                            && argc == 4) {
+                            // Fourth arg autocomplete
+                            target_copy_arg_idx = 3;
+                            is_autocomplete_available = true;
+                        }
+                        else if ((isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv"))
+                            || isLastSubstring(arg_vector[0], "ln")
+                            && argc == 3) {
+                            // Third arg autocomplete
+                            target_copy_arg_idx = 2;
+                            is_autocomplete_available = true;
+                        }
+                        else if (isLastSubstring(arg_vector[0], "ls") || isLastSubstring(arg_vector[0], "cat")
+                            || isLastSubstring(arg_vector[0], "cd") || isLastSubstring(arg_vector[0], "cp")
+                            || isLastSubstring(arg_vector[0], "mv") || isLastSubstring(arg_vector[0], "ln")) {
+                            // Second arg autocomplete
                             target_copy_arg_idx = 1;
                             is_autocomplete_available = true;
                         }
                         else if (!forcestrcmp("./", arg_vector[0]) && argc == 1) {
+                            // First arg autocomplete
                             target_copy_arg_idx = 0;
                             is_autocomplete_available = true;
                         }
@@ -233,8 +251,9 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                                     strcpy(string+getLastMatchedCharIdx(CHAR_SLASH, string)+1, filename_buffer);
                                 }
                                 else {
+                                    // Autocomplete for n-arg
                                     // If not using relative pathing, use space as insertion location
-                                    strcpy(string+getFirstMatchedCharIdx(CHAR_SPACE, string)+1, filename_buffer);
+                                    strcpy(string+getLastMatchedCharIdx(CHAR_SPACE, string)+1, filename_buffer);
                                 }
                             }
 
@@ -404,17 +423,6 @@ void shell(char *cache) {
             // If executed, this code wont run
             print(arg_execute, BIOS_WHITE);
             print(": program not found\n", BIOS_WHITE);
-        }
-        else if (!strcmp("ln", arg_vector[0])) {
-            if (argc >= 3) {
-                print("TBA", BIOS_RED);
-                // if (!strcmp("-s", arg_vector[1]))
-                //     ln(directory_table, current_dir_index, 1, arg_vector[2], arg_vector[3]);
-                // else
-                //     ln(directory_table, current_dir_index, 0, arg_vector[1], arg_vector[2]);
-            }
-            else
-                print("Usage : ln [-s] <target> <linkname>\n", BIOS_WHITE);
         }
         else if (!strcmp("echo", arg_vector[0])) {
             // Because shell structure is simple, just handle echo here

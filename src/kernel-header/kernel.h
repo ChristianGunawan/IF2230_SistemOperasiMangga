@@ -47,6 +47,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex);
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex);
 // Writing file with relative path
 // WARNING : writeFile() will treat buffer as stream of binary
+// WARNING : writeFile() will stop if and only if writeFile() found 5 consecutive null terminator
 // -- Error code list --
 // 0 - Exit successfully
 // -1 - File exists

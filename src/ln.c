@@ -4,7 +4,7 @@
 #include "basic-header/std_opr.h"
 #include "std-header/boolean.h"
 
-void cp(char *dirtable, char current_dir_index, char flags, char *target, char *linkname);
+void ln(char *dirtable, char current_dir_index, char flags, char *target, char *linkname);
 
 int main() {
     char directory_table[FILES_SECTOR_SIZE*SECTOR_SIZE];
@@ -26,20 +26,21 @@ int main() {
 
     // Argument count
     if (argc >= 3) {
-        if (!strcmp("-r", arg_vector[0]))
-            cp(directory_table, current_dir_index, 1, arg_vector[1], arg_vector[2]);
+        if (!strcmp("-s", arg_vector[0])) {
+            print("ln: softlink mode\n", BIOS_WHITE);
+            ln(directory_table, current_dir_index, 1, arg_vector[1], arg_vector[2]);
+        }
         else
-            cp(directory_table, current_dir_index, 0, arg_vector[0], arg_vector[1]);
+            ln(directory_table, current_dir_index, 0, arg_vector[0], arg_vector[1]);
     }
     else
-        print("Usage : cp [-r] <source> <destination>\n", BIOS_WHITE);
+        print("Usage : ln [-s] <source> <destination>\n", BIOS_WHITE);
 
     setShellCache(shell_cache);
     shellReturn();
 }
 
-// TODO : Autocomplete & relative pathing
-void cp(char *dirtable, char current_dir_index, char flags, char *target, char *linkname) {
+void ln(char *dirtable, char current_dir_index, char flags, char *target, char *linkname) {
     // Technically just "copy" of previous implementation of ln
     // char as string / char
     char filename_buffer[16];
@@ -50,10 +51,15 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
     char target_entry_byte = 0;
     char source_dir_idx;
     char copied_dir_idx;
+    char link_status;
+    char parent_entry_byte;
+    char parent_files_index;
     int returncode_src = 0;
     int returncode_cpy = 0;
     bool is_write_success = false, valid_filename = true;
     bool f_target_found = false, empty_entry_found = false;
+    bool is_found_parent = false;
+    bool is_found_empty = false;
     int i = 0, j = 0;
     int f_entry_idx = 0;
     int f_entry_sector_idx = 0;
@@ -106,12 +112,12 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
 
     // Copying file if path evaluation success
     if (returncode_src == -1) {
-        print("cp: ", BIOS_GRAY);
+        print("ln: ", BIOS_GRAY);
         print(target, BIOS_GRAY);
         print(": target not found\n", BIOS_GRAY);
     }
     else if (returncode_cpy == -1) {
-        print("cp: ", BIOS_GRAY);
+        print("ln: ", BIOS_GRAY);
         print(copied_directory_name, BIOS_GRAY);
         print(": path not found\n", BIOS_GRAY);
     }
@@ -119,35 +125,68 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
         clear(file_read, FILE_SIZE_MAXIMUM);
         read(file_read, source_directory_name, &returncode_src, source_dir_idx);
         if (returncode_src == 0) {
-            if (flags == 0) {
-                // Simple copy, refuse folder
-                if (file_read[0] != NULL) {
-                    // FIXME : Will ignore ln for now
-                    write(file_read, copied_directory_name, &returncode_cpy, copied_dir_idx);
+            if (flags == 1)
+                link_status = SOFTLINK_ENTRY;
+            else
+                link_status = HARDLINK_ENTRY;
+
+            // Find parent S byte
+            i = 0;
+            while (i < FILES_ENTRY_COUNT && !is_found_parent) {
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
+                if (dirtable[i*FILES_ENTRY_SIZE + PARENT_BYTE_OFFSET] == source_dir_idx &&
+                    !strcmp(source_directory_name, filename_buffer)) {
+                    is_found_parent = true;
+                    parent_entry_byte = dirtable[i*FILES_ENTRY_SIZE + ENTRY_BYTE_OFFSET];
+                    parent_files_index = i;
                 }
-                else {
-                    print("cp: error: ", BIOS_WHITE);
-                    print(target, BIOS_WHITE);
-                    print(" is a folder\n", BIOS_WHITE);
-                    returncode_cpy = -1;
-                }
+                i++;
+            }
+
+            // Find empty files entry
+            i = 0;
+            while (i < FILES_ENTRY_COUNT && !is_found_empty && is_found_parent) {
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
+                if (dirtable[i*FILES_ENTRY_SIZE + PARENT_BYTE_OFFSET] == ROOT_PARENT_FOLDER &&
+                    dirtable[i*FILES_ENTRY_SIZE + ENTRY_BYTE_OFFSET] == EMPTY_FILES_ENTRY) {
+                        is_found_empty = true;
+                        // Put P and filename
+                        dirtable[i*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET] = copied_dir_idx;
+                        memcpy(dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, copied_directory_name, 14);
+                        dirtable[i*FILES_ENTRY_SIZE+LINK_BYTE_OFFSET] = link_status;
+                        // Put S byte
+                        if (flags == 0)
+                            dirtable[i*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] = parent_entry_byte;
+                        else
+                            dirtable[i*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] = parent_files_index;
+                    }
+                i++;
+            }
+
+
+            if (!is_found_parent) {
+                print("ln: searching parent ", BIOS_WHITE);
+                print(target, BIOS_WHITE);
+                print(" error\n", BIOS_WHITE);
+                returncode_cpy = -1;
+            }
+            else if (!is_found_empty) {
+                print("ln: searching empty space for ", BIOS_WHITE);
+                print(linkname, BIOS_WHITE);
+                print(" error\n", BIOS_WHITE);
+                returncode_cpy = -1;
             }
             else {
-                // Recursive
-                // TODO : Add
-
-                // read(file_read, linkname, &returncode, target_dir);
-
-
-
-                // else {
-                //     print("cp: recursive copy error\n", BIOS_GRAY);
-                //     returncode = -1;
-                // }
+                // Updating directory table
+                directSectorWrite(dirtable, FILES_SECTOR);
+                directSectorWrite(dirtable+SECTOR_SIZE, FILES_SECTOR+1);
             }
+
         }
         else {
-            print("cp: error: ", BIOS_WHITE);
+            print("ln: error: ", BIOS_WHITE);
             print(target, BIOS_WHITE);
             print(" not found\n", BIOS_WHITE);
             returncode_cpy = -1;
@@ -155,9 +194,9 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
 
         if (returncode_src == 0 && returncode_cpy == 0) {
             print(linkname, BIOS_GRAY);
-            print(": copy created\n", BIOS_GRAY);
+            print(": link created\n", BIOS_GRAY);
         }
         else
-            print("cp: file writing error\n", BIOS_GRAY);
+            print("ln: file writing error\n", BIOS_GRAY);
     }
 }

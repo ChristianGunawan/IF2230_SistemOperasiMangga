@@ -58,9 +58,9 @@ int main() {
         writeFile(CHAR_NULL, "bin", &ret_code, ROOT_PARENT_FOLDER);
 
     // Check if _mash_cache exist, if exists delete old record
-    readFile(buf, "_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+    readFile(buf, "_mash_cache\0\0\0", &ret_code, ROOT_PARENT_FOLDER);
     if (ret_code == 0)
-        deleteFile("_mash_cache", &ret_code, ROOT_PARENT_FOLDER);
+        deleteFile("_mash_cache\0\0\0", &ret_code, ROOT_PARENT_FOLDER);
 
     clear(buf, SECTOR_SIZE*SECTORS_ENTRY_SIZE);
     strcpybounded(buf, EMPTY_CACHE, 32);
@@ -248,7 +248,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex) {
                 if (files_buf[i][j+PARENT_BYTE_OFFSET] == parentIndex) {
                     // Needed buffer because entry may ignoring null terminator
                     clear(filename_buffer, 16);
-                    strcpybounded(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
+                    memcpy(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
                     if (!strcmp(path, filename_buffer)) {
                         is_filename_match_found = true;
                         sectors_entry_idx = files_buf[i][j+ENTRY_BYTE_OFFSET];
@@ -334,7 +334,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
                 if (files_buf[i][j+PARENT_BYTE_OFFSET] == parentIndex) {
                     // Needed buffer because entry may ignoring null terminator
                     clear(filename_buffer, 16);
-                    strcpybounded(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
+                    memcpy(filename_buffer, files_buf[i]+j+PATHNAME_BYTE_OFFSET, 14);
                     if (!strcmp(path, filename_buffer))
                         valid_filename = false;
                 }
@@ -364,7 +364,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex) {
     if (is_empty_dir_exist && valid_parent_folder && valid_filename) {
         // Updating files filesystem buffer
         files_buf[f_entry_sector_idx][f_entry_idx+PARENT_BYTE_OFFSET] = parentIndex;
-        rawstrcpy((files_buf[f_entry_sector_idx]+f_entry_idx+PATHNAME_BYTE_OFFSET), path);
+        memcpy((files_buf[f_entry_sector_idx]+f_entry_idx+PATHNAME_BYTE_OFFSET), path, 14);
 
         // ----------- Folder Writing Branch-----------
         // Folder writing does not need to readSector() sectors and map
