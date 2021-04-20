@@ -393,6 +393,7 @@ void shell(char *cache) {
             }
 
             // Preventing to loading empty arg_execute
+            // Empty arg_execute will cause load kernel / restarting OS
             if (!strcmp("./", arg_vector[0]))
                 print("unknown command", BIOS_LIGHT_RED);
             else if (returncode == 0)
@@ -400,13 +401,6 @@ void shell(char *cache) {
             // If executed, this code wont run
             print(arg_execute, BIOS_WHITE);
             print(": program not found\n", BIOS_WHITE);
-        }
-        else if (!strcmp("cat", arg_vector[0])) {
-            if (argc == 2)
-                print("TBA", BIOS_RED);
-                // cat(directory_table, arg_vector[1], current_dir_index);
-            else
-                print("Usage : cat <filename>\n", BIOS_WHITE);
         }
         else if (!strcmp("ln", arg_vector[0])) {
             if (argc >= 3) {
