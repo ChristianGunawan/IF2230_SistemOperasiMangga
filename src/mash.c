@@ -299,11 +299,14 @@ void shell(char *cache) {
     char directory_string[BUFFER_SIZE];
     char arg_vector[ARGC_MAX][ARG_LENGTH];
     char directory_table[2][SECTOR_SIZE];
+    char arg_execute[ARG_LENGTH];
     // char as 1 byte integer
     char io_buffer[SECTOR_SIZE];
     char current_dir_index = cache[CURRENT_DIR_CACHE_OFFSET];
     char is_between_quote_mark = false;
     int temp, returncode;
+    char evaluated_dir_idx = current_dir_index;
+    int last_execute_slash_index = 0;
     int i = 0, j = 0, k = 0, argc = 0;
 
     getDirectoryTable(directory_table);
@@ -360,7 +363,38 @@ void shell(char *cache) {
         cache[ARGC_OFFSET] = argc;
         setShellCache(cache);
         // Command evaluation, TODO : Move to program itself
-        if (!strcmp("cat", arg_vector[0])) {
+        if (!forcestrcmp("./", arg_vector[0])) {
+            // Do relative pathing if more than 1
+            last_execute_slash_index = getLastMatchedCharIdx(CHAR_SLASH, arg_vector[0]);
+            // FIXME : Extra, unsafe getlast
+            clear(arg_execute, ARG_LENGTH);
+            if (last_execute_slash_index != 1) {
+                // Split argument to path and filename
+                // Get path
+                strcpybounded(arg_execute, arg_vector[0], last_execute_slash_index);
+                evaluated_dir_idx = directoryEvaluator(directory_table, arg_execute, &returncode, current_dir_index);
+
+                // Get filename
+                strcpybounded(arg_execute, arg_vector[0]+last_execute_slash_index+1, ARG_LENGTH-last_execute_slash_index-1);
+            }
+            else {
+                // Cut slash
+                strcpybounded(arg_execute, arg_vector[0]+2, ARG_LENGTH-2);
+
+                evaluated_dir_idx = current_dir_index;
+                returncode = 0;
+            }
+
+            // Preventing to loading empty arg_execute
+            if (!strcmp("./", arg_vector[0]))
+                print("unknown command", BIOS_LIGHT_RED);
+            else if (returncode == 0)
+                exec(arg_execute, 0x3000, evaluated_dir_idx);
+            // If executed, this code wont run
+            print(arg_execute, BIOS_WHITE);
+            print(": program not found\n", BIOS_WHITE);
+        }
+        else if (!strcmp("cat", arg_vector[0])) {
             if (argc == 2)
                 print("TBA", BIOS_RED);
                 // cat(directory_table, arg_vector[1], current_dir_index);
@@ -404,6 +438,7 @@ void shell(char *cache) {
         }
         else {
             exec(arg_vector[0], 0x3000, BIN_PARENT_FOLDER);
+            // If executed, this code wont run
             print(arg_vector[0], BIOS_WHITE);
             print(": command not found\n", BIOS_WHITE);
         }

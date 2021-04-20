@@ -68,6 +68,8 @@ int main() {
 
     // Shell executing
     executeProgram("mash", 0x2000, &ret_code, BIN_PARENT_FOLDER);
+    if (ret_code == -1)
+        print("mash shell not found in bin/", BIOS_LIGHT_RED);
 
     while (true);
 }
