@@ -38,14 +38,92 @@ int main() {
     shellReturn();
 }
 
+void file_delete(char *file_read, char *source_directory_name, char *returncode_src, char source_dir_idx, char *dirtable) {
+    // char as character
+    char filename_buffer[16];
+    // char as 1 byte integer
+    char target_files_entry_index;
+    char target_entry_byte;
+    char target_parent_byte;
+    char link_status = -1;
+    bool is_found_parent = false;
+    int i = 0;
+
+    if (file_read[0] != NULL) {
+
+        // Find entry in files
+        i = 0;
+        while (i < FILES_ENTRY_COUNT && !is_found_parent) {
+            clear(filename_buffer, 16);
+            strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
+            if (dirtable[i*FILES_ENTRY_SIZE + PARENT_BYTE_OFFSET] == source_dir_idx &&
+                !strcmp(source_directory_name, filename_buffer)) {
+                is_found_parent = true;
+                target_entry_byte = dirtable[i*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET];
+                target_files_entry_index = i;
+                link_status = dirtable[i*FILES_ENTRY_SIZE+LINK_BYTE_OFFSET];
+            }
+            i++;
+        }
+
+        if (link_status == HARDLINK_ENTRY || link_status == SOFTLINK_ENTRY) {
+            dirtable[target_files_entry_index*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] = EMPTY_FILES_ENTRY;
+            dirtable[target_files_entry_index*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET] = ROOT_PARENT_FOLDER;
+            clear(dirtable+target_files_entry_index*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
+
+            if (!is_found_parent) {
+                print("rm: searching hardlink: ", BIOS_WHITE);
+                print(source_directory_name, BIOS_WHITE);
+                print(" error\n", BIOS_WHITE);
+                returncode_src = -1;
+            }
+            else if (link_status == HARDLINK_ENTRY) {
+                // Updating directory table
+                print("rm: hardlink: ", BIOS_WHITE);
+                print(source_directory_name, BIOS_WHITE);
+                print(" deleted\n", BIOS_WHITE);
+
+                directSectorWrite(dirtable, FILES_SECTOR);
+                directSectorWrite(dirtable+SECTOR_SIZE, FILES_SECTOR+1);
+            }
+            else if (link_status == SOFTLINK_ENTRY) {
+                // Updating directory table
+                print("rm: softlink: ", BIOS_WHITE);
+                print(source_directory_name, BIOS_WHITE);
+                print(" deleted\n", BIOS_WHITE);
+
+                directSectorWrite(dirtable, FILES_SECTOR);
+                directSectorWrite(dirtable+SECTOR_SIZE, FILES_SECTOR+1);
+            }
+        }
+        else {
+            remove(source_directory_name, &returncode_src, source_dir_idx);
+            if (returncode_src == -1)
+            print("rm: removal error\n", BIOS_LIGHT_RED);
+            else {
+                print("rm: ", BIOS_WHITE);
+                print(source_directory_name, BIOS_WHITE);
+                print(" deleted\n", BIOS_WHITE);
+            }
+        }
+    }
+    else {
+        print("rm: error: ", BIOS_WHITE);
+        print(source_directory_name, BIOS_WHITE);
+        print(" is a folder\n", BIOS_WHITE);
+    }
+}
+
 void rm(char *dirtable, char current_dir_index, char flags, char *target) {
-    // Technically just "copy" of previous implementation of ln
+    // FIXME : Extra, Extra, Currently deleting file that softlinked will have some consistency problem
     // char as string / char
     char filename_buffer[16];
     char source_directory_name[16];
     // char as 1 byte integer
     char file_read[FILE_SIZE_MAXIMUM];
     char target_entry_byte = 0;
+    char stack_but_without_typedef_because_im_scared_with_bcc[256]; // <3 stack, but not bcc :(
+    char stack_top_pointer;
     char source_dir_idx;
     int returncode_src = 0;
     bool is_write_success = false, valid_filename = true;
@@ -91,35 +169,20 @@ void rm(char *dirtable, char current_dir_index, char flags, char *target) {
         if (returncode_src == 0) {
             if (flags == 0) {
                 // Simple delete, refuse folder
-                if (file_read[0] != NULL) {
-                    // FIXME : Will ignore ln for now
-                    remove(source_directory_name, &returncode_src, source_dir_idx);
-                    if (returncode_src == -1)
-                        print("rm: removal error\n", BIOS_LIGHT_RED);
-                    else {
-                        print("rm: ", BIOS_WHITE);
-                        print(source_directory_name, BIOS_WHITE);
-                        print(" deleted\n", BIOS_WHITE);
-                    }
-                }
-                else {
-                    print("rm: error: ", BIOS_WHITE);
-                    print(target, BIOS_WHITE);
-                    print(" is a folder\n", BIOS_WHITE);
-                }
+                file_delete(file_read, source_directory_name, returncode_src, source_dir_idx, dirtable);
             }
             else {
                 // Recursive
-                // TODO : Add
+                // Will deleting file normally on -r
+                if (file_read[0] != NULL)
+                    file_delete(file_read, source_directory_name, returncode_src, source_dir_idx, dirtable);
+                else {
+                    clear(stack_but_without_typedef_because_im_scared_with_bcc, 256);
+                    stack_top_pointer = 0;
+                    stack_but_without_typedef_because_im_scared_with_bcc[0] = source_dir_idx;
 
-                // read(file_read, linkname, &returncode, target_dir);
+                }
 
-
-
-                // else {
-                //     print("rm: recursive copy error\n", BIOS_GRAY);
-                //     returncode = -1;
-                // }
             }
         }
 

@@ -178,7 +178,7 @@ void cp(char *dirtable, char current_dir_index, char flags, char *target, char *
                         //     print("cp: recursive copy error\n", BIOS_GRAY);
                         //     returncode = -1;
                         // }
-                    }
+                }
             }
             else {
                 print("cp: ", BIOS_WHITE);

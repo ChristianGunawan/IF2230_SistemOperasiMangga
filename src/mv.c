@@ -26,10 +26,7 @@ int main() {
 
     // Argument count
     if (argc >= 3) {
-        if (!strcmp("-r", arg_vector[0]))
-            mv(directory_table, current_dir_index, arg_vector[1], arg_vector[2]);
-        else
-            mv(directory_table, current_dir_index, arg_vector[0], arg_vector[1]);
+        mv(directory_table, current_dir_index, arg_vector[0], arg_vector[1]);
     }
     else
         print("Usage : mv <source> <destination>\n", BIOS_WHITE);
@@ -120,7 +117,8 @@ void mv(char *dirtable, char current_dir_index, char *target, char *linkname) {
     else {
         clear(file_read, FILE_SIZE_MAXIMUM);
         read(file_read, source_directory_name, &returncode_src, source_dir_idx);
-        if (returncode_src == 0) {
+        read(file_read, copied_directory_name, &returncode_cpy, copied_dir_idx);
+        if (returncode_src == 0 && returncode_cpy == -1) {
             i = 0;
             j = 0;
             while (i < FILES_ENTRY_COUNT && !is_found) {
@@ -141,7 +139,7 @@ void mv(char *dirtable, char current_dir_index, char *target, char *linkname) {
                 print("mv: searching: ", BIOS_WHITE);
                 print(target, BIOS_WHITE);
                 print(" error\n", BIOS_WHITE);
-                returncode_cpy = -1;
+                returncode_src = -1;
             }
             else {
                 // Updating directory table
@@ -150,14 +148,20 @@ void mv(char *dirtable, char current_dir_index, char *target, char *linkname) {
             }
 
         }
-        else {
+        else if (returncode_src == -1) {
             print("mv: error: ", BIOS_WHITE);
             print(target, BIOS_WHITE);
             print(" not found\n", BIOS_WHITE);
-            returncode_cpy = -1;
+            returncode_src = -1;
+        }
+        else {
+            print("mv: error: ", BIOS_WHITE);
+            print(linkname, BIOS_WHITE);
+            print(" exists\n", BIOS_WHITE);
+            returncode_src = -1;
         }
 
-        if (returncode_src == 0 && returncode_cpy == 0) {
+        if (returncode_src == 0 && returncode_cpy == -1) {
             print(linkname, BIOS_GRAY);
             print(": moved\n", BIOS_GRAY);
         }

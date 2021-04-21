@@ -4,6 +4,9 @@
 #include "basic-header/std_opr.h"
 #include "std-header/boolean.h"
 
+// Available parameter
+// -s , create softlink, currently cd not supporting softlink
+
 void ln(char *dirtable, char current_dir_index, char flags, char *target, char *linkname);
 
 int main() {

@@ -111,7 +111,6 @@ void cat(char *dirtable, char *filename, char target_dir) {
         }
 
         if (link_status == SOFTLINK_ENTRY) {
-            // Get linked strings / folder with recursion depth limit 16
             i = 0;
             // TODO : Extra, currently only single softlink depth supported
             clear(filename_buffer, 16);
@@ -148,5 +147,5 @@ void cat(char *dirtable, char *filename, char target_dir) {
             print(" softlink broken\n", BIOS_WHITE);
         }
     }
-    print("\n", BIOS_GRAY);
+    print("\n\n", BIOS_GRAY);
 }
