@@ -1,6 +1,6 @@
 # 13519214 - Makefile
 all: diskimage bootloader kernel createfilesystem \
-	 insertfilesystem fileloader shellpackage logoinsert extrapackage
+	 insertfilesystem fileloader shellpackage extrapackage logoinsert
 
 clean:
 	# -- Cleaning output files --

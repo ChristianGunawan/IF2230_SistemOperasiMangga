@@ -43,7 +43,7 @@ void directoryStringBuilder(char *string, char *dirtable, char current_dir) {
     char filename_buffer[16];
     // Use as 1 bytes integer
     char current_parent = 0, parent[FILES_ENTRY_COUNT];
-    // parent will contain indexes in reversed order
+    // parent will contain indices in reversed order
     int i = 0, parent_length = 0;
     if (current_dir == ROOT_PARENT_FOLDER)
         string[0] = '/';
@@ -329,16 +329,24 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
 
 void shell(char *cache) {
     // char as string / char
+    char filename_buffer[16];
+    char source_directory_name[16];
     char commands_history[MAX_HISTORY][BUFFER_SIZE]; // "FIFO" data type for commands
     char directory_string[BUFFER_SIZE];
     char arg_vector[ARGC_MAX][ARG_LENGTH];
     char directory_table[2][SECTOR_SIZE];
     char arg_execute[ARG_LENGTH];
     // char as 1 byte integer
+    char target_entry_byte = 0;
+    char target_parent_byte = 0;
+    char source_dir_idx;
+    char link_status = -1;
     char io_buffer[SECTOR_SIZE];
     char temp_file[FILE_SIZE_MAXIMUM];
     char current_dir_index = cache[CURRENT_DIR_CACHE_OFFSET];
     char is_between_quote_mark = false;
+    bool is_found_parent = false;
+    int returncode_src;
     int temp, returncode;
     char evaluated_dir_idx = current_dir_index;
     int last_execute_slash_index = 0;
@@ -422,17 +430,63 @@ void shell(char *cache) {
                 evaluated_dir_idx = current_dir_index;
                 returncode = 0;
             }
+            // TODO : Softlink
+
+            // Link check
+            // Find entry in files
+            i = 0;
+            is_found_parent = false;
+            while (i < FILES_ENTRY_COUNT && !is_found_parent) {
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, directory_table[0]+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
+                if (directory_table[0][i*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET] == evaluated_dir_idx &&
+                    !forcestrcmp(filename_buffer, arg_execute)) {
+                    is_found_parent = true;
+                    target_entry_byte = directory_table[0][i*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET];
+                    link_status = directory_table[0][i*FILES_ENTRY_SIZE+LINK_BYTE_OFFSET];
+
+                }
+                i++;
+            }
+
+            if (link_status == SOFTLINK_ENTRY) {
+                // TODO : Extra, currently only single softlink depth supported
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, directory_table[0]+target_entry_byte*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
+                strcpybounded(arg_execute, filename_buffer, 14);
+                target_parent_byte = directory_table[0][target_entry_byte*FILES_ENTRY_SIZE + PARENT_BYTE_OFFSET];
+                evaluated_dir_idx = target_parent_byte;
+                target_entry_byte = directory_table[0][target_entry_byte*FILES_ENTRY_SIZE + ENTRY_BYTE_OFFSET];
+                clear(temp_file, FILE_SIZE_MAXIMUM);
+                read(temp_file, filename_buffer, &returncode_src, target_parent_byte);
+                // Needed to compare due _mash_cache always filling empty space
+                // Implying softlink to _mash_cache is not available
+                print("mash: executing softlink to ", BIOS_WHITE);
+                print(arg_execute, BIOS_LIGHT_GREEN);
+                print("\n", BIOS_WHITE);
+
+                if (!strcmp(filename_buffer, "_mash_cache"))
+                    target_entry_byte = EMPTY_FILES_ENTRY;
+            }
+
 
             // Preventing to loading empty arg_execute
-            // Empty arg_execute will cause load kernel / restarting OS
-            read(temp_file, arg_execute, &returncode, evaluated_dir_idx);
-            if (!strcmp("./", arg_vector[0]))
-                print("unknown command", BIOS_LIGHT_RED);
-            else if (returncode == 0 && isBinaryFileMagicNumber(temp_file))
-                exec(arg_execute, 0x3000, evaluated_dir_idx);
-            // If executed, this code wont run
-            print(arg_execute, BIOS_WHITE);
-            print(": program not found\n", BIOS_WHITE);
+            if (target_entry_byte != EMPTY_FILES_ENTRY) {
+                // Empty arg_execute will cause load kernel / restarting OS
+                read(temp_file, arg_execute, &returncode, evaluated_dir_idx);
+                if (!strcmp("./", arg_vector[0]))
+                    print("unknown command", BIOS_LIGHT_RED);
+                else if (returncode == 0 && isBinaryFileMagicNumber(temp_file))
+                    exec(arg_execute, 0x3000, evaluated_dir_idx);
+                // If executed, this code wont run
+                print(arg_execute, BIOS_WHITE);
+                print(": program not found\n", BIOS_WHITE);
+            }
+            else {
+                print("mash: ", BIOS_WHITE);
+                print(arg_execute, BIOS_WHITE);
+                print(" softlink broken", BIOS_WHITE);
+            }
         }
         else if (!strcmp("echo", arg_vector[0])) {
             // Because shell structure is simple, just handle echo here
@@ -463,6 +517,8 @@ void shell(char *cache) {
             // Empty string -> doing nothing
         }
         else {
+            // WARNING : Softlink in bin/ will executing arbitrary pointed sectors as program
+            //           / Shell will ignore softlink flag and execute S byte as sectors entry index
             read(temp_file, arg_vector[0], &returncode, BIN_PARENT_FOLDER);
             if (returncode == 0 && isBinaryFileMagicNumber(temp_file))
                 exec(arg_vector[0], 0x3000, BIN_PARENT_FOLDER);
