@@ -15,6 +15,11 @@ void shell();
 //      used as shell history
 // rest of cache used as argv
 
+// BIOS_LIGHT_BLUE indicate folder
+// BIOS_LIGHT_GREEN indicate file
+// BIOS_LIGHT_CYAN indicate softlink
+// BIOS_LIGHT_RED indicate hardlink
+
 // CTRL + F / find Activate autocompletion for adding directory
 //      autocomplete for arbitrary commands
 
@@ -462,7 +467,7 @@ void shell(char *cache) {
                 // Needed to compare due _mash_cache always filling empty space
                 // Implying softlink to _mash_cache is not available
                 print("mash: executing softlink to ", BIOS_WHITE);
-                print(arg_execute, BIOS_LIGHT_GREEN);
+                print(arg_execute, BIOS_LIGHT_CYAN);
                 print("\n", BIOS_WHITE);
 
                 if (!strcmp(filename_buffer, "_mash_cache"))

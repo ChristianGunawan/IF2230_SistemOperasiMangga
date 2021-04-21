@@ -37,7 +37,7 @@ int main() {
             print("ls: path not found\n", BIOS_WHITE);
     }
     else
-        print("Usage : ls [directory]\n", BIOS_WHITE);
+        print("Usage : ls [--help, directory]\n", BIOS_WHITE);
 
     setShellCache(shell_cache);
     shellReturn();
@@ -50,15 +50,21 @@ void ls(char *dirtable, char target_dir) {
     // Use char as 1 byte integer
     char parent_byte_entry, entry_byte_entry;
     char print_color;
+    char link_byte_entry;
     while (i < FILES_ENTRY_COUNT) {
         parent_byte_entry = dirtable[FILES_ENTRY_SIZE*i+PARENT_BYTE_OFFSET];
         entry_byte_entry = dirtable[FILES_ENTRY_SIZE*i+ENTRY_BYTE_OFFSET];
+        link_byte_entry = dirtable[FILES_ENTRY_SIZE*i+LINK_BYTE_OFFSET];
         if (parent_byte_entry == target_dir && entry_byte_entry != EMPTY_FILES_ENTRY) {
             clear(filename_buffer, 16);
             strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
 
             if (entry_byte_entry == FOLDER_ENTRY)
                 print_color = BIOS_LIGHT_BLUE;
+            else if (link_byte_entry == SOFTLINK_ENTRY)
+                print_color = BIOS_LIGHT_CYAN;
+            else if (link_byte_entry == HARDLINK_ENTRY)
+                print_color = BIOS_LIGHT_RED;
             else
                 print_color = BIOS_LIGHT_GREEN;
 
