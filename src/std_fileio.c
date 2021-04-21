@@ -17,14 +17,12 @@ void read(char *buffer, char *path, int *returncode, char parentIndex) {
     interrupt(0x21, AX, buffer, path, returncode);
 }
 
-void delete(char *path, int *returncode, char parentIndex) {
-    // int AX = parentIndex << 8;
-    // AX |= 0x04; // TODO : Create syscall
-    // interrupt(0x21, AX, buffer, path, returncode);
-}
-
 void directSectorWrite(char *buffer, int sector) {
     interrupt(0x21, 0x03, buffer, sector, 0);
+}
+
+void directSectorRead(char *buffer, int sector) {
+    interrupt(0x21, 0x02, buffer, sector, 0);
 }
 
 // ---------------- Misc ----------------

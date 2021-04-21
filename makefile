@@ -14,7 +14,8 @@ test: kernelgcc
 cleantest: cleangcc
 
 shellpackage: fileloader mash insertls insertcd insertmkdir \
-			  insertcat insertcp insertmv insertln
+			  insertcat insertcp insertmv insertln insertrm \
+			  insertfile
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
@@ -90,6 +91,24 @@ insertln:
 			out/shell/std_stringio.o out/shell/shell_common.o \
 	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img ln 0
+
+insertrm:
+	if [ ! -d "out/shell/rm" ]; then mkdir out/shell/rm; fi
+	@bcc -ansi -c -o out/shell/rm/rm.o src/rm.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/rm -d out/shell/rm/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img rm 0
+
+insertfile:
+	if [ ! -d "out/shell/file" ]; then mkdir out/shell/file; fi
+	@bcc -ansi -c -o out/shell/file/file.o src/file.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/file -d out/shell/file/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img file 0
 
 logoinsert:
 	@cp other/logo.hoho out/logo.hoho

@@ -180,23 +180,26 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                         argc = split_j + 1; // Due split_j is between counting space between 2 args
 
                         is_autocomplete_available = false;
-                        if (isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv")
-                            || isLastSubstring(arg_vector[0], "ln")
-                            && argc == 4) {
+                        if (argc == 4 &&
+                            (  isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv")
+                            || isLastSubstring(arg_vector[0], "ln"))
+                            ) {
                             // Fourth arg autocomplete
                             target_copy_arg_idx = 3;
                             is_autocomplete_available = true;
                         }
-                        else if ((isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv"))
-                            || isLastSubstring(arg_vector[0], "ln")
-                            && argc == 3) {
+                        else if (argc == 3 &&
+                            (  isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv")
+                            || isLastSubstring(arg_vector[0], "ln") || isLastSubstring(arg_vector[0], "rm"))
+                            ) {
                             // Third arg autocomplete
                             target_copy_arg_idx = 2;
                             is_autocomplete_available = true;
                         }
                         else if (isLastSubstring(arg_vector[0], "ls") || isLastSubstring(arg_vector[0], "cat")
                             || isLastSubstring(arg_vector[0], "cd") || isLastSubstring(arg_vector[0], "cp")
-                            || isLastSubstring(arg_vector[0], "mv") || isLastSubstring(arg_vector[0], "ln")) {
+                            || isLastSubstring(arg_vector[0], "mv") || isLastSubstring(arg_vector[0], "ln")
+                            || isLastSubstring(arg_vector[0], "rm") || isLastSubstring(arg_vector[0], "file")) {
                             // Second arg autocomplete
                             target_copy_arg_idx = 1;
                             is_autocomplete_available = true;

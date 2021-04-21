@@ -18,7 +18,12 @@ void read(char *buffer, char *path, int *returncode, char parentIndex);
 void directSectorWrite(char *buffer, int sector);
 // Direct writing to sector, no checking
 
+void directSectorRead(char *buffer, int sector);
+// Direct reading to sector, no checking
 
 // --- Misc ---
 void memcpy(char *dest, char *src, int bytes);
 // Copying data from src to desc until bytes reached
+
+void remove(char *filename, int *returncode, char parentIndex);
+// Deleting file or folder

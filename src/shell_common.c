@@ -8,8 +8,8 @@ extern int interrupt(int number, int AX, int BX, int CX, int DX);
 
 void getDirectoryTable(char *buffer) {
     // WARNING : Naive implementation
-    interrupt(0x21, 0x0002, buffer, FILES_SECTOR, 0);
-    interrupt(0x21, 0x0002, buffer + SECTOR_SIZE, FILES_SECTOR + 1, 0);
+    directSectorRead(buffer, FILES_SECTOR);
+    directSectorRead(buffer + SECTOR_SIZE, FILES_SECTOR + 1);
 }
 
 void shellReturn() {
