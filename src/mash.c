@@ -485,7 +485,7 @@ void shell(char *cache) {
                     exec(arg_execute, 0x3000, evaluated_dir_idx);
                 // If executed, this code wont run
                 print(arg_execute, BIOS_WHITE);
-                print(": program not found\n", BIOS_WHITE);
+                print(": binary signature not found\n", BIOS_WHITE);
             }
             else {
                 print("mash: ", BIOS_WHITE);

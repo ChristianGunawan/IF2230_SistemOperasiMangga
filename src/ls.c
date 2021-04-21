@@ -22,8 +22,22 @@ int main() {
     argc = shell_cache[ARGC_OFFSET];
 
     if (argc == 1 || argc == 2) {
-        if (argc == 2)
-            target_directory = directoryEvaluator(directory_table, dirstr, &returncode, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
+        if (argc == 2) {
+            if (!strcmp("--help", dirstr)) {
+                print("ls:\n", BIOS_WHITE);
+                print("blue  ", BIOS_LIGHT_BLUE);
+                print(": folder\n", BIOS_WHITE);
+                print("green ", BIOS_LIGHT_GREEN);
+                print(": file\n", BIOS_WHITE);
+                print("red   ", BIOS_LIGHT_RED);
+                print(": hardlink\n", BIOS_WHITE);
+                print("cyan  ", BIOS_LIGHT_CYAN);
+                print(": softlink\n", BIOS_WHITE);
+                returncode = 2;
+            }
+            else
+                target_directory = directoryEvaluator(directory_table, dirstr, &returncode, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
+        }
         else {
             target_directory = shell_cache[CURRENT_DIR_CACHE_OFFSET];
             returncode = 0;
@@ -33,7 +47,7 @@ int main() {
             ls(directory_table, target_directory);
         else if (returncode == 1)
             print("ls: target is file\n", BIOS_WHITE);
-        else
+        else if (returncode != 2)
             print("ls: path not found\n", BIOS_WHITE);
     }
     else
