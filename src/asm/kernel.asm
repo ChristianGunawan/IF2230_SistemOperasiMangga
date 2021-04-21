@@ -28,6 +28,8 @@ _launchProgram:
 	mov bp,0xfff0
 
 jump: jmp 0x0000:0x0000
+; TODO : Extra, forkexec, currently no memory left for kernel modification
+; 		 outline : save address, put on stack, do jump again
 
 ;void putInMemory (int segment, int address, char character)
 _putInMemory:

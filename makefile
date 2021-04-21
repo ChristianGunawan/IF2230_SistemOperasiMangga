@@ -17,7 +17,7 @@ shellpackage: fileloader mash insertls insertcd insertmkdir \
 			  insertcat insertcp insertmv insertln insertrm
 
 
-extrapackage: insertfile insertwc
+extrapackage: insertfile insertwc insertstrings
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
@@ -120,6 +120,15 @@ insertwc:
 			out/shell/std_stringio.o out/shell/shell_common.o \
 	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img wc 0
+
+insertstrings:
+	if [ ! -d "out/shell/strings" ]; then mkdir out/shell/strings; fi
+	@bcc -ansi -c -o out/shell/strings/strings.o src/strings.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/strings -d out/shell/strings/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img strings 0
 
 logoinsert:
 	@cp other/logo.hoho out/logo.hoho
