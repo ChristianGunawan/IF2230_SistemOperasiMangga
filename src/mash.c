@@ -331,6 +331,7 @@ void shell(char *cache) {
     char arg_execute[ARG_LENGTH];
     // char as 1 byte integer
     char io_buffer[SECTOR_SIZE];
+    char temp_file[FILE_SIZE_MAXIMUM];
     char current_dir_index = cache[CURRENT_DIR_CACHE_OFFSET];
     char is_between_quote_mark = false;
     int temp, returncode;
@@ -393,6 +394,7 @@ void shell(char *cache) {
         memcpy(cache+ARGV_3_OFFSET, arg_vector[3], ARG_LENGTH);
         cache[ARGC_OFFSET] = argc;
         setShellCache(cache);
+        clear(temp_file, FILE_SIZE_MAXIMUM);
         // Command evaluation, TODO : Move to program itself
         if (!forcestrcmp("./", arg_vector[0])) {
             // Do relative pathing if more than 1
@@ -418,9 +420,10 @@ void shell(char *cache) {
 
             // Preventing to loading empty arg_execute
             // Empty arg_execute will cause load kernel / restarting OS
+            read(temp_file, arg_execute, &returncode, evaluated_dir_idx);
             if (!strcmp("./", arg_vector[0]))
                 print("unknown command", BIOS_LIGHT_RED);
-            else if (returncode == 0)
+            else if (returncode == 0 && isBinaryFileMagicNumber(temp_file))
                 exec(arg_execute, 0x3000, evaluated_dir_idx);
             // If executed, this code wont run
             print(arg_execute, BIOS_WHITE);
@@ -455,7 +458,9 @@ void shell(char *cache) {
             // Empty string -> doing nothing
         }
         else {
-            exec(arg_vector[0], 0x3000, BIN_PARENT_FOLDER);
+            read(temp_file, arg_vector[0], &returncode, BIN_PARENT_FOLDER);
+            if (returncode == 0 && isBinaryFileMagicNumber(temp_file))
+                exec(arg_vector[0], 0x3000, BIN_PARENT_FOLDER);
             // If executed, this code wont run
             print(arg_vector[0], BIOS_WHITE);
             print(": command not found\n", BIOS_WHITE);

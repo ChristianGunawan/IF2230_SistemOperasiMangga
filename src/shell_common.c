@@ -30,6 +30,11 @@ void setShellCache(char *buffer) {
     write(buffer, "_mash_cache\0\0\0", &returncode, ROOT_PARENT_FOLDER);
 }
 
+bool isBinaryFileMagicNumber(char *buffer) {
+    return !forcestrcmp(EXECUTABLE_SIGNATURE, buffer);
+}
+
+
 
 char directoryEvaluator(char *dirtable, char *dirstr, int *returncode, char current_dir) {
     // FIXME : Extra, will have problem with file & folder with same name on same directory

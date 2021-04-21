@@ -34,6 +34,26 @@ int main() {
     shellReturn();
 }
 
+bool isTextCharOnly(char *buffer) {
+    int i = 0;
+    int null_count = 0;
+    bool isCharOnly = true;
+    while (i < FILE_SIZE_MAXIMUM && null_count < 5 && isCharOnly) {
+        if (buffer[i] == '\0')
+            null_count++;
+        else
+            null_count = 0;
+
+        if (!(CHAR_SPACE <= buffer[i] && buffer[i] <= CHAR_TILDE
+        || buffer[i] == CHAR_NULL || buffer[i] == CHAR_CARRIAGE_RETURN
+        || buffer[i] == CHAR_LINEFEED) )
+            isCharOnly = false;
+
+        i++;
+    }
+    return isCharOnly;
+}
+
 void file(char *dirtable, char current_dir_index, char *target) {
     // char as string / char
     char filename_buffer[16];
@@ -131,7 +151,12 @@ void file(char *dirtable, char current_dir_index, char *target) {
 
             if (returncode_src == 0 && target_entry_byte != EMPTY_FILES_ENTRY) {
                 if (target_entry_byte != FOLDER_ENTRY) {
-                    print("type : file\n", BIOS_WHITE);
+                    if (isBinaryFileMagicNumber(file_read))
+                        print("type : binary executable\n", BIOS_LIGHT_GREEN);
+                    else if (isTextCharOnly(file_read))
+                        print("type : text\n", BIOS_WHITE);
+                    else
+                        print("type : file\n", BIOS_WHITE);
 
                     clear(string_byte_count, 32);
                     clear(string_disk_byte_count, 32);
