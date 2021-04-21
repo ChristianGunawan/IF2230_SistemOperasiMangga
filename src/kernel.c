@@ -89,6 +89,9 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
                 case 0x2:
                     scrollScreenSingleRow();
                     break;
+                case 0x3:
+                    clearScreen();
+                    break;
             }
             break;
         case 0x1:

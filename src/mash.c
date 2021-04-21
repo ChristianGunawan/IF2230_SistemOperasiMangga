@@ -21,6 +21,7 @@ int main() {
     // Cache reading
     clear(cache_buffer, SECTOR_SIZE);
     getShellCache(cache_buffer);
+    showKeyboardCursor();
 
     // Empty cache case
     if (!forcestrcmp(EMPTY_CACHE, cache_buffer)) {
@@ -28,8 +29,6 @@ int main() {
         cache_buffer[CURRENT_DIR_CACHE_OFFSET] = ROOT_PARENT_FOLDER;
         cache_buffer[CACHE_SIGNATURE_OFFSET] = CACHE_SIGNATURE;
     }
-
-    // TODO : Previous cache case
 
     setShellCache(cache_buffer);
     shell(cache_buffer);
@@ -442,6 +441,10 @@ void shell(char *cache) {
                     getDirectoryTable(directory_table);
                 }
             }
+        }
+        else if (!strcmp("clear", arg_vector[0])) {
+            clearEntireScreen();
+            setKeyboardCursor(0, 0);
         }
         else if (!strcmp("", arg_vector[0])) {
             // WARNING : Multiple space in single block will count as multiple argument due to argsplit above

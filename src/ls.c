@@ -49,19 +49,26 @@ void ls(char *dirtable, char target_dir) {
     char filename_buffer[16];
     // Use char as 1 byte integer
     char parent_byte_entry, entry_byte_entry;
+    char print_color;
     while (i < FILES_ENTRY_COUNT) {
         parent_byte_entry = dirtable[FILES_ENTRY_SIZE*i+PARENT_BYTE_OFFSET];
         entry_byte_entry = dirtable[FILES_ENTRY_SIZE*i+ENTRY_BYTE_OFFSET];
         if (parent_byte_entry == target_dir && entry_byte_entry != EMPTY_FILES_ENTRY) {
             clear(filename_buffer, 16);
             strcpybounded(filename_buffer, dirtable+FILES_ENTRY_SIZE*i+PATHNAME_BYTE_OFFSET, 14);
+
+            if (entry_byte_entry == FOLDER_ENTRY)
+                print_color = BIOS_LIGHT_BLUE;
+            else
+                print_color = BIOS_LIGHT_GREEN;
+
             if (isCharInString(CHAR_SPACE, filename_buffer)) {
-                print("\"");
-                print(filename_buffer, BIOS_LIGHT_GREEN);
-                print("\"");
+                print("\"", BIOS_GRAY);
+                print(filename_buffer, print_color);
+                print("\"", BIOS_GRAY);
             }
             else
-                print(filename_buffer, BIOS_LIGHT_GREEN);
+                print(filename_buffer, print_color);
             print(" ");
         }
         i++;

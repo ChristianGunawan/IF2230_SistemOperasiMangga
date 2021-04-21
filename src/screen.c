@@ -49,7 +49,7 @@ void clearScreen() {
     int i = 0;
     while (i < 4096) {
         charVideoMemoryWrite(2*i, ' ');
-        charVideoMemoryWrite(1 + 2*i, 0x0);
+        // charVideoMemoryWrite(1 + 2*i, 0x0);
         i++;
     }
 }

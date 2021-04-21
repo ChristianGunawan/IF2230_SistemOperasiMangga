@@ -260,3 +260,7 @@ int getKeyboardCursor(bool isrow) {
 void scrollScreen() {
     interrupt(0x21, 0x00, 0, 0x02, 0);
 }
+
+void clearEntireScreen() {
+    interrupt(0x21, 0x00, 0, 0x03, 0);
+}
