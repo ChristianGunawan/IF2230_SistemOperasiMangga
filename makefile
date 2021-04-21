@@ -130,6 +130,15 @@ insertstrings:
 	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img strings 0
 
+createrecursiontest:
+	if [ ! -d "out/shell/recursion_test" ]; then mkdir out/shell/recursion_test; fi
+	@bcc -ansi -c -o out/shell/recursion_test/recursion_test.o src/recursion_test.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/recursion_test -d out/shell/recursion_test/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img recursion_test 0
+
 logoinsert:
 	@cp other/logo.hoho out/logo.hoho
 	@cd out; ./loadFile mangga.img logo.hoho 255
