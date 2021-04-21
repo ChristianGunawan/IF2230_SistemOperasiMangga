@@ -15,6 +15,9 @@ void shell();
 //      used as shell history
 // rest of cache used as argv
 
+// CTRL + F / find Activate autocompletion for adding directory
+//      autocomplete for arbitrary commands
+
 int main() {
     char cache_buffer[SECTOR_SIZE];
     int returncode;
@@ -180,6 +183,7 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                         argc = split_j + 1; // Due split_j is between counting space between 2 args
 
                         is_autocomplete_available = false;
+                        // ------ Activate autocompletion feature here ------
                         if (argc == 4 &&
                             (  isLastSubstring(arg_vector[0], "cp") || isLastSubstring(arg_vector[0], "mv")
                             || isLastSubstring(arg_vector[0], "ln"))
@@ -199,7 +203,8 @@ void shellInput(char *commands_history, char *dirtable, char current_dir) {
                         else if (isLastSubstring(arg_vector[0], "ls") || isLastSubstring(arg_vector[0], "cat")
                             || isLastSubstring(arg_vector[0], "cd") || isLastSubstring(arg_vector[0], "cp")
                             || isLastSubstring(arg_vector[0], "mv") || isLastSubstring(arg_vector[0], "ln")
-                            || isLastSubstring(arg_vector[0], "rm") || isLastSubstring(arg_vector[0], "file")) {
+                            || isLastSubstring(arg_vector[0], "rm") || isLastSubstring(arg_vector[0], "file")
+                            || isLastSubstring(arg_vector[0], "wc")) {
                             // Second arg autocomplete
                             target_copy_arg_idx = 1;
                             is_autocomplete_available = true;

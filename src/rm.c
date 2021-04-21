@@ -38,7 +38,6 @@ int main() {
     shellReturn();
 }
 
-// TODO : Autocomplete & relative pathing
 void rm(char *dirtable, char current_dir_index, char flags, char *target) {
     // Technically just "copy" of previous implementation of ln
     // char as string / char

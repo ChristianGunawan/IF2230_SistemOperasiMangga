@@ -1,6 +1,6 @@
 # 13519214 - Makefile
 all: diskimage bootloader kernel createfilesystem \
-	 insertfilesystem fileloader shellpackage logoinsert
+	 insertfilesystem fileloader shellpackage logoinsert extrapackage
 
 clean:
 	# -- Cleaning output files --
@@ -14,8 +14,10 @@ test: kernelgcc
 cleantest: cleangcc
 
 shellpackage: fileloader mash insertls insertcd insertmkdir \
-			  insertcat insertcp insertmv insertln insertrm \
-			  insertfile
+			  insertcat insertcp insertmv insertln insertrm
+
+
+extrapackage: insertfile insertwc
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
@@ -109,6 +111,15 @@ insertfile:
 			out/shell/std_stringio.o out/shell/shell_common.o \
 	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img file 0
+
+insertwc:
+	if [ ! -d "out/shell/wc" ]; then mkdir out/shell/wc; fi
+	@bcc -ansi -c -o out/shell/wc/wc.o src/wc.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/wc -d out/shell/wc/*.o out/shell/std_fileio.o \
+			out/shell/std_stringio.o out/shell/shell_common.o \
+	 		out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img wc 0
 
 logoinsert:
 	@cp other/logo.hoho out/logo.hoho
