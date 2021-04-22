@@ -17,7 +17,7 @@ Tanur Rizaldi Rahardjo  | 13519214
 5. Jika hanya ingin menjalankan gunakan `./run.sh`
 
 ## Package makefile
-Jika tidak menginginkan menjalankan secara penuh menggunakan `./build-run.sh` dapat mencompile 
+Jika tidak menginginkan menjalankan secara penuh menggunakan `./build-run.sh` dapat mencompile
 program secara sebagian saja dengan command `make`, berikut recipe yang tersedia
 
 Recipe       | Target
@@ -32,7 +32,7 @@ extrapackage | Insersi bonus utility program, cek isi [disini](###bonus-mileston
 Untuk program loadFile, gunakan `make fileloader` untuk membuat program, program akan terletak pada
 folder other dengan nama **loadFile**.
 
-Program dapat dijalankan dengan `./loadFile <target image> <file>` untuk memasukan file kedalam image. 
+Program dapat dijalankan dengan `./loadFile <target image> <file>` untuk memasukan file kedalam image.
 Contoh dari command tersebut adalah `./loadFile mangga.img inputfile1`.
 
 
@@ -62,59 +62,59 @@ Pada tahap ini digunakan utility `dd` untuk membentuk image yang bernama `mangga
 Bootloader dibuat dengan mengikuti kit yang telah disediakan dan dicompile menggunakan `nasm`.
 
 #### 3.3. Pembuatan kernel
-Kernel dibuat menggunakan kit yang disediakan dan mengikuti spesifikasi yang diminta. 
+Kernel dibuat menggunakan kit yang disediakan dan mengikuti spesifikasi yang diminta.
 Fungsi-fungsi yang terdapat pada spesifikasi diimplementasi tanpa penambahan fitur.
-Pada tahap ini juga dibuat `bash` script dan makefile yang dapat digunakan untuk membentuk 
+Pada tahap ini juga dibuat `bash` script dan makefile yang dapat digunakan untuk membentuk
 kernel secara otomatis
 
 #### 3.4. Menjalankan sistem operasi
-Konfigurasi `if2230.config` dirubah pada penamaan disk imagenya dikarenakan perubahan nama 
+Konfigurasi `if2230.config` dirubah pada penamaan disk imagenya dikarenakan perubahan nama
 yang dilakukan pada tahap [pembuatan disk image](####3.1.-persiapan-disk-image) sebelumnya.
 
 #### 3.5. Implementasi interrupt 0x21
 Untuk implementasi `printString` dan `readString` digunakan interrupt yang sesuai keperluannya.
-Bagian untuk operasi string sederhana ditulis pada `std` dan bagian penulisan kelayar ditulis pada 
-`screen`. Implementasi `handleInterrupt21` mengikuti spesifikasi yang diberikan dan menambahkan beberapa 
-servis tambahan yang dapat digunakan library nantinya. Pada tahap ini juga diimplentasikan operasi sederhana 
+Bagian untuk operasi string sederhana ditulis pada `std` dan bagian penulisan kelayar ditulis pada
+`screen`. Implementasi `handleInterrupt21` mengikuti spesifikasi yang diberikan dan menambahkan beberapa
+servis tambahan yang dapat digunakan library nantinya. Pada tahap ini juga diimplentasikan operasi sederhana
 mod yang dapat digunakan sistem operasi.
 
 
 
 ### Milestone II
 #### 3.1. Pembuatan filesystem
-Pada tahap ini dibuat `filesystemcreator` yang mempermudah otomatisasi build kernel sebelum melanjutkan ke 
-pembuatan filesystem pada kernel. `filesystemcreator` membentuk secara otomatis `map`, `files`, dan `sectors` 
-menuruti konfigurasi yang digunakan. Konfigurasi tersebut dapat diganti jika ingin membuat konvensi filesystem 
+Pada tahap ini dibuat `filesystemcreator` yang mempermudah otomatisasi build kernel sebelum melanjutkan ke
+pembuatan filesystem pada kernel. `filesystemcreator` membentuk secara otomatis `map`, `files`, dan `sectors`
+menuruti konfigurasi yang digunakan. Konfigurasi tersebut dapat diganti jika ingin membuat konvensi filesystem
 yang berbeda.
 
 #### 3.2. Pembuatan syscall readSector, writeSector, readFile dan writeFile
 Implementasi syscall readSector dan writeSector mengikuti spesifikasi yang diberikan. Untuk system call readFile
 dan writeFile, diimplementasikan mengikuti konvensi yang ditulis pada spesifikasi dengan tambahan.
-readFile dan writeFile dapat membaca dan membentuk folder menggunakan macro `FOLDER` pada buffer. 
+readFile dan writeFile dapat membaca dan membentuk folder menggunakan macro `FOLDER` pada buffer.
 readFile akan mengembalikan `FOLDER` pada buffer dan writeFile akan menuliskan folder yang memiliki nama `path`.
 
 #### 3.3. Pembuatan program loadFile
-Program loadFile didasarkan pada writeFile namun diubah karena dicompile menggunakan `gcc`. Sebagian besar kode 
+Program loadFile didasarkan pada writeFile namun diubah karena dicompile menggunakan `gcc`. Sebagian besar kode
 hanya modifikasi secara minimum dari writeFile.
 
 #### 3.4. Membuat shell sederhana
-Shell dibuat dengan mensimulasikan user space dan kernel space, sehingga seluruh library `std` yang digunakan 
+Shell dibuat dengan mensimulasikan user space dan kernel space, sehingga seluruh library `std` yang digunakan
 `shell` tidak menggunakan system call kernel secara langsung. Library `std` akan menggunakan servis interrupt 0x21 yang
-sediakan oleh kernel. 
+sediakan oleh kernel.
 
-Pada pembuatan shell dibuat `directoryEvaluator` dan `directoryStringBuilder` yang sangat berguna 
-ketika melakukan operasi-operasi dasar pada filesystem. `directoryEvaluator` mempermudah evaluasi relative pathing suatu 
-program dengan mengembalikan hasil `P`-byte kepada caller. `directoryStringBuilder` dapat digunakan sebagai pembentuk absolute 
+Pada pembuatan shell dibuat `directoryEvaluator` dan `directoryStringBuilder` yang sangat berguna
+ketika melakukan operasi-operasi dasar pada filesystem. `directoryEvaluator` mempermudah evaluasi relative pathing suatu
+program dengan mengembalikan hasil `P`-byte kepada caller. `directoryStringBuilder` dapat digunakan sebagai pembentuk absolute
 directory string yang digunakan pada shell untuk membentuk current working directory.
 
 Shell memiliki fungsi input custom `shellInput` yang akan mengembalikan string input dan command history.
-Untuk memenuhi bonus autocomplete dan history, ditambahkan kode assembly `getFullKey` yang digunakan untuk mengambil 
-keycode dan scancode keyboard. `shellInput` menggunakan scancode dan keycode untuk menentukan tombol yang ditekan user dan 
+Untuk memenuhi bonus autocomplete dan history, ditambahkan kode assembly `getFullKey` yang digunakan untuk mengambil
+keycode dan scancode keyboard. `shellInput` menggunakan scancode dan keycode untuk menentukan tombol yang ditekan user dan
 melakukan operasi yang sesuai. Autocomplete dilakukan dengan tombol tab dan menggunakan `directoryEvaluator`.
-Command history disimpan pada queue yang dapat diakses dengan arrow keys. 
+Command history disimpan pada queue yang dapat diakses dengan arrow keys.
 
-`directoryEvaluator` mempermudah proses autocomplete dan memperbolehkan semua utility yang disupport 
-untuk melakukan autocomplete baik folder atau file. Autocomplete tidak membedakan file dan folder dikarenakan 
+`directoryEvaluator` mempermudah proses autocomplete dan memperbolehkan semua utility yang disupport
+untuk melakukan autocomplete baik folder atau file. Autocomplete tidak membedakan file dan folder dikarenakan
 dianggap dapat mempermudah user ketika melakukan operasi relative pathing.
 
 
@@ -123,11 +123,11 @@ dianggap dapat mempermudah user ketika melakukan operasi relative pathing.
 ### Milestone III
 #### 3.1. Membuat library sederhana
 Pada milestone II telah diimplementasikan wrapper system call yang selalu digunakan ketika implementasi `shell`
-sehingga tahap ini hanya memisakan modul pada `std`. Simulasi user space dan kernel space yang dilakukan pada 
-milestone II memperbolehkan melewati pengerjaan 3.1 dan 3.2, sehingga tahap ini dilakukan setelah tahap [eksekusi program](####3.3.-mengeksekusi-program). 
-Modul file I/O dan folder I/O tergabung menjadi satu pada 
-`std_fileio` dikarenakan menggunakan syscall yang sama namun berbeda argument yang diberikan. Modul teks dan 
-matematika dasar dinamai `std_stringio` dan `std_opr`. 
+sehingga tahap ini hanya memisakan modul pada `std`. Simulasi user space dan kernel space yang dilakukan pada
+milestone II memperbolehkan melewati pengerjaan 3.1 dan 3.2, sehingga tahap ini dilakukan setelah tahap [eksekusi program](####3.3.-mengeksekusi-program).
+Modul file I/O dan folder I/O tergabung menjadi satu pada
+`std_fileio` dikarenakan menggunakan syscall yang sama namun berbeda argument yang diberikan. Modul teks dan
+matematika dasar dinamai `std_stringio` dan `std_opr`.
 
 #### 3.2. Membuat aplikasi utilitas
 Bagian ini dikerjakan setelah bagian [eksekusi program](####3.3.-mengeksekusi-program) telah diimplementasikan.
@@ -142,11 +142,11 @@ Program utilitas tersebut diletakkan pada folder `/bin/` yang dapat dieksekusi s
 
 #### 3.3. Mengeksekusi program
 OS menggunakan prosedur `launchProgram` dan `executeProgram` yang telah disediakan pada spesifikasi.
-Umumnya program akan dieksekusi pada segment memori `0x2000` atau `0x3000` dan tidak ditambahkan fitur 
-kembali kepada pemanggil prosedur dikarenakan keterbatasan waktu dan kernel space yang ada. 
+Umumnya program akan dieksekusi pada segment memori `0x2000` atau `0x3000` dan tidak ditambahkan fitur
+kembali kepada pemanggil prosedur dikarenakan keterbatasan waktu dan kernel space yang ada.
 
-Ketika implementasi digunakan secara ekstensif debugger milik bochs untuk mencari tahu letak kesalahan 
-kode yang dibuat. Utilitas `hexedit` juga digunakan untuk mengecek penulisan pembacaan `writeFile` 
+Ketika implementasi digunakan secara ekstensif debugger milik bochs untuk mencari tahu letak kesalahan
+kode yang dibuat. Utilitas `hexedit` juga digunakan untuk mengecek penulisan pembacaan `writeFile`
 dan `readFile` dapat menulis secara binary.
 
 #### 3.4. Batasan-batasan
@@ -163,9 +163,9 @@ Program utilitas memiliki ukuran dibawah 8192 bytes agar dapat di`loadFile` keda
 ## Spesifikasi Bonus
 ### Bonus milestone I
 Bonus boot logo diimplementasikan menggunakan boot logo mode grafis.
-Boot logo diproses secara sederhana menggunakan python package `pillow` 
+Boot logo diproses secara sederhana menggunakan python package `pillow`
 atau deprecated package `pil` yang menghasilkan logo dalam bentuk data sederhana.
-Nantinya data tersebut akan dibaca oleh kernel dan digunakan sebagai acuan 
+Nantinya data tersebut akan dibaca oleh kernel dan digunakan sebagai acuan
 cara menggambar. Script python yang digunakan terletak pada [other/conv.py](other/conv.py).
 
 ### Bonus milestone II
@@ -184,8 +184,9 @@ Berikut merupakan utility program yang ditambahkan pada package `extrapackage`
 + recursion_test
 + snok
 + whereis
++ printf
 
-Beberapa utility memiliki parameter yang dapat digunakan pengguna ketika 
+Beberapa utility memiliki parameter yang dapat digunakan pengguna ketika
 menggunakan OS, berikut adalah parameternya
 
 Utility | Parameter | Deskripsi
@@ -234,6 +235,9 @@ Berikut merupakan screenshot terbaru sistem operasi
 ### Hasil file dari text editor
 ![mim-file](other/img/mim-file-cat-wc.jpg)
 
+### Utilitas printf
+![printf-test](other/img/printf-util.jpg)
+
 
 
 ## System Requirements
@@ -244,7 +248,7 @@ Berikut merupakan screenshot terbaru sistem operasi
 1. Silberschatz, Galvin, Gagne. "Operating System Concepts", Chapter 10.
 2. Asisten Sistem Terdistribusi. "Milestone 2 - 2021".
 3. stanislavs.org/helppc/int_13.html
-   
+
 
 
 

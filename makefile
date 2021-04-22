@@ -19,7 +19,7 @@ shellpackage: basekernel fileloader mash insertls insertcd insertmkdir \
 
 
 extrapackage: shellpackage insertfile insertwc insertstrings insertmim \
-			  insertwhereis insertsnok
+			  insertwhereis insertsnok insertprintf
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
