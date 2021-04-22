@@ -1,6 +1,7 @@
 # 13519214 - Makefile
-all: diskimage bootloader kernel createfilesystem \
-	 insertfilesystem fileloader shellpackage extrapackage createrecursiontest logoinsert
+all: basekernel shellpackage extrapackage createrecursiontest logoinsert
+
+basekernel: diskimage bootloader kernel createfilesystem insertfilesystem
 
 clean:
 	# -- Cleaning output files --
@@ -18,7 +19,7 @@ shellpackage: fileloader mash insertls insertcd insertmkdir \
 
 
 extrapackage: insertfile insertwc insertstrings insertmim \
-			  insertsnok
+			  insertwhereis insertsnok
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
@@ -148,6 +149,15 @@ insertsnok:
 	out/shell/std_stringio.o out/shell/shell_common.o \
 	out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img snok 0
+
+insertwhereis:
+	if [ ! -d "out/shell/whereis" ]; then mkdir out/shell/whereis; fi
+	@bcc -ansi -c -o out/shell/whereis/whereis.o src/whereis.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/whereis -d out/shell/whereis/*.o out/shell/std_fileio.o \
+	out/shell/std_stringio.o out/shell/shell_common.o \
+	out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img whereis 0
 
 createrecursiontest:
 	if [ ! -d "out/shell/recursion_test" ]; then mkdir out/shell/recursion_test; fi

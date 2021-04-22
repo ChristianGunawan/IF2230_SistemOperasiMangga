@@ -5,7 +5,7 @@
 #include "basic-header/std_opr.h"
 #include "std-header/boolean.h"
 
-#define ENTRY_INDEX 0x12
+#define ENTRY_INDEX 0x13 // Set this
 
 int main() {
     int debug_retcode;

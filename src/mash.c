@@ -435,7 +435,6 @@ void shell(char *cache) {
                 evaluated_dir_idx = current_dir_index;
                 returncode = 0;
             }
-            // TODO : Softlink
 
             // Link check
             // Find entry in files
