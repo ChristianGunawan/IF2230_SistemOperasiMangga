@@ -212,7 +212,7 @@ void rm(char *dirtable, char current_dir_index, char flags, char *target) {
                                     && dirtable[i*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] != EMPTY_FILES_ENTRY) {
                                     clear(filename_buffer, 16);
                                     strcpybounded(filename_buffer, dirtable+i*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
-                                    file_delete(file_read, filename_buffer, returncode_src, current_recursion_parent_index, dirtable);
+                                    file_delete(file_read, filename_buffer, &returncode_src, current_recursion_parent_index, dirtable);
                                 }
                                 // If folder, pass failed
                                 else {
