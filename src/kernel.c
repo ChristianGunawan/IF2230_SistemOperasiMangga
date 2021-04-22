@@ -25,7 +25,7 @@ int main() {
     // Initial screen
     clearScreen();
     // DEBUG
-    // drawBootLogo(buf);     // Note : drawBootLogo() does not revert video mode
+    drawBootLogo(buf);     // Note : drawBootLogo() does not revert video mode
 
     // Change video mode and spawn shell
     interrupt(0x10, 0x0003, 0, 0, 0);
