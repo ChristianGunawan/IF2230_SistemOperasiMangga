@@ -1,6 +1,6 @@
 # 13519214 - Makefile
 all: diskimage bootloader kernel createfilesystem \
-	 insertfilesystem fileloader shellpackage extrapackage logoinsert createrecursiontest
+	 insertfilesystem fileloader shellpackage extrapackage createrecursiontest logoinsert
 
 clean:
 	# -- Cleaning output files --

@@ -129,6 +129,9 @@ void rm(char *dirtable, char current_dir_index, char flags, char *target) {
     char target_entry_byte = 0;
     char stack_but_without_typedef_because_im_scared_with_bcc[256]; // <3 stack, but not bcc :(
     char stack_top_pointer;
+    char deleted_dir_pointer;
+    char target_parent_dir[256];
+    char deleted_dir_list[256];
     char source_dir_idx;
     char current_recursion_parent_index;
     char stack_folder_idx;
@@ -196,15 +199,23 @@ void rm(char *dirtable, char current_dir_index, char flags, char *target) {
                 if (file_read[0] != NULL)
                     file_delete(file_read, source_directory_name, &returncode_src, source_dir_idx, dirtable);
                 else {
-
+                    i = 0;
+                    while (i < 256) {
+                        target_parent_dir[i] = 0;
+                        deleted_dir_list[i] = 0;
+                        i++;
+                    }
                     clear(stack_but_without_typedef_because_im_scared_with_bcc, 256);
                     stack_top_pointer = 0;
+                    deleted_dir_pointer = 0;
                     stack_but_without_typedef_because_im_scared_with_bcc[0] = source_dir_idx;
+                    deleted_dir_list[0] = source_dir_idx;
 
                     while (!recursion_loop_pass_success) {
                         i = 0;
                         recursion_loop_pass_success = true;
                         current_recursion_parent_index = stack_but_without_typedef_because_im_scared_with_bcc[stack_top_pointer];
+                        target_parent_dir[stack_top_pointer] = 0;
                         while (i < FILES_ENTRY_COUNT) {
                             if (current_recursion_parent_index == dirtable[i*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET]) {
                                 // If still file, pass is still success
@@ -217,12 +228,30 @@ void rm(char *dirtable, char current_dir_index, char flags, char *target) {
                                 // If folder, pass failed
                                 else {
                                     stack_top_pointer++;
+                                    deleted_dir_pointer++;
                                     stack_but_without_typedef_because_im_scared_with_bcc[stack_top_pointer] = i;
+                                    target_parent_dir[stack_top_pointer] = current_recursion_parent_index;
+                                    deleted_dir_list[deleted_dir_pointer] = i;
                                     recursion_loop_pass_success = false;
                                 }
                             }
                             i++;
                         }
+
+
+                        if (recursion_loop_pass_success) {
+                            i = stack_top_pointer;
+                            while (i > 0) {
+                                if (target_parent_dir[i] != 0) {
+                                    // Stack unwinding
+                                    stack_top_pointer = i;
+                                    recursion_loop_pass_success = false;
+                                    break;
+                                }
+                                i--;
+                            }
+                        }
+
                     }
 
                     // Folder stack deletion
@@ -230,8 +259,8 @@ void rm(char *dirtable, char current_dir_index, char flags, char *target) {
                     getDirectoryTable(dirtable);
                     // Find entry in files
                     i = 0;
-                    while (i <= stack_top_pointer) {
-                        stack_folder_idx = stack_but_without_typedef_because_im_scared_with_bcc[i];
+                    while (i <= deleted_dir_pointer) {
+                        stack_folder_idx = deleted_dir_list[i];
                         dirtable[stack_folder_idx*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET] = ROOT_PARENT_FOLDER;
                         dirtable[stack_folder_idx*FILES_ENTRY_SIZE+ENTRY_BYTE_OFFSET] = EMPTY_FILES_ENTRY;
                         clear(filename_buffer, 16);
