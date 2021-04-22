@@ -130,10 +130,13 @@ void file(char *dirtable, char current_dir_index, char *target) {
             print(source_directory_name, BIOS_WHITE);
             print("\n", BIOS_WHITE);
 
-            if (link_status == HARDLINK_ENTRY)
-                print("type : hardlink\n", BIOS_WHITE);
+            if (link_status == HARDLINK_ENTRY) {
+                print("type : ", BIOS_WHITE);
+                print("hardlink\n", BIOS_LIGHT_RED);
+            }
             else if (link_status == SOFTLINK_ENTRY) {
-                print("type : softlink\n", BIOS_WHITE);
+                print("type : ", BIOS_WHITE);
+                print("softlink\n", BIOS_LIGHT_CYAN);
                 // Get linked file / folder with recursion depth limit 16
                 i = 0;
                 // TODO : Extra, currently only single softlink depth supported
@@ -151,8 +154,10 @@ void file(char *dirtable, char current_dir_index, char *target) {
 
             if (returncode_src == 0 && target_entry_byte != EMPTY_FILES_ENTRY) {
                 if (target_entry_byte != FOLDER_ENTRY) {
-                    if (isBinaryFileMagicNumber(file_read))
-                        print("type : binary executable\n", BIOS_LIGHT_GREEN);
+                    if (isBinaryFileMagicNumber(file_read)) {
+                        print("type : ", BIOS_WHITE);
+                        print("binary executable\n", BIOS_LIGHT_GREEN);
+                    }
                     else if (isTextCharOnly(file_read))
                         print("type : text\n", BIOS_WHITE);
                     else
