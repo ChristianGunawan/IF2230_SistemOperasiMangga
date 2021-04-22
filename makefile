@@ -14,11 +14,11 @@ test: kernelgcc
 
 cleantest: cleangcc
 
-shellpackage: fileloader mash insertls insertcd insertmkdir \
+shellpackage: basekernel fileloader mash insertls insertcd insertmkdir \
 			  insertcat insertcp insertmv insertln insertrm
 
 
-extrapackage: insertfile insertwc insertstrings insertmim \
+extrapackage: shellpackage insertfile insertwc insertstrings insertmim \
 			  insertwhereis insertsnok
 
 mash:
@@ -158,6 +158,15 @@ insertwhereis:
 	out/shell/std_stringio.o out/shell/shell_common.o \
 	out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img whereis 0
+
+insertprintf:
+	if [ ! -d "out/shell/printf" ]; then mkdir out/shell/printf; fi
+	@bcc -ansi -c -o out/shell/printf/printf.o src/printf.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/printf -d out/shell/printf/*.o out/shell/std_fileio.o \
+	out/shell/std_stringio.o out/shell/shell_common.o \
+	out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img printf 0
 
 createrecursiontest:
 	if [ ! -d "out/shell/recursion_test" ]; then mkdir out/shell/recursion_test; fi
