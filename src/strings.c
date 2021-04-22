@@ -127,7 +127,6 @@ void strings(char *dirtable, char current_dir_index, char *target) {
 
             if (returncode_src == 0 && target_entry_byte != EMPTY_FILES_ENTRY) {
                 if (target_entry_byte != FOLDER_ENTRY) {
-
                     clear(string_word_count, 32);
 
                     i = 0;

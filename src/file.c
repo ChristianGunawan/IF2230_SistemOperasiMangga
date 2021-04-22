@@ -165,7 +165,7 @@ void file(char *dirtable, char current_dir_index, char *target) {
 
                     clear(string_byte_count, 32);
                     clear(string_disk_byte_count, 32);
-                    inttostr(string_byte_count, strlenbin(file_read));
+                    inttostr(string_byte_count, strlenbin(file_read) - 5);
                     print("file size : ", BIOS_WHITE);
                     print(string_byte_count, BIOS_WHITE);
 

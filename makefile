@@ -17,7 +17,7 @@ shellpackage: fileloader mash insertls insertcd insertmkdir \
 			  insertcat insertcp insertmv insertln insertrm
 
 
-extrapackage: insertfile insertwc insertstrings
+extrapackage: insertfile insertwc insertstrings insertmim
 
 mash:
 	if [ ! -d "out/shell" ]; then mkdir out/shell; fi
@@ -129,6 +129,15 @@ insertstrings:
 			out/shell/std_stringio.o out/shell/shell_common.o \
 	 		out/shell/std_opr.o out/shell/asm/interrupt.o
 	@cd out; ./loadFile mangga.img strings 0
+
+insertmim:
+	if [ ! -d "out/shell/mim" ]; then mkdir out/shell/mim; fi
+	@bcc -ansi -c -o out/shell/mim/mim.o src/mim.c
+	@nasm -f as86 src/asm/interrupt.asm -o out/shell/asm/interrupt.o
+	@ld86 -o out/mim -d out/shell/mim/*.o out/shell/std_fileio.o \
+	out/shell/std_stringio.o out/shell/shell_common.o \
+	out/shell/std_opr.o out/shell/asm/interrupt.o
+	@cd out; ./loadFile mangga.img mim 0
 
 createrecursiontest:
 	if [ ! -d "out/shell/recursion_test" ]; then mkdir out/shell/recursion_test; fi
