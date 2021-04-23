@@ -26,7 +26,13 @@ int main() {
 
     // Argument count
     if (argc == 2 || argc == 3) {
-        if (!strcmp("-r", arg_vector[0]))
+        if (!strcmp("--help", arg_vector[0])) {
+            print("Utility to delete file\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("rm [file_name]\n", BIOS_LIGHT_CYAN);
+            print("rm -r [folder_name]\n", BIOS_LIGHT_CYAN);
+        }
+        else if (!strcmp("-r", arg_vector[0]))
             rm(directory_table, current_dir_index, 1, arg_vector[1]);
         else
             rm(directory_table, current_dir_index, 0, arg_vector[0]);
