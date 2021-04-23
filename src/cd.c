@@ -22,8 +22,16 @@ int main() {
     argc = shell_cache[ARGC_OFFSET];
 
     if (argc == 2) {
-        new_index = cd(directory_table, dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
-        shell_cache[CURRENT_DIR_CACHE_OFFSET] = new_index;
+        if (!strcmp("--help", dirstr)) {
+            print("Utility to change working directory\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("cd [directory_name]\n", BIOS_LIGHT_CYAN);
+            print("cd ..\n", BIOS_LIGHT_CYAN);
+        }
+        else {
+            new_index = cd(directory_table, dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
+            shell_cache[CURRENT_DIR_CACHE_OFFSET] = new_index;
+        }
     }
     else if (argc == 1)
         shell_cache[CURRENT_DIR_CACHE_OFFSET] = ROOT_PARENT_FOLDER;
