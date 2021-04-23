@@ -28,7 +28,13 @@ int main() {
     current_dir_index = shell_cache[CURRENT_DIR_CACHE_OFFSET];
 
     // Argument count
-    if (argc >= 3) {
+    if (argc == 2 && !strcmp("--help", arg_vector[0])) {
+        print("Utility to create a hard link or a symbolic link (symlink) to an existing file or directory\n", BIOS_WHITE);
+        print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+        print("ln [source_directory] [destination_directory]\n", BIOS_LIGHT_CYAN);
+        print("ln -s [source_directory] [destination_directory]\n", BIOS_LIGHT_CYAN);
+    }
+    else if (argc >= 3) {
         if (!strcmp("-s", arg_vector[0])) {
             print("ln: softlink mode\n", BIOS_WHITE);
             ln(directory_table, current_dir_index, 1, arg_vector[1], arg_vector[2]);
