@@ -38,17 +38,22 @@ int main() {
 
 void mkdir(char *foldername, char current_dir_index) {
     int returncode;
-    write(FOLDER, foldername, &returncode, current_dir_index);
-    switch (returncode) {
-        case 0:
+    // Slash checking
+    if (getLastMatchedCharIdx(CHAR_SLASH, foldername) == -1) {
+        write(FOLDER, foldername, &returncode, current_dir_index);
+        switch (returncode) {
+            case 0:
             // Do nothing
-            break;
-        case -1:
-            print("mkdir: ", BIOS_WHITE);
-            print(foldername, BIOS_WHITE);
-            print(" exist\n", BIOS_WHITE);
-            break;
-        default:
-            print("Usage : mkdir <name>\n");
+                break;
+            case -1:
+                print("mkdir: ", BIOS_WHITE);
+                print(foldername, BIOS_WHITE);
+                print(" exist\n", BIOS_WHITE);
+                break;
+            default:
+                print("Usage : mkdir <name>\n");
+        }
     }
+    else
+        print("mkdir: invalid directory name\n", BIOS_WHITE);
 }

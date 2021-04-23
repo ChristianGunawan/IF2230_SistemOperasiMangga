@@ -29,7 +29,7 @@ int main() {
 
     // Argument count
     if (argc == 2 && !strcmp("--help", arg_vector[0])) {
-        print("Utility to create a hard link or a symbolic link (symlink) to an existing file or directory\n", BIOS_WHITE);
+        print("Utility to create a hard link or a symbolic link (symlink)\n to an existing file or directory\n", BIOS_WHITE);
         print("Possible Usage:\n", BIOS_LIGHT_BLUE);
         print("ln [source_directory] [destination_directory]\n", BIOS_LIGHT_CYAN);
         print("ln -s [source_directory] [destination_directory]\n", BIOS_LIGHT_CYAN);

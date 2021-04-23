@@ -66,6 +66,9 @@ void ls(char *dirtable, char target_dir) {
     char print_color;
     char link_byte_entry;
     while (i < FILES_ENTRY_COUNT) {
+        if (getKeyboardCursor(0) > 50)
+            print("\n", BIOS_WHITE);
+
         parent_byte_entry = dirtable[FILES_ENTRY_SIZE*i+PARENT_BYTE_OFFSET];
         entry_byte_entry = dirtable[FILES_ENTRY_SIZE*i+ENTRY_BYTE_OFFSET];
         link_byte_entry = dirtable[FILES_ENTRY_SIZE*i+LINK_BYTE_OFFSET];
@@ -89,9 +92,9 @@ void ls(char *dirtable, char target_dir) {
             }
             else
                 print(filename_buffer, print_color);
-            print(" ");
+            print(" ", BIOS_WHITE);
         }
         i++;
     }
-    print("\n");
+    print("\n", BIOS_WHITE);
 }
