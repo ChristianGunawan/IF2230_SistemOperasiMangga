@@ -21,8 +21,15 @@ int main() {
 
     // Argument count
     if (argc == 2) {
-       mkdir(dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
-       setShellCache(shell_cache);
+        if (!strcmp("--help", dirstr)) {
+            print("Utility to create a new folder/directory\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("mkdir [folder_name]\n", BIOS_LIGHT_CYAN);
+        }
+        else {
+            mkdir(dirstr, shell_cache[CURRENT_DIR_CACHE_OFFSET]);
+            setShellCache(shell_cache);
+        }
     }
     else
         print("Usage : mkdir <name>\n", BIOS_WHITE);
