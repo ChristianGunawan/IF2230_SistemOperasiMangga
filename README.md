@@ -133,12 +133,12 @@ matematika dasar dinamai `std_stringio` dan `std_opr`.
 #### 3.2. Membuat aplikasi utilitas
 Bagian ini dikerjakan setelah bagian [eksekusi program](#33-mengeksekusi-program) telah diimplementasikan.
 Utilitas wajib berikut telah diimplementasikan pada OS
-- mv
-- cp
-- mkdir
-- rm
-- cat
-- ln
+- mv = memindahkan file/folder
+- cp = mengcopy file/folder
+- mkdir = membuat directory
+- rm = menghapus file/folder
+- cat = mencetak isi file)
+- ln = membuat symbolic link
 
 Program utilitas tersebut diletakkan pada folder `/bin/` yang dapat dieksekusi shell dimana saja.
 
