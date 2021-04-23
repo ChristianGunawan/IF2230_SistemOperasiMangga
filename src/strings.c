@@ -26,7 +26,14 @@ int main() {
 
     // Argument count
     if (argc == 2)
-        strings(directory_table, current_dir_index, arg_vector[0]);
+        if (!strcmp("--help", arg_vector[0])) {
+            print("Utility to print any printable character in file\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("strings [file_name]\n", BIOS_LIGHT_CYAN);
+        }
+        else {
+            strings(directory_table, current_dir_index, arg_vector[0]);
+        }
     else
         print("Usage : strings <source>\n", BIOS_WHITE);
 
