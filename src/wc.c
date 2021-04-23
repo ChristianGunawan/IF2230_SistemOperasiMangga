@@ -26,7 +26,14 @@ int main() {
 
     // Argument count
     if (argc == 2)
-        wc(directory_table, current_dir_index, arg_vector[0]);
+        if (!strcmp("--help", arg_vector[0])) {
+            print("Utility to view word count of a file\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("wc [file_name]\n", BIOS_LIGHT_CYAN);
+        }
+        else {
+            wc(directory_table, current_dir_index, arg_vector[0]);
+        }
     else
         print("Usage : wc <source>\n", BIOS_WHITE);
 
