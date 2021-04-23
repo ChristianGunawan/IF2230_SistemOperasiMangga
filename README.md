@@ -133,14 +133,14 @@ matematika dasar dinamai `std_stringio` dan `std_opr`.
 #### 3.2. Membuat aplikasi utilitas
 Bagian ini dikerjakan setelah bagian [eksekusi program](#33-mengeksekusi-program) telah diimplementasikan.
 Utilitas wajib berikut telah diimplementasikan pada OS
-Utilitas | Fungsi | Cara Kerja 
---------------------------------
-mv | Memindahkan file/folder | 
-cp | Mngcopy file/folder | 
-mkdir | Mmbuat directory | 
-rm | Menghapus file/folder | 
-cat | Mencetak isi file | | 
-ln | Membuat symbolic link | 
+Utilitas  | Fungsi                    | Cara Kerja 
+----------|---------------------------|-------------------
+mv        | Memindahkan file/folder   | 
+cp        | Mengcopy file/folder      | 
+mkdir     | Mmbuat directory          | 
+rm        | Menghapus file/folder     |  
+cat       | Mencetak isi file         |  
+ln        | Membuat symbolic link     | 
 
 Program utilitas tersebut diletakkan pada folder `/bin/` yang dapat dieksekusi shell dimana saja.
 
