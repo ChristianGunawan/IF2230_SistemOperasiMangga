@@ -29,7 +29,14 @@ int main() {
 
     // Argument count
     if (argc == 2)
-        mim_editor(arg_vector[0], current_dir_index, directory_table);
+        if (!strcmp("--help", arg_vector[0])) {
+            print("Utility to create/edit file in mim text editor\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("mim [file_name]\n", BIOS_LIGHT_CYAN);
+        }
+        else {
+            mim_editor(arg_vector[0], current_dir_index, directory_table);
+        }
     else
         print("Usage : mim <source>\n", BIOS_WHITE);
 
