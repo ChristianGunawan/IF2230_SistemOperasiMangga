@@ -32,26 +32,34 @@ int main() {
 
     // Argument count
     if (argc == 2) {
-        i = 0;
-        while (i < FILES_ENTRY_COUNT) {
-            clear(filename_buffer, 16);
-            strcpybounded(filename_buffer, directory_table+i*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
-            if (!strcmp(filename_buffer, arg_vector[0])) {
-                any_match = true;
-                clear(absolute_path, 256);
-                directoryStringBuilder(absolute_path, directory_table, directory_table[i*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET]);
-                strapp(absolute_path, "/");
-                strapp(absolute_path, arg_vector[0]);
-                print(absolute_path, BIOS_LIGHT_BLUE);
-                print("\n", BIOS_WHITE);
-            }
-            i++;
+        if (!strcmp("--help", arg_vector[0])) {
+            print("Utility to find the location of source/binary file of a command and manuals sections for a specified file\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("whereis [file_name]\n", BIOS_LIGHT_CYAN);
+            print("whereis [folder_name]\n", BIOS_LIGHT_CYAN);
         }
+        else {
+            i = 0;
+            while (i < FILES_ENTRY_COUNT) {
+                clear(filename_buffer, 16);
+                strcpybounded(filename_buffer, directory_table+i*FILES_ENTRY_SIZE+PATHNAME_BYTE_OFFSET, 14);
+                if (!strcmp(filename_buffer, arg_vector[0])) {
+                    any_match = true;
+                    clear(absolute_path, 256);
+                    directoryStringBuilder(absolute_path, directory_table, directory_table[i*FILES_ENTRY_SIZE+PARENT_BYTE_OFFSET]);
+                    strapp(absolute_path, "/");
+                    strapp(absolute_path, arg_vector[0]);
+                    print(absolute_path, BIOS_LIGHT_BLUE);
+                    print("\n", BIOS_WHITE);
+                }
+                i++;
+            }
 
-        if (!any_match) {
-            print("whereis: ", BIOS_WHITE);
-            print(arg_vector[1], BIOS_WHITE);
-            print(" not found", BIOS_WHITE);
+            if (!any_match) {
+                print("whereis: ", BIOS_WHITE);
+                print(arg_vector[1], BIOS_WHITE);
+                print(" not found", BIOS_WHITE);
+            }
         }
     }
     else
