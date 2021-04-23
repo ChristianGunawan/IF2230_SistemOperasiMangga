@@ -25,7 +25,7 @@ Recipe       | Target
 all          | Membuat seluruh package
 basekernel   | Membuat kernel saja tanpa shell
 shellpackage | Insersi spesifikasi wajib shell
-extrapackage | Insersi bonus utility program, cek isi [disini](###bonus-milestone-iii)
+extrapackage | Insersi bonus utility program, cek isi [disini](#bonus-milestone-iii)
 
 
 ## Program loadFile
@@ -47,6 +47,7 @@ Milestone I dan II juga menggunakan beberapa fungsi pendukung yang terdapat di b
 3. screen.c
 4. shell.c
 5. std.c
+
 dan beberapa header yang juga menjadi header atas .c tersebut.
 
 
@@ -69,7 +70,7 @@ kernel secara otomatis
 
 #### 3.4. Menjalankan sistem operasi
 Konfigurasi `if2230.config` dirubah pada penamaan disk imagenya dikarenakan perubahan nama
-yang dilakukan pada tahap [pembuatan disk image](####3.1.-persiapan-disk-image) sebelumnya.
+yang dilakukan pada tahap [pembuatan disk image](#31-persiapan-disk-image) sebelumnya.
 
 #### 3.5. Implementasi interrupt 0x21
 Untuk implementasi `printString` dan `readString` digunakan interrupt yang sesuai keperluannya.
@@ -124,13 +125,13 @@ dianggap dapat mempermudah user ketika melakukan operasi relative pathing.
 #### 3.1. Membuat library sederhana
 Pada milestone II telah diimplementasikan wrapper system call yang selalu digunakan ketika implementasi `shell`
 sehingga tahap ini hanya memisakan modul pada `std`. Simulasi user space dan kernel space yang dilakukan pada
-milestone II memperbolehkan melewati pengerjaan 3.1 dan 3.2, sehingga tahap ini dilakukan setelah tahap [eksekusi program](####3.3.-mengeksekusi-program).
+milestone II memperbolehkan melewati pengerjaan 3.1 dan 3.2, sehingga tahap ini dilakukan setelah tahap [eksekusi program](#33-mengeksekusi-program).
 Modul file I/O dan folder I/O tergabung menjadi satu pada
 `std_fileio` dikarenakan menggunakan syscall yang sama namun berbeda argument yang diberikan. Modul teks dan
 matematika dasar dinamai `std_stringio` dan `std_opr`.
 
 #### 3.2. Membuat aplikasi utilitas
-Bagian ini dikerjakan setelah bagian [eksekusi program](####3.3.-mengeksekusi-program) telah diimplementasikan.
+Bagian ini dikerjakan setelah bagian [eksekusi program](#33-mengeksekusi-program) telah diimplementasikan.
 Utilitas wajib berikut telah diimplementasikan pada OS
 - mv
 - cp
@@ -138,6 +139,7 @@ Utilitas wajib berikut telah diimplementasikan pada OS
 - rm
 - cat
 - ln
+
 Program utilitas tersebut diletakkan pada folder `/bin/` yang dapat dieksekusi shell dimana saja.
 
 #### 3.3. Mengeksekusi program
