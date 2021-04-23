@@ -135,12 +135,12 @@ Bagian ini dikerjakan setelah bagian [eksekusi program](#33-mengeksekusi-program
 Utilitas wajib berikut telah diimplementasikan pada OS
 Utilitas  | Fungsi                    | Cara Kerja 
 ----------|---------------------------|-------------------
-mv        | Memindahkan file/folder   | mv [nama file/folder] [source destination]
-cp        | Mengcopy file/folder      | 
-mkdir     | Mmbuat directory          | 
-rm        | Menghapus file/folder     |  
-cat       | Mencetak isi file         |  
-ln        | Membuat symbolic link     | 
+mv        | Memindahkan file/folder   | mv [file/folder] [source destination]
+cp        | Mengcopy file/folder      | cp [file/folder] [source destination]
+mkdir     | Mmbuat directory          | mkdir [folder] 
+rm        | Menghapus file/folder     | rm [file/folder]
+cat       | Mencetak isi file         | cat [file/folder] 
+ln        | Membuat symbolic link     | ln -s [file yang mau dilink] [file yang akan dilink] 
 
 Program utilitas tersebut diletakkan pada folder `/bin/` yang dapat dieksekusi shell dimana saja.
 
