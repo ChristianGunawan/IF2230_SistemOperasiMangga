@@ -135,7 +135,7 @@ Bagian ini dikerjakan setelah bagian [eksekusi program](#33-mengeksekusi-program
 Utilitas wajib berikut telah diimplementasikan pada OS
 Utilitas  | Fungsi                    | Cara Kerja 
 ----------|---------------------------|-------------------
-mv        | Memindahkan file/folder   | 
+mv        | Memindahkan file/folder   | mv [nama file/folder] [source destination]
 cp        | Mengcopy file/folder      | 
 mkdir     | Mmbuat directory          | 
 rm        | Menghapus file/folder     |  
