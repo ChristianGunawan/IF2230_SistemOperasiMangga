@@ -26,7 +26,13 @@ int main() {
     current_dir_index = shell_cache[CURRENT_DIR_CACHE_OFFSET];
 
     // Argument count
-    if (argc >= 3) {
+    if (argc == 2 && !strcmp("--help", arg_vector[0])) {
+        print("Utility to copy file\n", BIOS_WHITE);
+        print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+        print("cp [source_directory] [target_directory]\n", BIOS_LIGHT_CYAN);
+        print("cp -r [source_directory] [target_directory]\n", BIOS_LIGHT_CYAN);
+    }
+    else if (argc >= 3) {
         if (!strcmp("-r", arg_vector[0]))
             cp(file_read, directory_table, current_dir_index, 1, arg_vector[1], arg_vector[2]);
         else
