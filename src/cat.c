@@ -25,8 +25,15 @@ int main() {
 
 
     // Argument count
-    if (argc == 2)
-        cat(directory_table, dirstr, current_dir_index);
+    if (argc == 2) 
+        if (!strcmp("--help", dirstr)) {
+            print("Utility to view file\n", BIOS_WHITE);
+            print("Possible Usage:\n", BIOS_LIGHT_BLUE);
+            print("cat [file_name]\n", BIOS_LIGHT_CYAN);
+        }
+        else {
+            cat(directory_table, dirstr, current_dir_index);
+        }
     else
         print("Usage : cat <filename>\n", BIOS_WHITE);
     shellReturn();
