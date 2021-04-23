@@ -91,8 +91,8 @@ void strcpybounded(unsigned char *dest, const char *src, int n) {
 }
 
 int main(int argc, char const *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage : loadFile <target> <file>\n");
+    if (argc < 4) {
+        fprintf(stderr, "Usage : loadFile <target> <file> <parent idx>\n");
         exit(1);
     }
     // Load entire file and save to buffer
@@ -139,7 +139,7 @@ int main(int argc, char const *argv[]) {
                     f_entry_sector_idx = i;
                     f_entry_idx = j;
                 }
-                if (!modstrcmp(argv[2], targetbuffer[i]+PATHNAME_BYTE_OFFSET+j))
+                if (!modstrcmp(argv[2], targetbuffer[i]+PATHNAME_BYTE_OFFSET+j) && (targetbuffer[i][PARENT_BYTE_OFFSET+j] == atoi(argv[3])))
                     valid_filename = false;
             }
         }
@@ -194,7 +194,7 @@ int main(int argc, char const *argv[]) {
             sector_idx++;
         }
 
-        targetbuffer[f_entry_sector_idx][PARENT_BYTE_OFFSET+f_entry_idx] = ROOT_PARENT_FOLDER;
+        targetbuffer[f_entry_sector_idx][PARENT_BYTE_OFFSET+f_entry_idx] = atoi(argv[3]);
         targetbuffer[f_entry_sector_idx][ENTRY_BYTE_OFFSET+f_entry_idx] = sectors_entry_idx;
         rawstrcpybounded(targetbuffer[f_entry_sector_idx]+PATHNAME_BYTE_OFFSET+f_entry_idx, argv[2], 14);
         write_success = true;
@@ -214,7 +214,7 @@ int main(int argc, char const *argv[]) {
         printf("Files - Entry sector : 0x%x\n", f_entry_sector_idx);
         printf("Files - Entry index  : 0x%x\n", f_entry_idx);
         printf("Files - Entry offset : 0x%x\n", f_entry_sector_idx*SECTOR_SIZE + 0x10*f_entry_idx);
-        printf("Files - P byte       : 0x%x\n", ROOT_PARENT_FOLDER);
+        printf("Files - P byte       : %s\n", argv[3]);
         printf("Files - S byte       : 0x%x\n", sectors_entry_idx);
         printf("Files - Pathname     : %s\n\n", argv[2]);
 
